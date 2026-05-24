@@ -24,7 +24,7 @@ window.MathJax = {
 }
 body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
 
-/* SIDEBAR */
+/* SIDEBAR - Default: Hidden (for mobile & desktop closed) */
 .sidebar{
   position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
   background:var(--surface);border-right:1px solid var(--border);
@@ -32,7 +32,11 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
   transition:transform 0.25s ease;
   transform:translateX(calc(-1 * var(--sidebar-w)));
 }
-.sidebar.collapsed{transform:translateX(calc(-1 * var(--sidebar-w)));}
+
+/* When Sidebar is Open */
+body.sidebar-open .sidebar {
+  transform: translateX(0);
+}
 
 .sidebar-logo{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .logo-wrap{display:flex;align-items:center;gap:10px;}
@@ -53,19 +57,27 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .lang-btn{padding:2px 8px;font-size:10px;cursor:pointer;border-radius:3px;font-family:'JetBrains Mono',monospace;transition:all 0.15s;border:1px solid var(--border2);background:transparent;color:var(--text3);}
 .lang-btn.active{border-color:var(--accent);background:rgba(74,222,128,0.1);color:var(--accent);}
 
-/* OVERLAY for mobile */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;}
-.overlay.show{display:block;}
+/* OVERLAY */
+.overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;
+  opacity: 0; transition: opacity 0.25s ease; pointer-events: none;
+}
+body.sidebar-open .overlay {
+  display: block; opacity: 1; pointer-events: auto;
+}
 
 /* TOPBAR */
 .topbar{
   position:fixed;top:0;left:0;right:0;height:52px;
   background:var(--surface);border-bottom:1px solid var(--border);
   display:flex;align-items:center;padding:0 20px;z-index:100;
-  transition:left 0.25s ease;
+  transition: left 0.25s ease;
   gap:12px;
 }
-.topbar.full{left:0;}
+body.sidebar-open .topbar {
+  left: var(--sidebar-w);
+}
+
 .hamburger{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;padding:4px;flex-shrink:0;}
 .topbar-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;}
 .topbar-sub{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -74,40 +86,51 @@ body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-ser
 .main{
   margin-left:0;margin-top:52px;
   padding:24px;min-height:calc(100vh - 52px);
-  transition:margin-left 0.25s ease;
+  transition: margin-left 0.25s ease;
   max-width:800px;
 }
-.main.full{margin-left:0;}
+body.sidebar-open .main {
+  margin-left: var(--sidebar-w);
+}
 
-/* PAGE */
+/* RESPONSIVE OVERRIDES */
+@media(max-width:768px){
+  :root{--sidebar-w:260px;}
+  
+  /* On mobile, main and topbar never shift */
+  body.sidebar-open .main, body.sidebar-open .topbar {
+    margin-left: 0;
+    left: 0;
+  }
+  
+  .sidebar {
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+  }
+  
+  .close-sidebar{display:block !important;}
+  .main{padding:14px;}
+  .mode-grid{grid-template-columns:repeat(3,1fr);}
+}
+
+/* Rest of your existing styles */
 .page{display:none;}.page.active{display:block;}
 .page-header{margin-bottom:20px;}
 .page-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
 .page-desc{font-size:13px;color:var(--text2);margin-top:3px;}
-
-/* CARD */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px;}
 .card-title{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:12px;}
-
-/* MODE GRID */
 .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
 .mode-btn{padding:10px 6px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;transition:all 0.15s;text-align:center;}
 .mode-btn .mode-icon{font-size:16px;display:block;margin-bottom:3px;}
 .mode-btn:hover,.mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(74,222,128,0.05);}
-
-/* CHIPS */
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
 .chip{padding:5px 11px;border:1px solid var(--border2);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:12px;transition:all 0.15s;white-space:nowrap;}
 .chip:hover{border-color:var(--accent2);color:var(--accent2);}
 .chip.active{border-color:var(--accent2);color:var(--accent2);background:rgba(34,211,238,0.08);}
-
-/* INPUTS */
 textarea,input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;padding:12px;outline:none;transition:border-color 0.15s;resize:vertical;}
 textarea{min-height:130px;}
 textarea:focus,input[type=text]:focus{border-color:var(--accent);}
 textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
-
-/* UPLOAD */
 .upload-zone{border:1.5px dashed var(--border2);border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:all 0.15s;}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(74,222,128,0.03);}
 .upload-zone.show{display:block;}
@@ -119,13 +142,9 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
 .preview-row img{width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);}
 .dir-wrap{margin-top:10px;}
 .dir-label{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:5px;letter-spacing:1px;text-transform:uppercase;}
-
-/* BUTTON */
 .submit-btn{width:100%;padding:12px;background:var(--accent);color:#0a0a0a;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;border:none;border-radius:8px;cursor:pointer;margin-top:12px;transition:opacity 0.15s;}
 .submit-btn:hover{opacity:0.9;}
 .submit-btn:disabled{opacity:0.35;cursor:not-allowed;}
-
-/* LOADING */
 .loading-wrap{display:none;padding:20px;text-align:center;}
 .loading-wrap.show{display:block;}
 .loading-dots{display:flex;justify-content:center;gap:6px;margin-bottom:8px;}
@@ -134,8 +153,6 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
 .loading-dots span:nth-child(3){animation-delay:0.4s;}
 @keyframes pulse{0%,80%,100%{opacity:0.2;transform:scale(0.8);}40%{opacity:1;transform:scale(1);}}
 .loading-text{font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
-
-/* RESULT */
 .result-wrap{display:none;}
 .result-wrap.show{display:block;}
 .result-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
@@ -158,47 +175,20 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
 .result-body code{background:var(--surface);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent3);}
 .result-body pre{background:var(--surface);padding:12px;border-radius:8px;overflow-x:auto;margin:8px 0;}
 .result-body blockquote{border-left:3px solid var(--accent);padding-left:12px;color:var(--text2);margin:8px 0;}
-
-/* HISTORY */
 .empty-state{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
 .empty-icon{font-size:28px;margin-bottom:8px;}
 .history-item{padding:11px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;}
 .history-item:hover{border-color:var(--border2);}
 .history-time{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
 .history-preview{font-size:13px;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-
-/* RESPONSIVE */
-@media(max-width:768px){
-  :root{--sidebar-w:260px;}
-  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));box-shadow:4px 0 20px rgba(0,0,0,0.5);}
-  .sidebar.open{transform:translateX(0);}
-  .close-sidebar{display:block !important;}
-  .topbar{left:0 !important;right:0;}
-  .main{margin-left:0 !important;padding:14px;}
-  .main.full{margin-left:0;}
-  .mode-grid{grid-template-columns:repeat(3,1fr);}
-  .chips{gap:5px;}
-  .chip{font-size:11px;padding:4px 9px;}
-  .result-body{font-size:13px;}
-}
-
-/* MOBILE CRITICAL FIX - before JS loads */
-@media(max-width:768px){
-  .sidebar{transform:translateX(-260px) !important;}
-  .main{margin-left:0 !important;}
-  .topbar{left:0 !important;}
-}
 </style>
 </head>
-<body>
+<body class=""> <!-- sidebar-open will be toggled here -->
 
-<!-- Overlay -->
 <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="logo-wrap">
@@ -250,7 +240,6 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
   </div>
 </div>
 
-<!-- Topbar -->
 <div class="topbar" id="topbar">
   <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
   <div>
@@ -259,9 +248,7 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
   </div>
 </div>
 
-<!-- Main -->
 <div class="main" id="main">
-
   <!-- RINGKAS -->
   <div class="page active" id="page-ringkas">
     <div class="card">
@@ -277,11 +264,9 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
           <span class="mode-icon">&#9654;</span><span id="txt-mode-yt">YouTube</span>
         </button>
       </div>
-
       <div id="inputText">
         <textarea id="textArea" placeholder="Paste atau ketik materi di sini..."></textarea>
       </div>
-
       <div id="inputFoto" style="display:none;">
         <input type="file" id="fileInput" accept="image/*" multiple style="display:none"/>
         <div class="upload-zone" id="uploadZone" style="display:block;">
@@ -295,33 +280,25 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
           <input type="text" id="directionInput" placeholder="cth: fokus ke rumus, jelaskan langkah-langkah"/>
         </div>
       </div>
-
       <div id="inputYT" style="display:none;">
         <input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=..."/>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title" id="txt-style-label">Gaya Ringkasan</div>
-      <div class="chips" id="styleRow">
-        <button class="chip active" data-id="Poin Penting" data-en="Key Points">Poin Penting</button>
-        <button class="chip" data-id="Narasi Singkat" data-en="Short Narrative">Narasi Singkat</button>
-        <button class="chip" data-id="Tabel Ringkasan" data-en="Summary Table">Tabel</button>
-        <button class="chip" data-id="Langkah-langkah" data-en="Step-by-Step">Langkah</button>
-        <button class="chip" data-id="Rumus dan Definisi" data-en="Formulas and Definitions">Rumus</button>
-        <button class="chip" data-id="Soal dan Jawaban" data-en="Q and A">Q&amp;A</button>
+      <div class="card" style="margin-top:14px;padding:15px;border-color:var(--border2);">
+        <div class="card-title" id="txt-style-label">Gaya Ringkasan</div>
+        <div class="chips" id="styleRow">
+          <div class="chip active" data-id="Poin Penting" data-en="Key Points">Poin Penting</div>
+          <div class="chip" data-id="Penjelasan Detail" data-en="Detailed Explanation">Penjelasan Detail</div>
+          <div class="chip" data-id="Langkah demi Langkah" data-en="Step by Step">Langkah demi Langkah</div>
+          <div class="chip" data-id="Tabel Perbandingan" data-en="Comparison Table">Tabel Perbandingan</div>
+          <div class="chip" data-id="Gaya Storytelling" data-en="Storytelling Style">Gaya Storytelling</div>
+        </div>
       </div>
-    </div>
-
-    <button class="submit-btn" id="submitBtn" onclick="doRingkas()">&#9889; Ringkas Sekarang</button>
-
-    <div class="loading-wrap" id="loadingWrap">
-      <div class="loading-dots"><span></span><span></span><span></span></div>
-      <div class="loading-text" id="txt-loading-ringkas">Sedang memproses...</div>
-    </div>
-
-    <div class="result-wrap" id="resultWrap">
-      <div class="card">
+      <button class="submit-btn" id="submitBtn" onclick="doRingkas()">⚡ Ringkas Sekarang</button>
+      <div class="loading-wrap" id="loadingWrap">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <div class="loading-text" id="txt-loading-ringkas">Sedang memproses...</div>
+      </div>
+      <div class="result-wrap" id="resultWrap">
         <div class="result-toolbar">
           <div class="result-label" id="txt-result-label">Hasil</div>
           <div class="result-actions">
@@ -339,34 +316,27 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
     <div class="card">
       <div class="card-title" id="txt-kuis-materi-label">Materi Kuis</div>
       <textarea id="kuisInput" placeholder="Paste materi di sini..."></textarea>
-    </div>
-    <div class="card">
-      <div class="card-title" id="txt-kuis-jumlah-label">Jumlah Soal</div>
+      <div class="card-title" style="margin-top:14px;" id="txt-kuis-jumlah-label">Jumlah Soal</div>
       <div class="chips" id="kuisJumlah">
-        <button class="chip active" data-jumlah="5">5</button>
-        <button class="chip" data-jumlah="10">10</button>
-        <button class="chip" data-jumlah="15">15</button>
-        <button class="chip" data-jumlah="20">20</button>
+        <div class="chip active" data-jumlah="5">5</div>
+        <div class="chip" data-jumlah="10">10</div>
+        <div class="chip" data-jumlah="15">15</div>
       </div>
-      <div class="card-title" style="margin-top:12px;" id="txt-kuis-tipe-label">Tipe Soal</div>
+      <div class="card-title" style="margin-top:14px;" id="txt-kuis-tipe-label">Tipe Soal</div>
       <div class="chips" id="kuisTipe">
-        <button class="chip active" data-id="Pilihan Ganda" data-en="Multiple Choice">Pilihan Ganda</button>
-        <button class="chip" data-id="Benar/Salah" data-en="True/False">Benar/Salah</button>
-        <button class="chip" data-id="Essay singkat" data-en="Short Essay">Essay</button>
+        <div class="chip active" data-id="Pilihan Ganda" data-en="Multiple Choice">Pilihan Ganda</div>
+        <div class="chip" data-id="Esai Singkat" data-en="Short Essay">Esai Singkat</div>
+        <div class="chip" data-id="Benar/Salah" data-en="True/False">Benar/Salah</div>
       </div>
-    </div>
-    <button class="submit-btn" id="kuisBtn" onclick="doKuis()">&#10067; Buat Kuis</button>
-    <div class="loading-wrap" id="kuisLoading">
-      <div class="loading-dots"><span></span><span></span><span></span></div>
-      <div class="loading-text" id="txt-loading-kuis">AI sedang membuat soal...</div>
-    </div>
-    <div class="result-wrap" id="kuisResult">
-      <div class="card">
+      <button class="submit-btn" id="kuisBtn" onclick="doKuis()">❓ Buat Kuis</button>
+      <div class="loading-wrap" id="kuisLoading">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <div class="loading-text" id="txt-loading-kuis">AI sedang membuat soal...</div>
+      </div>
+      <div class="result-wrap" id="kuisResult">
         <div class="result-toolbar">
           <div class="result-label" id="txt-kuis-result-label">Soal Kuis</div>
-          <div class="result-actions">
-            <button class="action-btn" onclick="copyKuis()">Salin</button>
-          </div>
+          <button class="action-btn" onclick="copyKuis()">Salin</button>
         </div>
         <div class="result-body" id="kuisBody"></div>
       </div>
@@ -378,33 +348,24 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
     <div class="card">
       <div class="card-title" id="txt-trans-input-label">Teks yang Mau Diterjemahkan</div>
       <textarea id="transInput" placeholder="Paste teks di sini..."></textarea>
-    </div>
-    <div class="card">
-      <div class="card-title" id="txt-trans-to-label">Terjemahkan ke</div>
+      <div class="card-title" style="margin-top:14px;" id="txt-trans-to-label">Terjemahkan ke</div>
       <div class="chips" id="langRow">
-        <button class="chip active" data-lang="Bahasa Indonesia">&#127470;&#127465; ID</button>
-        <button class="chip" data-lang="English">&#127468;&#127463; EN</button>
-        <button class="chip" data-lang="Bahasa Melayu">&#127474;&#127486; MY</button>
-        <button class="chip" data-lang="Arabic">&#127462;&#127479; AR</button>
-        <button class="chip" data-lang="Japanese">&#127471;&#127477; JA</button>
-        <button class="chip" data-lang="Korean">&#127472;&#127479; KO</button>
-        <button class="chip" data-lang="Mandarin Chinese">&#127464;&#127475; ZH</button>
-        <button class="chip" data-lang="Spanish">&#127466;&#127480; ES</button>
-        <button class="chip" data-lang="French">&#127467;&#127479; FR</button>
+        <div class="chip active" data-lang="English">English</div>
+        <div class="chip" data-lang="Indonesia">Indonesia</div>
+        <div class="chip" data-lang="Jawa">Jawa</div>
+        <div class="chip" data-lang="Sunda">Sunda</div>
+        <div class="chip" data-lang="Arab">Arab</div>
+        <div class="chip" data-lang="Jepang">Jepang</div>
       </div>
-    </div>
-    <button class="submit-btn" id="transBtn" onclick="doTerjemah()">&#127760; Terjemahkan</button>
-    <div class="loading-wrap" id="transLoading">
-      <div class="loading-dots"><span></span><span></span><span></span></div>
-      <div class="loading-text" id="txt-loading-trans">Sedang menerjemahkan...</div>
-    </div>
-    <div class="result-wrap" id="transResult">
-      <div class="card">
+      <button class="submit-btn" id="transBtn" onclick="doTerjemah()">🌐 Terjemahkan</button>
+      <div class="loading-wrap" id="transLoading">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <div class="loading-text" id="txt-loading-trans">Sedang menerjemahkan...</div>
+      </div>
+      <div class="result-wrap" id="transResult">
         <div class="result-toolbar">
           <div class="result-label" id="txt-trans-result-label">Hasil Terjemahan</div>
-          <div class="result-actions">
-            <button class="action-btn" onclick="copyTrans()">Salin</button>
-          </div>
+          <button class="action-btn" onclick="copyTrans()">Salin</button>
         </div>
         <div class="result-body" id="transBody"></div>
       </div>
@@ -434,7 +395,6 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
       </p>
     </div>
   </div>
-
 </div>
 
 <script>
@@ -446,51 +406,14 @@ var lastResultText = '';
 var lastKuisText = '';
 var lastTransText = '';
 var historyData = JSON.parse(localStorage.getItem('kstools_v2') || '[]');
-var sidebarOpen = false; // always closed on load, user opens manually
 
-// Sidebar
+// SIDEBAR TOGGLE (CSS-First Approach)
 function toggleSidebar() {
-  sidebarOpen = !sidebarOpen;
-  updateSidebarState();
+  document.body.classList.toggle('sidebar-open');
 }
 function closeSidebar() {
-  sidebarOpen = false;
-  updateSidebarState();
+  document.body.classList.remove('sidebar-open');
 }
-function updateSidebarState() {
-  var sb = document.getElementById('sidebar');
-  var main = document.getElementById('main');
-  var tb = document.getElementById('topbar');
-  var ov = document.getElementById('overlay');
-  var isMobile = window.innerWidth <= 768;
-  if (isMobile) {
-    // Mobile: use open class to show, default CSS hides it
-    if (sidebarOpen) {
-      sb.style.transform = 'translateX(0)';
-    } else {
-      sb.style.transform = '';
-    }
-    ov.classList.toggle('show', sidebarOpen);
-    main.style.marginLeft = '0';
-    tb.style.left = '0';
-  } else {
-    // Desktop: toggle via style
-    ov.classList.remove('show');
-    if (sidebarOpen) {
-      sb.style.transform = 'translateX(0)';
-      main.style.marginLeft = 'var(--sidebar-w)';
-      tb.style.left = 'var(--sidebar-w)';
-    } else {
-      sb.style.transform = '';
-      main.style.marginLeft = '0';
-      tb.style.left = '0';
-    }
-  }
-}
-window.addEventListener('resize', function() {
-  if (window.innerWidth > 768 && sidebarOpen) { updateSidebarState(); }
-  else if (window.innerWidth <= 768) { sidebarOpen = false; updateSidebarState(); }
-});
 
 // Pages
 var pageTitles = {
@@ -717,8 +640,8 @@ function viewHistory(i) {
 
 // i18n
 var i18n = {
-  id: {'txt-nav-ringkas':'Ringkas','txt-nav-kuis':'Mode Kuis','txt-nav-terjemahan':'Terjemahan','txt-nav-riwayat':'Riwayat','txt-nav-tentang':'Tentang','txt-nav-dukung':'Dukung','txt-mode-label':'Mode Input','txt-mode-text':'Teks','txt-mode-foto':'Foto','txt-mode-yt':'YouTube','txt-style-label':'Gaya Ringkasan','txt-upload-text':'Klik untuk pilih foto','txt-upload-sub':'Maks 4 foto \u00b7 JPG \u00b7 PNG','txt-dir-label':'Arahan (opsional)','txt-loading-ringkas':'Sedang memproses...','txt-result-label':'Hasil','copyResultBtn':'Salin','saveResultBtn':'Simpan','submitBtn':'\u26a1 Ringkas Sekarang','txt-kuis-materi-label':'Materi Kuis','txt-kuis-jumlah-label':'Jumlah Soal','txt-kuis-tipe-label':'Tipe Soal','txt-loading-kuis':'AI sedang membuat soal...','txt-kuis-result-label':'Soal Kuis','kuisBtn':'\u2753 Buat Kuis','txt-trans-input-label':'Teks yang Mau Diterjemahkan','txt-trans-to-label':'Terjemahkan ke','txt-loading-trans':'Sedang menerjemahkan...','txt-trans-result-label':'Hasil Terjemahan','transBtn':'\ud83c\udf10 Terjemahkan','txt-riwayat-title':'Riwayat','txt-riwayat-desc':'Hasil ringkasan yang disimpan','txt-tentang-title':'Tentang'},
-  en: {'txt-nav-ringkas':'Summarize','txt-nav-kuis':'Quiz Mode','txt-nav-terjemahan':'Translation','txt-nav-riwayat':'History','txt-nav-tentang':'About','txt-nav-dukung':'Support','txt-mode-label':'Input Mode','txt-mode-text':'Text','txt-mode-foto':'Photo','txt-mode-yt':'YouTube','txt-style-label':'Summary Style','txt-upload-text':'Click to select photos','txt-upload-sub':'Max 4 photos \u00b7 JPG \u00b7 PNG','txt-dir-label':'Direction (optional)','txt-loading-ringkas':'Processing...','txt-result-label':'Result','copyResultBtn':'Copy','saveResultBtn':'Save','submitBtn':'\u26a1 Summarize Now','txt-kuis-materi-label':'Quiz Material','txt-kuis-jumlah-label':'Number of Questions','txt-kuis-tipe-label':'Question Type','txt-loading-kuis':'Generating questions...','txt-kuis-result-label':'Quiz Questions','kuisBtn':'\u2753 Generate Quiz','txt-trans-input-label':'Text to Translate','txt-trans-to-label':'Translate to','txt-loading-trans':'Translating...','txt-trans-result-label':'Translation Result','transBtn':'\ud83c\udf10 Translate','txt-riwayat-title':'History','txt-riwayat-desc':'Saved summaries','txt-tentang-title':'About'}
+  id: {'txt-nav-ringkas':'Ringkas','txt-nav-kuis':'Mode Kuis','txt-nav-terjemahan':'Terjemahan','txt-nav-riwayat':'Riwayat','txt-nav-tentang':'Tentang','txt-nav-dukung':'Dukung','txt-mode-label':'Mode Input','txt-mode-text':'Teks','txt-mode-foto':'Foto','txt-mode-yt':'YouTube','txt-style-label':'Gaya Ringkasan','txt-upload-text':'Klik untuk pilih foto','txt-upload-sub':'Maks 4 foto \u00b7 JPG \u00b7 PNG','txt-dir-label':'Arahan (opsional)','txt-loading-ringkas':'Sedang memproses...','txt-result-label':'Hasil','copyResultBtn':'Salin','saveResultBtn':'Simpan','submitBtn':'⚡ Ringkas Sekarang','txt-kuis-materi-label':'Materi Kuis','txt-kuis-jumlah-label':'Jumlah Soal','txt-kuis-tipe-label':'Tipe Soal','txt-loading-kuis':'AI sedang membuat soal...','txt-kuis-result-label':'Soal Kuis','kuisBtn':'❓ Buat Kuis','txt-trans-input-label':'Teks yang Mau Diterjemahkan','txt-trans-to-label':'Terjemahkan ke','txt-loading-trans':'Sedang menerjemahkan...','txt-trans-result-label':'Hasil Terjemahan','transBtn':'🌐 Terjemahkan','txt-riwayat-title':'Riwayat','txt-riwayat-desc':'Hasil ringkasan yang disimpan','txt-tentang-title':'Tentang'},
+  en: {'txt-nav-ringkas':'Summarize','txt-nav-kuis':'Quiz Mode','txt-nav-terjemahan':'Translation','txt-nav-riwayat':'History','txt-nav-tentang':'About','txt-nav-dukung':'Support','txt-mode-label':'Input Mode','txt-mode-text':'Text','txt-mode-foto':'Photo','txt-mode-yt':'YouTube','txt-style-label':'Summary Style','txt-upload-text':'Click to select photos','txt-upload-sub':'Max 4 photos \u00b7 JPG \u00b7 PNG','txt-dir-label':'Direction (optional)','txt-loading-ringkas':'Processing...','txt-result-label':'Result','copyResultBtn':'Copy','saveResultBtn':'Save','submitBtn':'⚡ Summarize Now','txt-kuis-materi-label':'Quiz Material','txt-kuis-jumlah-label':'Number of Questions','txt-kuis-tipe-label':'Question Type','txt-loading-kuis':'Generating questions...','txt-kuis-result-label':'Quiz Questions','kuisBtn':'❓ Generate Quiz','txt-trans-input-label':'Text to Translate','txt-trans-to-label':'Translate to','txt-loading-trans':'Translating...','txt-trans-result-label':'Translation Result','transBtn':'🌐 Translate','txt-riwayat-title':'History','txt-riwayat-desc':'Saved summaries','txt-tentang-title':'About'}
 };
 
 function setLang(lang) {
@@ -730,21 +653,18 @@ function setLang(lang) {
     var el = document.getElementById(k);
     if (el) el.textContent = t[k];
   });
-  // Style chips
   document.querySelectorAll('#styleRow .chip').forEach(function(c){c.textContent = lang==='en'?c.dataset.en:c.dataset.id;});
   document.querySelectorAll('#kuisTipe .chip').forEach(function(c){c.textContent = lang==='en'?c.dataset.en:c.dataset.id;});
-  // Placeholders
   var ph = {
     id:{textArea:'Paste atau ketik materi di sini...',kuisInput:'Paste materi di sini...',transInput:'Paste teks di sini...',directionInput:'cth: fokus ke rumus, jelaskan langkah-langkah',ytUrl:'https://youtube.com/watch?v=...'},
     en:{textArea:'Paste or type material here...',kuisInput:'Paste material here...',transInput:'Paste text here...',directionInput:'e.g: focus on formulas, step by step',ytUrl:'https://youtube.com/watch?v=...'}
   };
   Object.keys(ph[lang]).forEach(function(id){var el=document.getElementById(id);if(el)el.placeholder=ph[lang][id];});
-  // Topbar
   document.getElementById('topbar-title').textContent = pageTitles[lang][currentPage] || currentPage;
 }
 
-// Init
-updateSidebarState();
+// On load, sidebar is closed by default.
+// Desktop users can open it. On mobile it stays hidden until toggled.
 </script>
 </body>
 </html>
