@@ -909,6 +909,7 @@ sb.auth.getSession().then(function(result) {
 // APP LOGIC
 // =====================
 var WORKER = 'https://ringkas-api.ryalandsokay.workers.dev';
+var HF_BACKEND = 'https://kian1904-ringkas-backend.hf.space';
 var currentMode = 'text';
 var currentLang = 'id';
 var uploadedImages = [];
@@ -1024,7 +1025,26 @@ async function doRingkas(){
   } else {
     var yt=document.getElementById('ytUrl').value.trim();
     if(!yt){alert(lang==='en'?'Enter YouTube link.':'Masukkan link YouTube.');return;}
-    msgContent=[{type:'text',text:(lang==='en'?'Summarize this YouTube video in "'+style+'" style: ':'Ringkas video YouTube ini dengan gaya "'+style+'": ')+yt}];
+    // Fetch transcript dari HF backend dulu
+    setLoading('submitBtn','loadingWrap','resultWrap',true);
+    document.getElementById('txt-loading-ringkas').textContent=lang==='en'?'Fetching transcript...':'Mengambil transcript...';
+    try {
+      var trRes=await fetch(HF_BACKEND+'/transcript?url='+encodeURIComponent(yt));
+      var trData=await trRes.json();
+      if(trData.error){
+        document.getElementById('resultBody').textContent='Error transcript: '+trData.error;
+        document.getElementById('resultWrap').classList.add('show');
+        setLoading('submitBtn','loadingWrap','resultWrap',false);
+        return;
+      }
+      document.getElementById('txt-loading-ringkas').textContent=lang==='en'?'Processing...':'Sedang memproses...';
+      msgContent=[{type:'text',text:(lang==='en'?'Summarize this YouTube transcript in "'+style+'" style:\n\n':'Ringkas transcript YouTube ini dengan gaya "'+style+'":\n\n')+trData.transcript}];
+    } catch(e){
+      document.getElementById('resultBody').textContent='Gagal ambil transcript: '+e.message;
+      document.getElementById('resultWrap').classList.add('show');
+      setLoading('submitBtn','loadingWrap','resultWrap',false);
+      return;
+    }
   }
   setLoading('submitBtn','loadingWrap','resultWrap',true);
   try {
