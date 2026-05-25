@@ -941,10 +941,11 @@ function showPage(name) {
 
 function setMode(mode) {
   currentMode = mode;
+  var modeMap = {text:'Text', foto:'Foto', yt:'YT'};
+  var inputMap = {text:'Text', foto:'Foto', yt:'YT'};
   ['text','foto','yt'].forEach(function(m){
-    var cap = m.charAt(0).toUpperCase()+m.slice(1);
-    document.getElementById('mode'+cap).classList.toggle('active', mode===m);
-    document.getElementById('input'+cap).style.display = mode===m?'block':'none';
+    document.getElementById('mode'+modeMap[m]).classList.toggle('active', mode===m);
+    document.getElementById('input'+inputMap[m]).style.display = mode===m?'block':'none';
   });
 }
 
