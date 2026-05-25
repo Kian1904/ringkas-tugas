@@ -6,6 +6,7 @@
 <title>K's Tools for School</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 window.MathJax = {
   tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
@@ -14,390 +15,899 @@ window.MathJax = {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#0a0a0a;--surface:#111;--surface2:#181818;
-  --border:#222;--border2:#2d2d2d;
-  --accent:#4ade80;--accent2:#22d3ee;--accent3:#f59e0b;
-  --text:#f1f5f9;--text2:#94a3b8;--text3:#475569;
-  --sidebar-w:220px;
-}
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
+/* =====================
+   RESET & ROOT
+===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* SIDEBAR - Default: Hidden (for mobile & desktop closed) */
-.sidebar{
-  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
-  background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;z-index:200;
-  transition:transform 0.25s ease;
-  transform:translateX(calc(-1 * var(--sidebar-w)));
-}
-
-/* When Sidebar is Open */
-body.sidebar-open .sidebar {
-  transform: translateX(0);
-}
-
-.sidebar-logo{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.logo-wrap{display:flex;align-items:center;gap:10px;}
-.logo-text{font-size:15px;font-weight:700;color:var(--accent);}
-.logo-sub{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-top:1px;}
-.close-sidebar{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px;display:none;}
-
-.nav-section{padding:12px;flex:1;overflow-y:auto;}
-.nav-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:0 8px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:all 0.15s;border:1px solid transparent;margin-bottom:2px;}
-.nav-item:hover{background:var(--surface2);color:var(--text);}
-.nav-item.active{background:rgba(74,222,128,0.08);color:var(--accent);border-color:rgba(74,222,128,0.15);}
-.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
-
-.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
-.lang-row{display:flex;justify-content:space-between;align-items:center;}
-.lang-btns{display:flex;gap:4px;}
-.lang-btn{padding:2px 8px;font-size:10px;cursor:pointer;border-radius:3px;font-family:'JetBrains Mono',monospace;transition:all 0.15s;border:1px solid var(--border2);background:transparent;color:var(--text3);}
-.lang-btn.active{border-color:var(--accent);background:rgba(74,222,128,0.1);color:var(--accent);}
-
-/* OVERLAY */
-.overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:150;
-  opacity: 0; transition: opacity 0.25s ease; pointer-events: none;
-}
-body.sidebar-open .overlay {
-  display: block; opacity: 1; pointer-events: auto;
+:root {
+  --bg:       #0a0a0a;
+  --surface:  #111111;
+  --surface2: #181818;
+  --border:   #222222;
+  --border2:  #2d2d2d;
+  --accent:   #4ade80;
+  --accent2:  #22d3ee;
+  --accent3:  #f59e0b;
+  --text:     #f1f5f9;
+  --text2:    #94a3b8;
+  --text3:    #475569;
+  --sidebar-w:   220px;
+  --topbar-h:    52px;
+  --content-max: 800px;
+  --gap:         20px;
+  --radius:      10px;
+  --fs-xs:   11px;
+  --fs-sm:   12px;
+  --fs-base: 13px;
+  --fs-md:   14px;
+  --fs-lg:   16px;
+  --fs-xl:   20px;
 }
 
-/* TOPBAR */
-.topbar{
-  position:fixed;top:0;left:0;right:0;height:52px;
-  background:var(--surface);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;z-index:100;
-  transition: left 0.25s ease;
-  gap:12px;
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
 }
-body.sidebar-open .topbar {
-  left: var(--sidebar-w);
+button { font-family: inherit; }
+img { display: block; max-width: 100%; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* =====================
+   AUTH GATE
+===================== */
+#authGate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--bg);
+}
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+.auth-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.auth-logo-text { text-align: left; }
+.auth-logo-title { font-size: 20px; font-weight: 700; color: var(--accent); line-height: 1; }
+.auth-logo-sub {
+  font-size: 9px;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.auth-heading {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.auth-sub {
+  font-size: var(--fs-base);
+  color: var(--text2);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 20px;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.google-btn:hover { opacity: 0.93; }
+.google-btn:active { transform: scale(0.98); }
+.google-btn svg { flex-shrink: 0; }
+.auth-note {
+  font-size: var(--fs-xs);
+  color: var(--text3);
+  margin-top: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.7;
+}
+.auth-error {
+  display: none;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: var(--fs-sm);
+  color: #f87171;
+  margin-top: 16px;
+  text-align: left;
+}
+.auth-error.show { display: block; }
+
+/* =====================
+   APP (hidden until authed)
+===================== */
+#app { display: none; }
+
+/* =====================
+   OVERLAY
+===================== */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 150;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+body.sidebar-open .overlay { display: block; opacity: 1; pointer-events: auto; }
+
+/* =====================
+   SIDEBAR
+===================== */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  transform: translateX(calc(-1 * var(--sidebar-w)));
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform;
+}
+body.sidebar-open .sidebar { transform: translateX(0); }
+
+.sidebar-logo {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.logo-wrap { display: flex; align-items: center; gap: 10px; }
+.logo-text { font-size: 15px; font-weight: 700; color: var(--accent); }
+.logo-sub {
+  font-size: 9px; color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px; text-transform: uppercase; margin-top: 1px;
+}
+.close-sidebar {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 16px; padding: 4px 6px;
+  border-radius: 4px; transition: color 0.15s; display: none;
+}
+.close-sidebar:hover { color: var(--text); }
+
+.nav-section { padding: 12px; flex: 1; overflow-y: auto; overflow-x: hidden; }
+.nav-label {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); padding: 0 8px; margin-bottom: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 6px; cursor: pointer;
+  color: var(--text2); font-size: var(--fs-base); font-weight: 500;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  border: 1px solid transparent; margin-bottom: 2px;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(74,222,128,0.08); color: var(--accent); border-color: rgba(74,222,128,0.15); }
+.nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+
+/* User profile di sidebar */
+.sidebar-user {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.user-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--surface2);
+}
+.user-avatar-placeholder {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: rgba(74,222,128,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--accent);
+  flex-shrink: 0;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name {
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.user-email {
+  font-size: 10px; color: var(--text3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: 'JetBrains Mono', monospace;
+}
+.logout-btn {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 14px; padding: 4px;
+  border-radius: 4px; transition: color 0.15s; flex-shrink: 0;
+}
+.logout-btn:hover { color: #f87171; }
+
+.sidebar-footer {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-xs); color: var(--text3);
+  font-family: 'JetBrains Mono', monospace; flex-shrink: 0;
+}
+.lang-row { display: flex; justify-content: space-between; align-items: center; }
+.lang-btns { display: flex; gap: 4px; }
+.lang-btn {
+  padding: 2px 8px; font-size: var(--fs-xs); cursor: pointer;
+  border-radius: 3px; font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s; border: 1px solid var(--border2);
+  background: transparent; color: var(--text3);
+}
+.lang-btn.active { border-color: var(--accent); background: rgba(74,222,128,0.1); color: var(--accent); }
+
+/* =====================
+   TOPBAR
+===================== */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 16px;
+  z-index: 100; gap: 10px;
+  transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+@media (min-width: 769px) {
+  body.sidebar-open .topbar { left: var(--sidebar-w); }
+}
+.hamburger {
+  background: none; border: none; color: var(--text2);
+  cursor: pointer; font-size: 18px; padding: 4px; flex-shrink: 0;
+  line-height: 1; border-radius: 4px; transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.hamburger:hover { color: var(--text); }
+.topbar-info { flex: 1; min-width: 0; }
+.topbar-title {
+  font-size: var(--fs-md); font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.topbar-sub {
+  font-size: var(--fs-xs); color: var(--text3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* User avatar di topbar (mobile) */
+.topbar-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid var(--border2); object-fit: cover;
+  flex-shrink: 0; background: var(--surface2);
+}
+.topbar-avatar-placeholder {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid rgba(74,222,128,0.3);
+  background: rgba(74,222,128,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--accent); flex-shrink: 0;
 }
 
-.hamburger{background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;padding:4px;flex-shrink:0;}
-.topbar-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;}
-.topbar-sub{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-/* MAIN */
-.main{
-  margin-left:0;margin-top:52px;
-  padding:24px;min-height:calc(100vh - 52px);
-  transition: margin-left 0.25s ease;
-  max-width:800px;
+/* =====================
+   MAIN
+===================== */
+.main {
+  margin-top: var(--topbar-h);
+  padding: var(--gap);
+  min-height: calc(100vh - var(--topbar-h));
+  transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1);
+  max-width: calc(var(--content-max) + var(--gap) * 2);
 }
-body.sidebar-open .main {
-  margin-left: var(--sidebar-w);
+@media (min-width: 769px) {
+  body.sidebar-open .main { margin-left: var(--sidebar-w); }
 }
 
-/* RESPONSIVE OVERRIDES */
-@media(max-width:768px){
-  :root{--sidebar-w:260px;}
-  
-  /* On mobile, main and topbar never shift */
-  body.sidebar-open .main, body.sidebar-open .topbar {
-    margin-left: 0;
-    left: 0;
+/* =====================
+   PAGES
+===================== */
+.page { display: none; }
+.page.active { display: block; }
+.page-header { margin-bottom: 20px; }
+.page-title { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -0.5px; }
+.page-desc { font-size: var(--fs-base); color: var(--text2); margin-top: 3px; }
+
+/* =====================
+   CARDS
+===================== */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px; margin-bottom: 14px;
+}
+.card-title {
+  font-size: 9px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text3);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 12px;
+}
+
+/* =====================
+   MODE GRID
+===================== */
+.mode-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 8px; margin-bottom: 14px;
+}
+.mode-btn {
+  padding: 10px 6px; border: 1px solid var(--border2); border-radius: 8px;
+  background: transparent; color: var(--text2); cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif; font-size: var(--fs-sm);
+  font-weight: 500; transition: all 0.15s; text-align: center;
+  -webkit-tap-highlight-color: transparent; min-height: 56px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.mode-icon { font-size: 16px; display: block; margin-bottom: 4px; }
+.mode-btn:hover, .mode-btn.active {
+  border-color: var(--accent); color: var(--accent); background: rgba(74,222,128,0.05);
+}
+
+/* =====================
+   CHIPS
+===================== */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.chip {
+  padding: 5px 11px; border: 1px solid var(--border2); border-radius: 20px;
+  background: transparent; color: var(--text2); cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif; font-size: var(--fs-sm);
+  transition: all 0.15s; white-space: nowrap;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.chip:hover { border-color: var(--accent2); color: var(--accent2); }
+.chip.active { border-color: var(--accent2); color: var(--accent2); background: rgba(34,211,238,0.08); }
+
+/* =====================
+   INPUTS
+===================== */
+textarea, input[type=text] {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text); font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-base); line-height: 1.7; padding: 12px; outline: none;
+  transition: border-color 0.15s; resize: vertical;
+  -webkit-appearance: none; appearance: none;
+}
+textarea { min-height: 130px; }
+textarea:focus, input[type=text]:focus { border-color: var(--accent); }
+textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
+
+/* =====================
+   UPLOAD
+===================== */
+.upload-zone {
+  border: 1.5px dashed var(--border2); border-radius: 8px;
+  padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.15s;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(74,222,128,0.03); }
+.upload-zone-icon { font-size: 24px; margin-bottom: 6px; }
+.upload-zone-text { font-size: var(--fs-base); color: var(--text2); }
+.upload-zone-sub { font-size: var(--fs-xs); color: var(--text3); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+.preview-row { display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.preview-row.show { display: flex; }
+.preview-row img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border2); flex-shrink: 0; }
+.dir-wrap { margin-top: 10px; }
+.dir-label { font-size: var(--fs-xs); color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-bottom: 5px; letter-spacing: 1px; text-transform: uppercase; }
+
+/* =====================
+   BUTTONS
+===================== */
+.submit-btn {
+  width: 100%; padding: 12px 16px; background: var(--accent);
+  color: #0a0a0a; font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700; font-size: var(--fs-md); border: none;
+  border-radius: 8px; cursor: pointer; margin-top: 12px;
+  transition: opacity 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent;
+}
+.submit-btn:hover { opacity: 0.9; }
+.submit-btn:active { transform: scale(0.99); }
+.submit-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.action-btn {
+  padding: 4px 11px; border: 1px solid var(--border2); border-radius: 5px;
+  background: transparent; color: var(--text2); font-size: var(--fs-xs);
+  cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+  transition: all 0.15s; white-space: nowrap; -webkit-tap-highlight-color: transparent;
+}
+.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* =====================
+   LOADING
+===================== */
+.loading-wrap { display: none; padding: 20px; text-align: center; }
+.loading-wrap.show { display: block; }
+.loading-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
+.loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s infinite; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8);}40%{opacity:1;transform:scale(1);} }
+.loading-text { font-size: var(--fs-sm); color: var(--text2); font-family: 'JetBrains Mono', monospace; }
+
+/* =====================
+   RESULT
+===================== */
+.result-wrap { display: none; }
+.result-wrap.show { display: block; }
+.result-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
+.result-label { font-size: var(--fs-xs); font-family: 'JetBrains Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); flex-shrink: 0; }
+.result-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.result-body {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 18px; min-height: 60px;
+  font-size: var(--fs-md); line-height: 1.8; color: var(--text);
+  overflow-wrap: break-word; word-break: break-word;
+}
+.result-body h1,.result-body h2,.result-body h3 { color: var(--accent); margin: 14px 0 6px; font-weight: 600; }
+.result-body h1 { font-size: var(--fs-xl); }
+.result-body h2 { font-size: var(--fs-lg); }
+.result-body h3 { font-size: var(--fs-md); }
+.result-body p { margin-bottom: 8px; }
+.result-body ul, .result-body ol { margin: 6px 0 8px 20px; }
+.result-body li { margin-bottom: 3px; }
+.result-body strong { color: var(--accent2); font-weight: 600; }
+.result-body em { color: var(--accent3); }
+.result-body .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
+.result-body table { width: 100%; min-width: 400px; border-collapse: collapse; font-size: var(--fs-base); }
+.result-body th { background: var(--surface); border: 1px solid var(--border2); padding: 7px 10px; text-align: left; color: var(--accent); font-weight: 600; white-space: nowrap; }
+.result-body td { border: 1px solid var(--border2); padding: 7px 10px; }
+.result-body tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+.result-body code { background: var(--surface); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: var(--fs-sm); color: var(--accent3); word-break: break-all; }
+.result-body pre { background: var(--surface); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
+.result-body pre code { background: none; padding: 0; word-break: normal; }
+.result-body blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text2); margin: 8px 0; }
+
+/* =====================
+   MISC
+===================== */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: var(--fs-base); }
+.empty-icon { font-size: 28px; margin-bottom: 8px; }
+.history-item { padding: 11px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s; }
+.history-item:hover { border-color: var(--border2); }
+.history-time { font-size: var(--fs-xs); color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+.history-preview { font-size: var(--fs-base); color: var(--text2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* =====================
+   RESPONSIVE — MOBILE ≤ 480px
+===================== */
+@media (max-width: 480px) {
+  :root {
+    --sidebar-w: 260px; --gap: 12px;
+    --fs-xs: 10px; --fs-sm: 11px; --fs-base: 12px;
+    --fs-md: 13px; --fs-lg: 15px; --fs-xl: 18px;
   }
-  
-  .sidebar {
-    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
-  }
-  
-  .close-sidebar{display:block !important;}
-  .main{padding:14px;}
-  .mode-grid{grid-template-columns:repeat(3,1fr);}
+  .close-sidebar { display: block !important; }
+  body.sidebar-open .topbar { left: 0; }
+  body.sidebar-open .main  { margin-left: 0; }
+  .sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+  .mode-btn { min-height: 50px; }
+  .mode-icon { font-size: 15px; }
+  .card { padding: 14px; }
+  .result-body { padding: 14px; }
+  .submit-btn { font-size: var(--fs-base); padding: 11px 14px; }
+  .chips { gap: 5px; }
+  .chip { padding: 4px 10px; }
+  .preview-row img { width: 60px; height: 60px; }
+  .auth-card { padding: 28px 20px; }
 }
 
-/* Rest of your existing styles */
-.page{display:none;}.page.active{display:block;}
-.page-header{margin-bottom:20px;}
-.page-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;}
-.page-desc{font-size:13px;color:var(--text2);margin-top:3px;}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px;}
-.card-title{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:12px;}
-.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-.mode-btn{padding:10px 6px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;transition:all 0.15s;text-align:center;}
-.mode-btn .mode-icon{font-size:16px;display:block;margin-bottom:3px;}
-.mode-btn:hover,.mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(74,222,128,0.05);}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
-.chip{padding:5px 11px;border:1px solid var(--border2);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:12px;transition:all 0.15s;white-space:nowrap;}
-.chip:hover{border-color:var(--accent2);color:var(--accent2);}
-.chip.active{border-color:var(--accent2);color:var(--accent2);background:rgba(34,211,238,0.08);}
-textarea,input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;padding:12px;outline:none;transition:border-color 0.15s;resize:vertical;}
-textarea{min-height:130px;}
-textarea:focus,input[type=text]:focus{border-color:var(--accent);}
-textarea::placeholder,input[type=text]::placeholder{color:var(--text3);}
-.upload-zone{border:1.5px dashed var(--border2);border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:all 0.15s;}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(74,222,128,0.03);}
-.upload-zone.show{display:block;}
-.upload-zone-icon{font-size:24px;margin-bottom:6px;}
-.upload-zone-text{font-size:13px;color:var(--text2);}
-.upload-zone-sub{font-size:11px;color:var(--text3);margin-top:3px;font-family:'JetBrains Mono',monospace;}
-.preview-row{display:none;gap:8px;margin-top:10px;flex-wrap:wrap;}
-.preview-row.show{display:flex;}
-.preview-row img{width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);}
-.dir-wrap{margin-top:10px;}
-.dir-label{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:5px;letter-spacing:1px;text-transform:uppercase;}
-.submit-btn{width:100%;padding:12px;background:var(--accent);color:#0a0a0a;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;border:none;border-radius:8px;cursor:pointer;margin-top:12px;transition:opacity 0.15s;}
-.submit-btn:hover{opacity:0.9;}
-.submit-btn:disabled{opacity:0.35;cursor:not-allowed;}
-.loading-wrap{display:none;padding:20px;text-align:center;}
-.loading-wrap.show{display:block;}
-.loading-dots{display:flex;justify-content:center;gap:6px;margin-bottom:8px;}
-.loading-dots span{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.2s infinite;}
-.loading-dots span:nth-child(2){animation-delay:0.2s;}
-.loading-dots span:nth-child(3){animation-delay:0.4s;}
-@keyframes pulse{0%,80%,100%{opacity:0.2;transform:scale(0.8);}40%{opacity:1;transform:scale(1);}}
-.loading-text{font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
-.result-wrap{display:none;}
-.result-wrap.show{display:block;}
-.result-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.result-label{font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);}
-.result-actions{display:flex;gap:6px;}
-.action-btn{padding:4px 11px;border:1px solid var(--border2);border-radius:5px;background:transparent;color:var(--text2);font-size:11px;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all 0.15s;}
-.action-btn:hover{border-color:var(--accent);color:var(--accent);}
-.result-body{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:18px;min-height:60px;font-size:14px;line-height:1.8;color:var(--text);}
-.result-body h1,.result-body h2,.result-body h3{color:var(--accent);margin:14px 0 6px;font-weight:600;}
-.result-body h1{font-size:18px;}.result-body h2{font-size:16px;}.result-body h3{font-size:14px;}
-.result-body p{margin-bottom:8px;}
-.result-body ul,.result-body ol{margin:6px 0 8px 18px;}
-.result-body li{margin-bottom:3px;}
-.result-body strong{color:var(--accent2);font-weight:600;}
-.result-body em{color:var(--accent3);}
-.result-body table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
-.result-body th{background:var(--surface);border:1px solid var(--border2);padding:7px 10px;text-align:left;color:var(--accent);font-weight:600;}
-.result-body td{border:1px solid var(--border2);padding:7px 10px;}
-.result-body tr:nth-child(even) td{background:rgba(255,255,255,0.02);}
-.result-body code{background:var(--surface);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent3);}
-.result-body pre{background:var(--surface);padding:12px;border-radius:8px;overflow-x:auto;margin:8px 0;}
-.result-body blockquote{border-left:3px solid var(--accent);padding-left:12px;color:var(--text2);margin:8px 0;}
-.empty-state{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
-.empty-icon{font-size:28px;margin-bottom:8px;}
-.history-item{padding:11px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;}
-.history-item:hover{border-color:var(--border2);}
-.history-time{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
-.history-preview{font-size:13px;color:var(--text2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* =====================
+   RESPONSIVE — TABLET 481-768px
+===================== */
+@media (min-width: 481px) and (max-width: 768px) {
+  :root { --sidebar-w: 240px; --gap: 16px; }
+  .close-sidebar { display: block !important; }
+  body.sidebar-open .topbar { left: 0; }
+  body.sidebar-open .main  { margin-left: 0; }
+  .sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
+}
+
+/* =====================
+   RESPONSIVE — DESKTOP ≥ 769px
+===================== */
+@media (min-width: 769px) {
+  .close-sidebar { display: none !important; }
+  .overlay { display: none !important; }
+}
+
+@media (min-width: 1200px) {
+  :root { --fs-base: 14px; --fs-md: 15px; --gap: 28px; }
+}
 </style>
 </head>
-<body class=""> <!-- sidebar-open will be toggled here -->
+<body>
 
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-<div class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-wrap">
-      <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="100" fill="#111" rx="8"/>
+<!-- ===== AUTH GATE ===== -->
+<div id="authGate">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" fill="#111" rx="10"/>
         <rect x="28" y="20" width="6" height="60" fill="#4ade80"/>
         <polygon points="34,20 52,20 72,50 52,50" fill="#4ade80" opacity="0.9"/>
         <polygon points="34,52 52,52 76,80 52,80" fill="#4ade80" opacity="0.9"/>
         <circle cx="72" cy="50" r="4" fill="#22d3ee"/>
       </svg>
-      <div>
-        <div class="logo-text">K's Tools</div>
-        <div class="logo-sub">for School</div>
+      <div class="auth-logo-text">
+        <div class="auth-logo-title">K's Tools</div>
+        <div class="auth-logo-sub">for School</div>
       </div>
     </div>
-    <button class="close-sidebar" onclick="closeSidebar()">&#10005;</button>
-  </div>
-
-  <div class="nav-section">
-    <div class="nav-label">Menu</div>
-    <div class="nav-item active" id="nav-ringkas" onclick="showPage('ringkas')">
-      <span class="nav-icon">&#9889;</span><span id="txt-nav-ringkas">Ringkas</span>
-    </div>
-    <div class="nav-item" id="nav-kuis" onclick="showPage('kuis')">
-      <span class="nav-icon">&#10067;</span><span id="txt-nav-kuis">Mode Kuis</span>
-    </div>
-    <div class="nav-item" id="nav-terjemahan" onclick="showPage('terjemahan')">
-      <span class="nav-icon">&#127760;</span><span id="txt-nav-terjemahan">Terjemahan</span>
-    </div>
-    <div class="nav-item" id="nav-riwayat" onclick="showPage('riwayat')">
-      <span class="nav-icon">&#128338;</span><span id="txt-nav-riwayat">Riwayat</span>
-    </div>
-    <div class="nav-item" id="nav-tentang" onclick="showPage('tentang')">
-      <span class="nav-icon">&#8505;</span><span id="txt-nav-tentang">Tentang</span>
-    </div>
-    <div class="nav-item" onclick="window.open('https://saweria.co/iiiaaannn','_blank')" style="margin-top:8px;border-color:rgba(245,158,11,0.2);color:var(--accent3);">
-      <span class="nav-icon">&#9749;</span><span id="txt-nav-dukung">Dukung</span>
-    </div>
-  </div>
-
-  <div class="sidebar-footer">
-    <div class="lang-row">
-      <span>v1.0 &middot; Groq</span>
-      <div class="lang-btns">
-        <button class="lang-btn active" id="btnID" onclick="setLang('id')">ID</button>
-        <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
-      </div>
-    </div>
+    <div class="auth-heading">Selamat Datang</div>
+    <div class="auth-sub">Login dengan Google untuk mulai ringkas materi, buat kuis, dan terjemahkan teks.</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="20" height="20" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Masuk dengan Google
+    </button>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-note">Hanya pengguna yang login yang bisa mengakses app ini.</div>
   </div>
 </div>
 
-<div class="topbar" id="topbar">
-  <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-  <div>
-    <div class="topbar-title" id="topbar-title">Ringkas Materi</div>
-    <div class="topbar-sub" id="topbar-sub">K's Tools for School</div>
-  </div>
-</div>
+<!-- ===== APP ===== -->
+<div id="app">
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<div class="main" id="main">
-  <!-- RINGKAS -->
-  <div class="page active" id="page-ringkas">
-    <div class="card">
-      <div class="card-title" id="txt-mode-label">Mode Input</div>
-      <div class="mode-grid">
-        <button class="mode-btn active" id="modeText" onclick="setMode('text')">
-          <span class="mode-icon">&#128196;</span><span id="txt-mode-text">Teks</span>
-        </button>
-        <button class="mode-btn" id="modeFoto" onclick="setMode('foto')">
-          <span class="mode-icon">&#128247;</span><span id="txt-mode-foto">Foto</span>
-        </button>
-        <button class="mode-btn" id="modeYT" onclick="setMode('yt')">
-          <span class="mode-icon">&#9654;</span><span id="txt-mode-yt">YouTube</span>
-        </button>
-      </div>
-      <div id="inputText">
-        <textarea id="textArea" placeholder="Paste atau ketik materi di sini..."></textarea>
-      </div>
-      <div id="inputFoto" style="display:none;">
-        <input type="file" id="fileInput" accept="image/*" multiple style="display:none"/>
-        <div class="upload-zone" id="uploadZone" style="display:block;">
-          <div class="upload-zone-icon">&#128247;</div>
-          <div class="upload-zone-text" id="txt-upload-text">Klik untuk pilih foto</div>
-          <div class="upload-zone-sub" id="txt-upload-sub">Maks 4 foto &middot; JPG &middot; PNG</div>
-        </div>
-        <div class="preview-row" id="previewRow"></div>
-        <div class="dir-wrap">
-          <div class="dir-label" id="txt-dir-label">Arahan (opsional)</div>
-          <input type="text" id="directionInput" placeholder="cth: fokus ke rumus, jelaskan langkah-langkah"/>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-wrap">
+        <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="100" fill="#111" rx="8"/>
+          <rect x="28" y="20" width="6" height="60" fill="#4ade80"/>
+          <polygon points="34,20 52,20 72,50 52,50" fill="#4ade80" opacity="0.9"/>
+          <polygon points="34,52 52,52 76,80 52,80" fill="#4ade80" opacity="0.9"/>
+          <circle cx="72" cy="50" r="4" fill="#22d3ee"/>
+        </svg>
+        <div>
+          <div class="logo-text">K's Tools</div>
+          <div class="logo-sub">for School</div>
         </div>
       </div>
-      <div id="inputYT" style="display:none;">
-        <input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=..."/>
+      <button class="close-sidebar" onclick="closeSidebar()">&#10005;</button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Menu</div>
+      <div class="nav-item active" id="nav-ringkas" onclick="showPage('ringkas')">
+        <span class="nav-icon">&#9889;</span><span id="txt-nav-ringkas">Ringkas</span>
       </div>
-      <div class="card" style="margin-top:14px;padding:15px;border-color:var(--border2);">
-        <div class="card-title" id="txt-style-label">Gaya Ringkasan</div>
-        <div class="chips" id="styleRow">
-          <div class="chip active" data-id="Poin Penting" data-en="Key Points">Poin Penting</div>
-          <div class="chip" data-id="Penjelasan Detail" data-en="Detailed Explanation">Penjelasan Detail</div>
-          <div class="chip" data-id="Langkah demi Langkah" data-en="Step by Step">Langkah demi Langkah</div>
-          <div class="chip" data-id="Tabel Perbandingan" data-en="Comparison Table">Tabel Perbandingan</div>
-          <div class="chip" data-id="Gaya Storytelling" data-en="Storytelling Style">Gaya Storytelling</div>
+      <div class="nav-item" id="nav-kuis" onclick="showPage('kuis')">
+        <span class="nav-icon">&#10067;</span><span id="txt-nav-kuis">Mode Kuis</span>
+      </div>
+      <div class="nav-item" id="nav-terjemahan" onclick="showPage('terjemahan')">
+        <span class="nav-icon">&#127760;</span><span id="txt-nav-terjemahan">Terjemahan</span>
+      </div>
+      <div class="nav-item" id="nav-riwayat" onclick="showPage('riwayat')">
+        <span class="nav-icon">&#128338;</span><span id="txt-nav-riwayat">Riwayat</span>
+      </div>
+      <div class="nav-item" id="nav-tentang" onclick="showPage('tentang')">
+        <span class="nav-icon">&#8505;</span><span id="txt-nav-tentang">Tentang</span>
+      </div>
+      <div class="nav-item" onclick="window.open('https://saweria.co/iiiaaannn','_blank')" style="margin-top:8px;border-color:rgba(245,158,11,0.2);color:var(--accent3);">
+        <span class="nav-icon">&#9749;</span><span id="txt-nav-dukung">Dukung</span>
+      </div>
+    </div>
+
+    <!-- User profile -->
+    <div class="sidebar-user" id="sidebarUser">
+      <div class="user-avatar-placeholder" id="userAvatarPlaceholder">K</div>
+      <img class="user-avatar" id="userAvatar" src="" alt="" style="display:none"/>
+      <div class="user-info">
+        <div class="user-name" id="userName">—</div>
+        <div class="user-email" id="userEmail">—</div>
+      </div>
+      <button class="logout-btn" onclick="signOut()" title="Logout">&#8594;</button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="lang-row">
+        <span>v1.0 &middot; Groq</span>
+        <div class="lang-btns">
+          <button class="lang-btn active" id="btnID" onclick="setLang('id')">ID</button>
+          <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
         </div>
       </div>
-      <button class="submit-btn" id="submitBtn" onclick="doRingkas()">⚡ Ringkas Sekarang</button>
-      <div class="loading-wrap" id="loadingWrap">
-        <div class="loading-dots"><span></span><span></span><span></span></div>
-        <div class="loading-text" id="txt-loading-ringkas">Sedang memproses...</div>
-      </div>
-      <div class="result-wrap" id="resultWrap">
-        <div class="result-toolbar">
-          <div class="result-label" id="txt-result-label">Hasil</div>
-          <div class="result-actions">
-            <button class="action-btn" id="copyResultBtn" onclick="copyResult()">Salin</button>
-            <button class="action-btn" id="saveResultBtn" onclick="saveHistory()">Simpan</button>
+    </div>
+  </div>
+
+  <div class="topbar" id="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+    <div class="topbar-info">
+      <div class="topbar-title" id="topbar-title">Ringkas Materi</div>
+      <div class="topbar-sub" id="topbar-sub">K's Tools for School</div>
+    </div>
+    <div class="topbar-avatar-placeholder" id="topbarAvatarPlaceholder">K</div>
+    <img class="topbar-avatar" id="topbarAvatar" src="" alt="" style="display:none"/>
+  </div>
+
+  <div class="main" id="main">
+
+    <!-- RINGKAS -->
+    <div class="page active" id="page-ringkas">
+      <div class="card">
+        <div class="card-title" id="txt-mode-label">Mode Input</div>
+        <div class="mode-grid">
+          <button class="mode-btn active" id="modeText" onclick="setMode('text')">
+            <span class="mode-icon">&#128196;</span><span id="txt-mode-text">Teks</span>
+          </button>
+          <button class="mode-btn" id="modeFoto" onclick="setMode('foto')">
+            <span class="mode-icon">&#128247;</span><span id="txt-mode-foto">Foto</span>
+          </button>
+          <button class="mode-btn" id="modeYT" onclick="setMode('yt')">
+            <span class="mode-icon">&#9654;</span><span id="txt-mode-yt">YouTube</span>
+          </button>
+        </div>
+        <div id="inputText">
+          <textarea id="textArea" placeholder="Paste atau ketik materi di sini..."></textarea>
+        </div>
+        <div id="inputFoto" style="display:none;">
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none"/>
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-zone-icon">&#128247;</div>
+            <div class="upload-zone-text" id="txt-upload-text">Klik untuk pilih foto</div>
+            <div class="upload-zone-sub" id="txt-upload-sub">Maks 4 foto &middot; JPG &middot; PNG</div>
+          </div>
+          <div class="preview-row" id="previewRow"></div>
+          <div class="dir-wrap">
+            <div class="dir-label" id="txt-dir-label">Arahan (opsional)</div>
+            <input type="text" id="directionInput" placeholder="cth: fokus ke rumus, jelaskan langkah-langkah"/>
           </div>
         </div>
-        <div class="result-body" id="resultBody"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- KUIS -->
-  <div class="page" id="page-kuis">
-    <div class="card">
-      <div class="card-title" id="txt-kuis-materi-label">Materi Kuis</div>
-      <textarea id="kuisInput" placeholder="Paste materi di sini..."></textarea>
-      <div class="card-title" style="margin-top:14px;" id="txt-kuis-jumlah-label">Jumlah Soal</div>
-      <div class="chips" id="kuisJumlah">
-        <div class="chip active" data-jumlah="5">5</div>
-        <div class="chip" data-jumlah="10">10</div>
-        <div class="chip" data-jumlah="15">15</div>
-      </div>
-      <div class="card-title" style="margin-top:14px;" id="txt-kuis-tipe-label">Tipe Soal</div>
-      <div class="chips" id="kuisTipe">
-        <div class="chip active" data-id="Pilihan Ganda" data-en="Multiple Choice">Pilihan Ganda</div>
-        <div class="chip" data-id="Esai Singkat" data-en="Short Essay">Esai Singkat</div>
-        <div class="chip" data-id="Benar/Salah" data-en="True/False">Benar/Salah</div>
-      </div>
-      <button class="submit-btn" id="kuisBtn" onclick="doKuis()">❓ Buat Kuis</button>
-      <div class="loading-wrap" id="kuisLoading">
-        <div class="loading-dots"><span></span><span></span><span></span></div>
-        <div class="loading-text" id="txt-loading-kuis">AI sedang membuat soal...</div>
-      </div>
-      <div class="result-wrap" id="kuisResult">
-        <div class="result-toolbar">
-          <div class="result-label" id="txt-kuis-result-label">Soal Kuis</div>
-          <button class="action-btn" onclick="copyKuis()">Salin</button>
+        <div id="inputYT" style="display:none;">
+          <input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=..."/>
         </div>
-        <div class="result-body" id="kuisBody"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TERJEMAHAN -->
-  <div class="page" id="page-terjemahan">
-    <div class="card">
-      <div class="card-title" id="txt-trans-input-label">Teks yang Mau Diterjemahkan</div>
-      <textarea id="transInput" placeholder="Paste teks di sini..."></textarea>
-      <div class="card-title" style="margin-top:14px;" id="txt-trans-to-label">Terjemahkan ke</div>
-      <div class="chips" id="langRow">
-        <div class="chip active" data-lang="English">English</div>
-        <div class="chip" data-lang="Indonesia">Indonesia</div>
-        <div class="chip" data-lang="Jawa">Jawa</div>
-        <div class="chip" data-lang="Sunda">Sunda</div>
-        <div class="chip" data-lang="Arab">Arab</div>
-        <div class="chip" data-lang="Jepang">Jepang</div>
-      </div>
-      <button class="submit-btn" id="transBtn" onclick="doTerjemah()">🌐 Terjemahkan</button>
-      <div class="loading-wrap" id="transLoading">
-        <div class="loading-dots"><span></span><span></span><span></span></div>
-        <div class="loading-text" id="txt-loading-trans">Sedang menerjemahkan...</div>
-      </div>
-      <div class="result-wrap" id="transResult">
-        <div class="result-toolbar">
-          <div class="result-label" id="txt-trans-result-label">Hasil Terjemahan</div>
-          <button class="action-btn" onclick="copyTrans()">Salin</button>
+        <div class="card" style="margin-top:14px;padding:15px;border-color:var(--border2);">
+          <div class="card-title" id="txt-style-label">Gaya Ringkasan</div>
+          <div class="chips" id="styleRow">
+            <div class="chip active" data-id="Poin Penting" data-en="Key Points">Poin Penting</div>
+            <div class="chip" data-id="Penjelasan Detail" data-en="Detailed Explanation">Penjelasan Detail</div>
+            <div class="chip" data-id="Langkah demi Langkah" data-en="Step by Step">Langkah demi Langkah</div>
+            <div class="chip" data-id="Tabel Perbandingan" data-en="Comparison Table">Tabel Perbandingan</div>
+            <div class="chip" data-id="Gaya Storytelling" data-en="Storytelling Style">Gaya Storytelling</div>
+          </div>
         </div>
-        <div class="result-body" id="transBody"></div>
+        <button class="submit-btn" id="submitBtn" onclick="doRingkas()">⚡ Ringkas Sekarang</button>
+        <div class="loading-wrap" id="loadingWrap">
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+          <div class="loading-text" id="txt-loading-ringkas">Sedang memproses...</div>
+        </div>
+        <div class="result-wrap" id="resultWrap">
+          <div class="result-toolbar">
+            <div class="result-label" id="txt-result-label">Hasil</div>
+            <div class="result-actions">
+              <button class="action-btn" id="copyResultBtn" onclick="copyResult()">Salin</button>
+              <button class="action-btn" id="saveResultBtn" onclick="saveHistory()">Simpan</button>
+            </div>
+          </div>
+          <div class="result-body" id="resultBody"></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- RIWAYAT -->
-  <div class="page" id="page-riwayat">
-    <div class="page-header">
-      <div class="page-title" id="txt-riwayat-title">Riwayat</div>
-      <div class="page-desc" id="txt-riwayat-desc">Hasil ringkasan yang disimpan</div>
+    <!-- KUIS -->
+    <div class="page" id="page-kuis">
+      <div class="card">
+        <div class="card-title" id="txt-kuis-materi-label">Materi Kuis</div>
+        <textarea id="kuisInput" placeholder="Paste materi di sini..."></textarea>
+        <div class="card-title" style="margin-top:14px;" id="txt-kuis-jumlah-label">Jumlah Soal</div>
+        <div class="chips" id="kuisJumlah">
+          <div class="chip active" data-jumlah="5">5</div>
+          <div class="chip" data-jumlah="10">10</div>
+          <div class="chip" data-jumlah="15">15</div>
+        </div>
+        <div class="card-title" style="margin-top:14px;" id="txt-kuis-tipe-label">Tipe Soal</div>
+        <div class="chips" id="kuisTipe">
+          <div class="chip active" data-id="Pilihan Ganda" data-en="Multiple Choice">Pilihan Ganda</div>
+          <div class="chip" data-id="Esai Singkat" data-en="Short Essay">Esai Singkat</div>
+          <div class="chip" data-id="Benar/Salah" data-en="True/False">Benar/Salah</div>
+        </div>
+        <button class="submit-btn" id="kuisBtn" onclick="doKuis()">❓ Buat Kuis</button>
+        <div class="loading-wrap" id="kuisLoading">
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+          <div class="loading-text" id="txt-loading-kuis">AI sedang membuat soal...</div>
+        </div>
+        <div class="result-wrap" id="kuisResult">
+          <div class="result-toolbar">
+            <div class="result-label" id="txt-kuis-result-label">Soal Kuis</div>
+            <button class="action-btn" onclick="copyKuis()">Salin</button>
+          </div>
+          <div class="result-body" id="kuisBody"></div>
+        </div>
+      </div>
     </div>
-    <div id="historyList"></div>
-  </div>
 
-  <!-- TENTANG -->
-  <div class="page" id="page-tentang">
-    <div class="page-header">
-      <div class="page-title" id="txt-tentang-title">Tentang</div>
+    <!-- TERJEMAHAN -->
+    <div class="page" id="page-terjemahan">
+      <div class="card">
+        <div class="card-title" id="txt-trans-input-label">Teks yang Mau Diterjemahkan</div>
+        <textarea id="transInput" placeholder="Paste teks di sini..."></textarea>
+        <div class="card-title" style="margin-top:14px;" id="txt-trans-to-label">Terjemahkan ke</div>
+        <div class="chips" id="langRow">
+          <div class="chip active" data-lang="English">English</div>
+          <div class="chip" data-lang="Indonesia">Indonesia</div>
+          <div class="chip" data-lang="Jawa">Jawa</div>
+          <div class="chip" data-lang="Sunda">Sunda</div>
+          <div class="chip" data-lang="Arab">Arab</div>
+          <div class="chip" data-lang="Jepang">Jepang</div>
+        </div>
+        <button class="submit-btn" id="transBtn" onclick="doTerjemah()">🌐 Terjemahkan</button>
+        <div class="loading-wrap" id="transLoading">
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+          <div class="loading-text" id="txt-loading-trans">Sedang menerjemahkan...</div>
+        </div>
+        <div class="result-wrap" id="transResult">
+          <div class="result-toolbar">
+            <div class="result-label" id="txt-trans-result-label">Hasil Terjemahan</div>
+            <button class="action-btn" onclick="copyTrans()">Salin</button>
+          </div>
+          <div class="result-body" id="transBody"></div>
+        </div>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-title">K's Tools for School</div>
-      <p style="font-size:14px;color:var(--text2);line-height:1.9;">
-        Tool AI buat pelajar &mdash; ringkas materi, buat kuis, terjemahkan teks.<br/><br/>
-        Powered by <strong style="color:var(--accent)">Groq AI</strong> &middot; Web search by <strong style="color:var(--accent)">Tavily</strong><br/><br/>
-        Output mendukung <strong style="color:var(--accent2)">Markdown</strong>, <strong style="color:var(--accent2)">Tabel</strong>, dan <strong style="color:var(--accent2)">Rumus LaTeX</strong>.
-      </p>
+
+    <!-- RIWAYAT -->
+    <div class="page" id="page-riwayat">
+      <div class="page-header">
+        <div class="page-title" id="txt-riwayat-title">Riwayat</div>
+        <div class="page-desc" id="txt-riwayat-desc">Hasil ringkasan yang disimpan</div>
+      </div>
+      <div id="historyList"></div>
     </div>
-  </div>
-</div>
+
+    <!-- TENTANG -->
+    <div class="page" id="page-tentang">
+      <div class="page-header">
+        <div class="page-title" id="txt-tentang-title">Tentang</div>
+      </div>
+      <div class="card">
+        <div class="card-title">K's Tools for School</div>
+        <p style="font-size:var(--fs-md);color:var(--text2);line-height:1.9;">
+          Tool AI buat pelajar &mdash; ringkas materi, buat kuis, terjemahkan teks.<br/><br/>
+          Powered by <strong style="color:var(--accent)">Groq AI</strong> &middot; Web search by <strong style="color:var(--accent)">Tavily</strong><br/><br/>
+          Output mendukung <strong style="color:var(--accent2)">Markdown</strong>, <strong style="color:var(--accent2)">Tabel</strong>, dan <strong style="color:var(--accent2)">Rumus LaTeX</strong>.
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
 
 <script>
+// =====================
+// SUPABASE INIT
+// =====================
+const SUPABASE_URL  = 'https://xqrrimruddjmnhutxcjf.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_-r0safaA4GUE6o9I2NupBw_NqyBJn15';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// =====================
+// AUTH
+// =====================
+async function signInWithGoogle() {
+  const btn = document.querySelector('.google-btn');
+  btn.disabled = true;
+  btn.textContent = 'Mengarahkan...';
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href }
+  });
+  if (error) {
+    showAuthError(error.message);
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg> Masuk dengan Google`;
+  }
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authGate').style.display = 'flex';
+}
+
+function showAuthError(msg) {
+  var el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function setUserUI(user) {
+  var name  = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+  var email = user.email || '';
+  var photo = user.user_metadata?.avatar_url || '';
+  var initial = name.charAt(0).toUpperCase();
+
+  document.getElementById('userName').textContent  = name;
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('userAvatarPlaceholder').textContent = initial;
+  document.getElementById('topbarAvatarPlaceholder').textContent = initial;
+
+  if (photo) {
+    var av1 = document.getElementById('userAvatar');
+    var av2 = document.getElementById('topbarAvatar');
+    av1.src = photo; av1.style.display = 'block';
+    av2.src = photo; av2.style.display = 'block';
+    document.getElementById('userAvatarPlaceholder').style.display  = 'none';
+    document.getElementById('topbarAvatarPlaceholder').style.display = 'none';
+  }
+}
+
+function showApp(user) {
+  setUserUI(user);
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// Listen to auth state
+sb.auth.onAuthStateChange(function(event, session) {
+  if (session && session.user) {
+    showApp(session.user);
+  } else {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('authGate').style.display = 'flex';
+  }
+});
+
+// Check existing session on load
+sb.auth.getSession().then(function(result) {
+  if (result.data.session) {
+    showApp(result.data.session.user);
+  }
+});
+
+// =====================
+// APP LOGIC
+// =====================
 var WORKER = 'https://ringkas-api.ryalandsokay.workers.dev';
 var currentMode = 'text';
 var currentLang = 'id';
@@ -407,18 +917,12 @@ var lastKuisText = '';
 var lastTransText = '';
 var historyData = JSON.parse(localStorage.getItem('kstools_v2') || '[]');
 
-// SIDEBAR TOGGLE (CSS-First Approach)
-function toggleSidebar() {
-  document.body.classList.toggle('sidebar-open');
-}
-function closeSidebar() {
-  document.body.classList.remove('sidebar-open');
-}
+function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
+function closeSidebar()  { document.body.classList.remove('sidebar-open'); }
 
-// Pages
 var pageTitles = {
-  id: {ringkas:'Ringkas Materi',kuis:'Mode Kuis',terjemahan:'Terjemahan',riwayat:'Riwayat',tentang:'Tentang'},
-  en: {ringkas:'Summarize',kuis:'Quiz Mode',terjemahan:'Translation',riwayat:'History',tentang:'About'}
+  id: { ringkas:'Ringkas Materi', kuis:'Mode Kuis', terjemahan:'Terjemahan', riwayat:'Riwayat', tentang:'Tentang' },
+  en: { ringkas:'Summarize',     kuis:'Quiz Mode',  terjemahan:'Translation', riwayat:'History',  tentang:'About'   }
 };
 var currentPage = 'ringkas';
 
@@ -434,237 +938,207 @@ function showPage(name) {
   if (window.innerWidth <= 768) closeSidebar();
 }
 
-// Mode
 function setMode(mode) {
   currentMode = mode;
-  document.getElementById('modeText').classList.toggle('active', mode==='text');
-  document.getElementById('modeFoto').classList.toggle('active', mode==='foto');
-  document.getElementById('modeYT').classList.toggle('active', mode==='yt');
-  document.getElementById('inputText').style.display = mode==='text' ? 'block' : 'none';
-  document.getElementById('inputFoto').style.display = mode==='foto' ? 'block' : 'none';
-  document.getElementById('inputYT').style.display = mode==='yt' ? 'block' : 'none';
+  ['text','foto','yt'].forEach(function(m){
+    var cap = m.charAt(0).toUpperCase()+m.slice(1);
+    document.getElementById('mode'+cap).classList.toggle('active', mode===m);
+    document.getElementById('input'+cap).style.display = mode===m?'block':'none';
+  });
 }
 
-// Chip selectors
-['styleRow','kuisJumlah','kuisTipe','langRow'].forEach(function(id) {
-  document.getElementById(id).addEventListener('click', function(e) {
+['styleRow','kuisJumlah','kuisTipe','langRow'].forEach(function(id){
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('click', function(e){
     var t = e.target.closest('.chip');
-    if (t) {
+    if (t){
       this.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
       t.classList.add('active');
     }
   });
 });
 
-// Upload
-document.getElementById('uploadZone').addEventListener('click', function(){document.getElementById('fileInput').click();});
-document.getElementById('uploadZone').addEventListener('dragover', function(e){e.preventDefault();this.classList.add('drag');});
-document.getElementById('uploadZone').addEventListener('dragleave', function(){this.classList.remove('drag');});
-document.getElementById('uploadZone').addEventListener('drop', function(e){e.preventDefault();this.classList.remove('drag');processFiles(e.dataTransfer.files);});
+var uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('click', function(){document.getElementById('fileInput').click();});
+uploadZone.addEventListener('dragover', function(e){e.preventDefault();this.classList.add('drag');});
+uploadZone.addEventListener('dragleave', function(){this.classList.remove('drag');});
+uploadZone.addEventListener('drop', function(e){e.preventDefault();this.classList.remove('drag');processFiles(e.dataTransfer.files);});
 document.getElementById('fileInput').addEventListener('change', function(){processFiles(this.files);});
 
-function processFiles(files) {
+function processFiles(files){
   var arr = Array.from(files).slice(0,4);
   if (!arr.length) return;
-  uploadedImages = [];
-  var row = document.getElementById('previewRow');
-  row.innerHTML = '';
-  row.classList.add('show');
-  document.getElementById('txt-upload-text').textContent = arr.length + (currentLang==='en'?' photos selected':' foto dipilih');
-  arr.forEach(function(file) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var full = e.target.result;
-      var parts = full.split(',');
+  uploadedImages=[];
+  var row=document.getElementById('previewRow');
+  row.innerHTML=''; row.classList.add('show');
+  document.getElementById('txt-upload-text').textContent=arr.length+(currentLang==='en'?' photos selected':' foto dipilih');
+  arr.forEach(function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var full=e.target.result, parts=full.split(',');
       uploadedImages.push({base64:parts[1],mediaType:parts[0].match(/:(.*?);/)[1]});
-      var img = document.createElement('img');
-      img.src = full;
-      row.appendChild(img);
+      var img=document.createElement('img'); img.src=full; row.appendChild(img);
     };
     reader.readAsDataURL(file);
   });
 }
 
-// API call
-async function callAPI(messages) {
-  var res = await fetch(WORKER, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({messages:messages})
+async function callAPI(messages){
+  var res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:messages})});
+  var data=await res.json();
+  if(data.error) return 'Error: '+JSON.stringify(data.error);
+  return (data.choices&&data.choices[0])?data.choices[0].message.content:JSON.stringify(data);
+}
+
+function renderMD(text,elId){
+  var el=document.getElementById(elId);
+  el.innerHTML=marked.parse(text);
+  el.querySelectorAll('table').forEach(function(tbl){
+    if(!tbl.parentNode.classList.contains('table-wrap')){
+      var wrap=document.createElement('div'); wrap.className='table-wrap';
+      tbl.parentNode.insertBefore(wrap,tbl); wrap.appendChild(tbl);
+    }
   });
-  var data = await res.json();
-  if (data.error) return 'Error: ' + JSON.stringify(data.error);
-  return (data.choices && data.choices[0]) ? data.choices[0].message.content : JSON.stringify(data);
+  if(window.MathJax&&MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(function(){});
 }
 
-function renderMD(text, elId) {
-  var el = document.getElementById(elId);
-  el.innerHTML = marked.parse(text);
-  if (window.MathJax && MathJax.typesetPromise) {
-    MathJax.typesetPromise([el]).catch(function(){});
-  }
-}
-
-// RINGKAS
-async function doRingkas() {
-  var lang = currentLang;
-  var chip = document.querySelector('#styleRow .chip.active');
-  var style = chip ? (lang==='en' ? chip.dataset.en : chip.dataset.id) : 'Poin Penting';
-  var sys = lang==='en'
-    ? 'You are a smart student assistant. Answer in English. Use proper Markdown: **bold**, headings (##), bullet lists, Markdown tables, LaTeX math ($formula$ or $$formula$$). Output ONLY in the requested style, not all styles.'
-    : 'Kamu adalah asisten pelajar. Jawab dalam Bahasa Indonesia. Gunakan Markdown: **bold**, heading (##), bullet, tabel Markdown, LaTeX math ($rumus$ atau $$rumus$$). Output HANYA sesuai gaya yang diminta, bukan semua gaya sekaligus.';
-
-  var msgContent = [];
-  if (currentMode==='text') {
-    var txt = document.getElementById('textArea').value.trim();
-    if (!txt) {alert(lang==='en'?'Enter text first.':'Isi dulu teksnya.');return;}
-    msgContent = [{type:'text',text:(lang==='en'?'Summarize in "'+style+'" style:\n\n':'Ringkas dengan gaya "'+style+'":\n\n')+txt}];
-  } else if (currentMode==='foto') {
-    if (!uploadedImages.length) {alert(lang==='en'?'Upload photos first.':'Upload foto dulu.');return;}
-    var dir = document.getElementById('directionInput').value.trim();
-    var p = lang==='en'
-      ? 'Read images and summarize in "'+style+'" style.'+(dir?' Instruction: '+dir:'')
-      : 'Baca gambar dan ringkas dengan gaya "'+style+'".'+(dir?' Arahan: '+dir:'');
+async function doRingkas(){
+  var lang=currentLang;
+  var chip=document.querySelector('#styleRow .chip.active');
+  var style=chip?(lang==='en'?chip.dataset.en:chip.dataset.id):'Poin Penting';
+  var sys=lang==='en'
+    ?'You are a smart student assistant. Answer in English. Use Markdown: **bold**, headings (##), bullets, tables, LaTeX math. Output ONLY in the requested style.'
+    :'Kamu adalah asisten pelajar. Jawab dalam Bahasa Indonesia. Gunakan Markdown: **bold**, heading (##), bullet, tabel, LaTeX math. Output HANYA sesuai gaya yang diminta.';
+  var msgContent=[];
+  if(currentMode==='text'){
+    var txt=document.getElementById('textArea').value.trim();
+    if(!txt){alert(lang==='en'?'Enter text first.':'Isi dulu teksnya.');return;}
+    msgContent=[{type:'text',text:(lang==='en'?'Summarize in "'+style+'" style:\n\n':'Ringkas dengan gaya "'+style+'":\n\n')+txt}];
+  } else if(currentMode==='foto'){
+    if(!uploadedImages.length){alert(lang==='en'?'Upload photos first.':'Upload foto dulu.');return;}
+    var dir=document.getElementById('directionInput').value.trim();
+    var p=lang==='en'?'Read images and summarize in "'+style+'" style.'+(dir?' Instruction: '+dir:''):'Baca gambar dan ringkas dengan gaya "'+style+'".'+(dir?' Arahan: '+dir:'');
     uploadedImages.forEach(function(img){msgContent.push({type:'image_url',image_url:{url:'data:'+img.mediaType+';base64,'+img.base64}});});
     msgContent.push({type:'text',text:p});
   } else {
-    var yt = document.getElementById('ytUrl').value.trim();
-    if (!yt) {alert(lang==='en'?'Enter YouTube link.':'Masukkan link YouTube.');return;}
-    msgContent = [{type:'text',text:(lang==='en'?'Summarize this YouTube video in "'+style+'" style: ':'Ringkas video YouTube ini dengan gaya "'+style+'": ')+yt}];
+    var yt=document.getElementById('ytUrl').value.trim();
+    if(!yt){alert(lang==='en'?'Enter YouTube link.':'Masukkan link YouTube.');return;}
+    msgContent=[{type:'text',text:(lang==='en'?'Summarize this YouTube video in "'+style+'" style: ':'Ringkas video YouTube ini dengan gaya "'+style+'": ')+yt}];
   }
-
   setLoading('submitBtn','loadingWrap','resultWrap',true);
   try {
-    lastResultText = await callAPI([{role:'system',content:sys},{role:'user',content:msgContent}]);
+    lastResultText=await callAPI([{role:'system',content:sys},{role:'user',content:msgContent}]);
     renderMD(lastResultText,'resultBody');
     document.getElementById('resultWrap').classList.add('show');
-  } catch(e) {
+  } catch(e){
     document.getElementById('resultBody').textContent='Error: '+e.message;
     document.getElementById('resultWrap').classList.add('show');
   }
   setLoading('submitBtn','loadingWrap','resultWrap',false);
 }
 
-// KUIS
-async function doKuis() {
-  var lang = currentLang;
-  var txt = document.getElementById('kuisInput').value.trim();
-  if (!txt) {alert(lang==='en'?'Enter material first.':'Isi dulu materinya.');return;}
-  var j = document.querySelector('#kuisJumlah .chip.active');
-  var t = document.querySelector('#kuisTipe .chip.active');
-  var jumlah = j ? j.dataset.jumlah : '5';
-  var tipe = t ? (lang==='en' ? t.dataset.en : t.dataset.id) : 'Pilihan Ganda';
-  var sys = lang==='en'
-    ? 'You are a teacher. Create '+jumlah+' "'+tipe+'" questions from the material. Include answer key at the end. Use Markdown, number each question.'
-    : 'Kamu adalah guru. Buat '+jumlah+' soal tipe "'+tipe+'" dari materi. Sertakan kunci jawaban di akhir. Gunakan Markdown, nomori setiap soal.';
-
+async function doKuis(){
+  var lang=currentLang;
+  var txt=document.getElementById('kuisInput').value.trim();
+  if(!txt){alert(lang==='en'?'Enter material first.':'Isi dulu materinya.');return;}
+  var j=document.querySelector('#kuisJumlah .chip.active');
+  var t=document.querySelector('#kuisTipe .chip.active');
+  var jumlah=j?j.dataset.jumlah:'5';
+  var tipe=t?(lang==='en'?t.dataset.en:t.dataset.id):'Pilihan Ganda';
+  var sys=lang==='en'?'You are a teacher. Create '+jumlah+' "'+tipe+'" questions. Include answer key at the end. Use Markdown.':'Kamu adalah guru. Buat '+jumlah+' soal tipe "'+tipe+'". Sertakan kunci jawaban di akhir. Gunakan Markdown.';
   setLoading('kuisBtn','kuisLoading','kuisResult',true);
   try {
-    lastKuisText = await callAPI([{role:'system',content:sys},{role:'user',content:[{type:'text',text:(lang==='en'?'Material:\n\n':'Materi:\n\n')+txt}]}]);
+    lastKuisText=await callAPI([{role:'system',content:sys},{role:'user',content:[{type:'text',text:(lang==='en'?'Material:\n\n':'Materi:\n\n')+txt}]}]);
     renderMD(lastKuisText,'kuisBody');
     document.getElementById('kuisResult').classList.add('show');
-  } catch(e) {
+  } catch(e){
     document.getElementById('kuisBody').textContent='Error: '+e.message;
     document.getElementById('kuisResult').classList.add('show');
   }
   setLoading('kuisBtn','kuisLoading','kuisResult',false);
 }
 
-// TERJEMAH
-async function doTerjemah() {
-  var txt = document.getElementById('transInput').value.trim();
-  if (!txt) {alert(currentLang==='en'?'Enter text first.':'Isi dulu teksnya.');return;}
-  var tl = document.querySelector('#langRow .chip.active');
-  var targetLang = tl ? tl.dataset.lang : 'English';
-  var sys = 'You are a professional translator. Translate the text to '+targetLang+'. Only provide the translation, no explanation.';
-
+async function doTerjemah(){
+  var txt=document.getElementById('transInput').value.trim();
+  if(!txt){alert(currentLang==='en'?'Enter text first.':'Isi dulu teksnya.');return;}
+  var tl=document.querySelector('#langRow .chip.active');
+  var targetLang=tl?tl.dataset.lang:'English';
+  var sys='You are a professional translator. Translate to '+targetLang+'. Only the translation, no explanation.';
   setLoading('transBtn','transLoading','transResult',true);
   try {
-    lastTransText = await callAPI([{role:'system',content:sys},{role:'user',content:[{type:'text',text:txt}]}]);
+    lastTransText=await callAPI([{role:'system',content:sys},{role:'user',content:[{type:'text',text:txt}]}]);
     renderMD(lastTransText,'transBody');
     document.getElementById('transResult').classList.add('show');
-  } catch(e) {
+  } catch(e){
     document.getElementById('transBody').textContent='Error: '+e.message;
     document.getElementById('transResult').classList.add('show');
   }
   setLoading('transBtn','transLoading','transResult',false);
 }
 
-function setLoading(btnId, loadingId, resultId, isLoading) {
-  document.getElementById(btnId).disabled = isLoading;
-  document.getElementById(loadingId).classList.toggle('show', isLoading);
-  if (isLoading) document.getElementById(resultId).classList.remove('show');
+function setLoading(btnId,loadingId,resultId,isLoading){
+  document.getElementById(btnId).disabled=isLoading;
+  document.getElementById(loadingId).classList.toggle('show',isLoading);
+  if(isLoading) document.getElementById(resultId).classList.remove('show');
 }
 
-// Copy
-function copyText(text) {
-  navigator.clipboard.writeText(text);
-}
-function copyResult() { copyText(lastResultText); flashBtn('copyResultBtn', currentLang==='en'?'Copied!':'Disalin!'); }
-function copyKuis() { copyText(lastKuisText); }
-function copyTrans() { copyText(lastTransText); }
-function flashBtn(id, txt) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  var orig = el.textContent;
-  el.textContent = txt;
+function copyText(text){navigator.clipboard.writeText(text);}
+function copyResult(){copyText(lastResultText);flashBtn('copyResultBtn',currentLang==='en'?'Copied!':'Disalin!');}
+function copyKuis(){copyText(lastKuisText);}
+function copyTrans(){copyText(lastTransText);}
+function flashBtn(id,txt){
+  var el=document.getElementById(id); if(!el) return;
+  var orig=el.textContent; el.textContent=txt;
   setTimeout(function(){el.textContent=orig;},2000);
 }
 
-// Save history
-function saveHistory() {
-  if (!lastResultText) return;
+function saveHistory(){
+  if(!lastResultText) return;
   historyData.unshift({time:new Date().toLocaleString('id-ID'),preview:lastResultText.slice(0,120),full:lastResultText});
-  if (historyData.length>30) historyData.pop();
+  if(historyData.length>30) historyData.pop();
   localStorage.setItem('kstools_v2',JSON.stringify(historyData));
-  flashBtn('saveResultBtn', currentLang==='en'?'Saved!':'Tersimpan!');
+  flashBtn('saveResultBtn',currentLang==='en'?'Saved!':'Tersimpan!');
 }
 
-function renderHistory() {
-  var list = document.getElementById('historyList');
-  if (!historyData.length) {
+function renderHistory(){
+  var list=document.getElementById('historyList');
+  if(!historyData.length){
     list.innerHTML='<div class="empty-state"><div class="empty-icon">&#128338;</div>'+(currentLang==='en'?'No saved history yet':'Belum ada riwayat tersimpan')+'</div>';
     return;
   }
-  list.innerHTML = historyData.map(function(item,i){
+  list.innerHTML=historyData.map(function(item,i){
     return '<div class="history-item" onclick="viewHistory('+i+')"><div class="history-time">'+item.time+'</div><div class="history-preview">'+item.preview+'</div></div>';
   }).join('');
 }
 
-function viewHistory(i) {
-  lastResultText = historyData[i].full;
+function viewHistory(i){
+  lastResultText=historyData[i].full;
   showPage('ringkas');
   renderMD(historyData[i].full,'resultBody');
   document.getElementById('resultWrap').classList.add('show');
 }
 
-// i18n
-var i18n = {
-  id: {'txt-nav-ringkas':'Ringkas','txt-nav-kuis':'Mode Kuis','txt-nav-terjemahan':'Terjemahan','txt-nav-riwayat':'Riwayat','txt-nav-tentang':'Tentang','txt-nav-dukung':'Dukung','txt-mode-label':'Mode Input','txt-mode-text':'Teks','txt-mode-foto':'Foto','txt-mode-yt':'YouTube','txt-style-label':'Gaya Ringkasan','txt-upload-text':'Klik untuk pilih foto','txt-upload-sub':'Maks 4 foto \u00b7 JPG \u00b7 PNG','txt-dir-label':'Arahan (opsional)','txt-loading-ringkas':'Sedang memproses...','txt-result-label':'Hasil','copyResultBtn':'Salin','saveResultBtn':'Simpan','submitBtn':'⚡ Ringkas Sekarang','txt-kuis-materi-label':'Materi Kuis','txt-kuis-jumlah-label':'Jumlah Soal','txt-kuis-tipe-label':'Tipe Soal','txt-loading-kuis':'AI sedang membuat soal...','txt-kuis-result-label':'Soal Kuis','kuisBtn':'❓ Buat Kuis','txt-trans-input-label':'Teks yang Mau Diterjemahkan','txt-trans-to-label':'Terjemahkan ke','txt-loading-trans':'Sedang menerjemahkan...','txt-trans-result-label':'Hasil Terjemahan','transBtn':'🌐 Terjemahkan','txt-riwayat-title':'Riwayat','txt-riwayat-desc':'Hasil ringkasan yang disimpan','txt-tentang-title':'Tentang'},
-  en: {'txt-nav-ringkas':'Summarize','txt-nav-kuis':'Quiz Mode','txt-nav-terjemahan':'Translation','txt-nav-riwayat':'History','txt-nav-tentang':'About','txt-nav-dukung':'Support','txt-mode-label':'Input Mode','txt-mode-text':'Text','txt-mode-foto':'Photo','txt-mode-yt':'YouTube','txt-style-label':'Summary Style','txt-upload-text':'Click to select photos','txt-upload-sub':'Max 4 photos \u00b7 JPG \u00b7 PNG','txt-dir-label':'Direction (optional)','txt-loading-ringkas':'Processing...','txt-result-label':'Result','copyResultBtn':'Copy','saveResultBtn':'Save','submitBtn':'⚡ Summarize Now','txt-kuis-materi-label':'Quiz Material','txt-kuis-jumlah-label':'Number of Questions','txt-kuis-tipe-label':'Question Type','txt-loading-kuis':'Generating questions...','txt-kuis-result-label':'Quiz Questions','kuisBtn':'❓ Generate Quiz','txt-trans-input-label':'Text to Translate','txt-trans-to-label':'Translate to','txt-loading-trans':'Translating...','txt-trans-result-label':'Translation Result','transBtn':'🌐 Translate','txt-riwayat-title':'History','txt-riwayat-desc':'Saved summaries','txt-tentang-title':'About'}
+var i18n={
+  id:{'txt-nav-ringkas':'Ringkas','txt-nav-kuis':'Mode Kuis','txt-nav-terjemahan':'Terjemahan','txt-nav-riwayat':'Riwayat','txt-nav-tentang':'Tentang','txt-nav-dukung':'Dukung','txt-mode-label':'Mode Input','txt-mode-text':'Teks','txt-mode-foto':'Foto','txt-mode-yt':'YouTube','txt-style-label':'Gaya Ringkasan','txt-upload-text':'Klik untuk pilih foto','txt-upload-sub':'Maks 4 foto \u00b7 JPG \u00b7 PNG','txt-dir-label':'Arahan (opsional)','txt-loading-ringkas':'Sedang memproses...','txt-result-label':'Hasil','copyResultBtn':'Salin','saveResultBtn':'Simpan','submitBtn':'⚡ Ringkas Sekarang','txt-kuis-materi-label':'Materi Kuis','txt-kuis-jumlah-label':'Jumlah Soal','txt-kuis-tipe-label':'Tipe Soal','txt-loading-kuis':'AI sedang membuat soal...','txt-kuis-result-label':'Soal Kuis','kuisBtn':'❓ Buat Kuis','txt-trans-input-label':'Teks yang Mau Diterjemahkan','txt-trans-to-label':'Terjemahkan ke','txt-loading-trans':'Sedang menerjemahkan...','txt-trans-result-label':'Hasil Terjemahan','transBtn':'🌐 Terjemahkan','txt-riwayat-title':'Riwayat','txt-riwayat-desc':'Hasil ringkasan yang disimpan','txt-tentang-title':'Tentang'},
+  en:{'txt-nav-ringkas':'Summarize','txt-nav-kuis':'Quiz Mode','txt-nav-terjemahan':'Translation','txt-nav-riwayat':'History','txt-nav-tentang':'About','txt-nav-dukung':'Support','txt-mode-label':'Input Mode','txt-mode-text':'Text','txt-mode-foto':'Photo','txt-mode-yt':'YouTube','txt-style-label':'Summary Style','txt-upload-text':'Click to select photos','txt-upload-sub':'Max 4 photos \u00b7 JPG \u00b7 PNG','txt-dir-label':'Direction (optional)','txt-loading-ringkas':'Processing...','txt-result-label':'Result','copyResultBtn':'Copy','saveResultBtn':'Save','submitBtn':'⚡ Summarize Now','txt-kuis-materi-label':'Quiz Material','txt-kuis-jumlah-label':'Number of Questions','txt-kuis-tipe-label':'Question Type','txt-loading-kuis':'Generating questions...','txt-kuis-result-label':'Quiz Questions','kuisBtn':'❓ Generate Quiz','txt-trans-input-label':'Text to Translate','txt-trans-to-label':'Translate to','txt-loading-trans':'Translating...','txt-trans-result-label':'Translation Result','transBtn':'🌐 Translate','txt-riwayat-title':'History','txt-riwayat-desc':'Saved summaries','txt-tentang-title':'About'}
 };
 
-function setLang(lang) {
-  currentLang = lang;
-  document.getElementById('btnID').classList.toggle('active', lang==='id');
-  document.getElementById('btnEN').classList.toggle('active', lang==='en');
-  var t = i18n[lang];
-  Object.keys(t).forEach(function(k){
-    var el = document.getElementById(k);
-    if (el) el.textContent = t[k];
-  });
-  document.querySelectorAll('#styleRow .chip').forEach(function(c){c.textContent = lang==='en'?c.dataset.en:c.dataset.id;});
-  document.querySelectorAll('#kuisTipe .chip').forEach(function(c){c.textContent = lang==='en'?c.dataset.en:c.dataset.id;});
-  var ph = {
+function setLang(lang){
+  currentLang=lang;
+  document.getElementById('btnID').classList.toggle('active',lang==='id');
+  document.getElementById('btnEN').classList.toggle('active',lang==='en');
+  var t=i18n[lang];
+  Object.keys(t).forEach(function(k){var el=document.getElementById(k);if(el)el.textContent=t[k];});
+  document.querySelectorAll('#styleRow .chip').forEach(function(c){c.textContent=lang==='en'?c.dataset.en:c.dataset.id;});
+  document.querySelectorAll('#kuisTipe .chip').forEach(function(c){c.textContent=lang==='en'?c.dataset.en:c.dataset.id;});
+  var ph={
     id:{textArea:'Paste atau ketik materi di sini...',kuisInput:'Paste materi di sini...',transInput:'Paste teks di sini...',directionInput:'cth: fokus ke rumus, jelaskan langkah-langkah',ytUrl:'https://youtube.com/watch?v=...'},
     en:{textArea:'Paste or type material here...',kuisInput:'Paste material here...',transInput:'Paste text here...',directionInput:'e.g: focus on formulas, step by step',ytUrl:'https://youtube.com/watch?v=...'}
   };
   Object.keys(ph[lang]).forEach(function(id){var el=document.getElementById(id);if(el)el.placeholder=ph[lang][id];});
-  document.getElementById('topbar-title').textContent = pageTitles[lang][currentPage] || currentPage;
+  document.getElementById('topbar-title').textContent=pageTitles[lang][currentPage]||currentPage;
 }
-
-// On load, sidebar is closed by default.
-// Desktop users can open it. On mobile it stays hidden until toggled.
 </script>
 </body>
 </html>
