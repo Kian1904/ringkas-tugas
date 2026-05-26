@@ -757,6 +757,8 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
             <div class="result-actions">
               <button class="action-btn" id="copyResultBtn" onclick="copyResult()">Salin</button>
               <button class="action-btn" id="saveResultBtn" onclick="saveHistory()">Simpan</button>
+              <button class="action-btn" onclick="exportTxt()">↓ TXT</button>
+              <button class="action-btn" onclick="exportPdf()">↓ PDF</button>
             </div>
           </div>
           <div class="result-body" id="resultBody"></div>
@@ -1174,6 +1176,52 @@ var i18n={
   id:{'txt-nav-ringkas':'Ringkas','txt-nav-kuis':'Mode Kuis','txt-nav-terjemahan':'Terjemahan','txt-nav-riwayat':'Riwayat','txt-nav-tentang':'Tentang','txt-nav-dukung':'Dukung','txt-mode-label':'Mode Input','txt-mode-text':'Teks','txt-mode-foto':'Foto','txt-mode-yt':'YouTube','txt-style-label':'Gaya Ringkasan','txt-upload-text':'Klik untuk pilih foto','txt-upload-sub':'Maks 4 foto \u00b7 JPG \u00b7 PNG','txt-dir-label':'Arahan (opsional)','txt-loading-ringkas':'Sedang memproses...','txt-result-label':'Hasil','copyResultBtn':'Salin','saveResultBtn':'Simpan','submitBtn':'⚡ Ringkas Sekarang','txt-kuis-materi-label':'Materi Kuis','txt-kuis-jumlah-label':'Jumlah Soal','txt-kuis-tipe-label':'Tipe Soal','txt-loading-kuis':'AI sedang membuat soal...','txt-kuis-result-label':'Soal Kuis','kuisBtn':'❓ Buat Kuis','txt-trans-input-label':'Teks yang Mau Diterjemahkan','txt-trans-to-label':'Terjemahkan ke','txt-loading-trans':'Sedang menerjemahkan...','txt-trans-result-label':'Hasil Terjemahan','transBtn':'🌐 Terjemahkan','txt-riwayat-title':'Riwayat','txt-riwayat-desc':'Hasil ringkasan yang disimpan','txt-tentang-title':'Tentang'},
   en:{'txt-nav-ringkas':'Summarize','txt-nav-kuis':'Quiz Mode','txt-nav-terjemahan':'Translation','txt-nav-riwayat':'History','txt-nav-tentang':'About','txt-nav-dukung':'Support','txt-mode-label':'Input Mode','txt-mode-text':'Text','txt-mode-foto':'Photo','txt-mode-yt':'YouTube','txt-style-label':'Summary Style','txt-upload-text':'Click to select photos','txt-upload-sub':'Max 4 photos \u00b7 JPG \u00b7 PNG','txt-dir-label':'Direction (optional)','txt-loading-ringkas':'Processing...','txt-result-label':'Result','copyResultBtn':'Copy','saveResultBtn':'Save','submitBtn':'⚡ Summarize Now','txt-kuis-materi-label':'Quiz Material','txt-kuis-jumlah-label':'Number of Questions','txt-kuis-tipe-label':'Question Type','txt-loading-kuis':'Generating questions...','txt-kuis-result-label':'Quiz Questions','kuisBtn':'❓ Generate Quiz','txt-trans-input-label':'Text to Translate','txt-trans-to-label':'Translate to','txt-loading-trans':'Translating...','txt-trans-result-label':'Translation Result','transBtn':'🌐 Translate','txt-riwayat-title':'History','txt-riwayat-desc':'Saved summaries','txt-tentang-title':'About'}
 };
+
+function exportTxt(){
+  if(!lastResultText) return;
+  var blob=new Blob([lastResultText],{type:'text/plain;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='ringkasan-kstools.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function exportPdf(){
+  if(!lastResultText) return;
+  var win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<title>Ringkasan - K's Tools for School</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.8;color:#1a1a1a;padding:48px;max-width:760px;margin:0 auto;}
+h1,h2,h3{color:#166534;margin:20px 0 8px;font-weight:600;}
+h1{font-size:22px;}h2{font-size:18px;}h3{font-size:15px;}
+p{margin-bottom:10px;}
+ul,ol{margin:6px 0 10px 22px;}
+li{margin-bottom:4px;}
+table{width:100%;border-collapse:collapse;margin:12px 0;}
+th{background:#f0fdf4;border:1px solid #86efac;padding:8px 10px;text-align:left;color:#166534;}
+td{border:1px solid #d1fae5;padding:8px 10px;}
+tr:nth-child(even) td{background:#f9fafb;}
+code{background:#f3f4f6;padding:2px 5px;border-radius:3px;font-family:monospace;font-size:12px;}
+pre{background:#f3f4f6;padding:12px;border-radius:6px;overflow-x:auto;margin:8px 0;}
+blockquote{border-left:3px solid #4ade80;padding-left:12px;color:#555;margin:8px 0;}
+strong{color:#15803d;}
+.header{border-bottom:2px solid #4ade80;padding-bottom:12px;margin-bottom:24px;}
+.header h1{color:#15803d;font-size:18px;}
+.header p{color:#888;font-size:11px;font-family:monospace;}
+@media print{body{padding:24px;}@page{margin:1.5cm;}}
+</style></head><body>
+<div class="header">
+<h1>K's Tools for School</h1>
+<p>Diekspor pada ${new Date().toLocaleString('id-ID')}</p>
+</div>
+${marked.parse(lastResultText)}
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`);
+  win.document.close();
+}
 
 function setLang(lang){
   currentLang=lang;
