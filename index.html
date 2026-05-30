@@ -1288,57 +1288,18 @@ function processFiles(files) {
 
 // 🟢 3. FUNGSI KHUSUS PEMBEDAH TEKS PDF
 // ==========================================
-// 1. VARIABEL GLOBAL (Paling Atas)
+// 1. VARIABEL GLOBAL (Pastikan sudah ada di atas)
 // ==========================================
 var extractedDocumentText = ""; 
 
 // ==========================================
-// 2. FUNGSI PROCESSFILES (Tengah)
-// ==========================================
-function processFiles(files) {
-  uploadedImages = [];
-  extractedDocumentText = ""; 
-  
-  var preview = document.getElementById('previewRow');
-  preview.innerHTML = '';
-  var count = 0;
-  
-  for (var i = 0; i < files.length && count < 4; i++) {
-    var f = files[i];
-    var fileName = f.name.toLowerCase();
-    
-    if (f.type.match('image.*')) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        uploadedImages.push(e.target.result);
-        var img = document.createElement('img');
-        img.src = e.target.result;
-        preview.appendChild(img);
-      };
-      reader.readAsDataURL(f);
-      count++;
-    } 
-    else if (fileName.endsWith('.pdf')) {
-      var div = document.createElement('div');
-      div.style = "padding: 8px 12px; background: rgba(47, 228, 138, 0.1); border: 1px solid #2fe48a; border-radius: 8px; font-size: 13px; color: #2fe48a; display: inline-flex; align-items: center; gap: 6px; margin: 4px;";
-      div.innerHTML = `📄 PDF: ${f.name}`;
-      preview.appendChild(div);
-      
-      bacaTeksPDF(f); // <--- Fungsi ini memanggil kode di bawahnya
-      count++;
-    }
-  }
-  preview.classList.add('show');
-}
-
-// ==========================================
-// 3. FUNGSI BACA TEKS PDF (Ganti di sini!)
+// 2. FUNGSI PEMBEDAH TEKS PDF (ANTI SPAM & LOG CONSOLE)
 // ==========================================
 function bacaTeksPDF(file) {
   var reader = new FileReader();
-  var btn = document.getElementById('submitBtn'); // Sesuaikan ID tombol ringkasmu
+  var btn = document.getElementById('submitBtn'); // Jika ID tombol ringkasmu bukan 'submitBtn', sesuaikan di sini
   
-  // 🔒 KUNCI TOMBOL: Matikan tombol dan ubah teksnya
+  // Kunci tombol ringkas selama membaca PDF
   if (btn) {
     btn.disabled = true;
     btn.innerText = "⏳ Membaca PDF (Mohon Tunggu)...";
@@ -1352,6 +1313,7 @@ function bacaTeksPDF(file) {
       var pdf = await pdfjsLib.getDocument(typedarray).promise;
       var totalTeks = "";
 
+      // Ekstrak teks dari halaman 1 sampai halaman terakhir
       for (var i = 1; i <= pdf.numPages; i++) {
         var page = await pdf.getPage(i);
         var textObj = await page.getTextContent();
@@ -1360,9 +1322,12 @@ function bacaTeksPDF(file) {
       }
 
       extractedDocumentText = totalTeks; 
-      console.log("Mantap! PDF berhasil dibaca. Total karakter:", extractedDocumentText.length);
+      console.log("====================================");
+      console.log("✅ PDF BERHASIL DIEKSTRAK!");
+      console.log("Total Karakter:", extractedDocumentText.length);
+      console.log("====================================");
       
-      // 🔓 BUKA TOMBOL: Kembalikan tombol jadi normal karena data sudah siap!
+      // Buka kembali kunci tombol setelah data siap
       if (btn) {
         btn.disabled = false;
         btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
@@ -1382,47 +1347,49 @@ function bacaTeksPDF(file) {
   };
   reader.readAsArrayBuffer(file);
 }
-  async function doRingkas() {
+
+// ==========================================
+// 3. FUNGSI DO RINGKAS (ANTI ERROR [OBJECT OBJECT])
+// ==========================================
+async function doRingkas() {
   var txt = document.getElementById('textArea').value.trim();
   
-  // 🛡️ MODIFIKASI INPUT CHECK: Boleh kosong kalau user sudah upload PDF
-  if (!txt && extractedDocumentText.trim().length === 0) { 
+  // Validasi input: boleh kosong kalau ada data PDF
+  if (!txt && (!extractedDocumentText || extractedDocumentText.trim().length === 0)) { 
     alert(currentLang==='id'?'Masukkan teks atau upload PDF terlebih dahulu!':'Enter text or upload a PDF first!'); 
     return; 
   }
   
-  var style = document.querySelector('#styleRow .chip.active').textContent;
+  var style = document.querySelector('#styleRow .chip.active') ? document.querySelector('#styleRow .chip.active').textContent : 'Poin Penting';
   var loading = document.getElementById('loadingWrap');
   var result = document.getElementById('resultWrap');
   
-  // Nyalakan animasi loading
-  loading.classList.add('show');
-  result.classList.remove('show');
+  if(loading) loading.classList.add('show');
+  if(result) result.classList.remove('show');
   
-  // 🛡️ PANGGIL SATPAM PEMERIKSA LIMIT HARIAN (Supabase)
-  const limitCheck = await checkAndUpdateLimit();
-  if (!limitCheck.allowed) {
-    alert(limitCheck.msg);
-    loading.classList.remove('remove'); // Matikan loading
-    return; // STOP!
+  // 🛡️ Pemeriksa Limit Kuota Supabase
+  if (typeof checkAndUpdateLimit === "function") {
+    const limitCheck = await checkAndUpdateLimit();
+    if (!limitCheck.allowed) {
+      alert(limitCheck.msg);
+      if(loading) loading.classList.remove('show');
+      return; 
+    }
   }
   
-  // ⚡ LOGIKA PENENTUAN TEKS YANG AKAN DIKIRIM KE AI
-  var textToSend = txt; // Default-nya adalah teks ketikan di textarea
-  
-  // Jika ada teks hasil bongkar PDF, kita bungkus teksnya dengan rapi
-  if (extractedDocumentText.trim().length > 0) {
+  // Satukan teks ketikan dengan teks PDF
+  var textToSend = txt;
+  if (extractedDocumentText && extractedDocumentText.trim().length > 0) {
     textToSend = "Materi Dokumen PDF:\n" + extractedDocumentText + "\n\n" + (txt ? "Arahan Tambahan dari User: " + txt : "");
   }
   
-  // Kirim data ke Cloudflare Worker
+  // Tembak Cloudflare Worker
   fetch(''+WORKER+'/ringkas', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({text:textToSend, style:style})
   })
   .then(async r => {
-    // 🔍 JIKA WORKER ERROR (Misal status 500 / 404 / 400)
     if (!r.ok) {
       var errorText = await r.text();
       throw new Error(`Worker Error (${r.status}): ${errorText}`);
@@ -1430,35 +1397,53 @@ function bacaTeksPDF(file) {
     return r.json();
   })
   .then(d => {
-    loading.classList.remove('show');
+    if(loading) loading.classList.remove('show');
     
-    // 🧠 LOGIKA PINTAR: Bongkar objek AI jika strukturnya bersarang
-    var rawResult = d.result || d.error || d;
-    
-    // Jika ternyata masih berupa objek beneran, kita ambil properti teks di dalamnya
-    if (typeof rawResult === 'object' && rawResult !== null) {
-      lastResultText = rawResult.text || rawResult.response || JSON.stringify(rawResult);
+    // 🧠 DETEKTIF STRUKTUR DATA: Bongkar paksa data objek dari Cloudflare Worker
+    console.log("Data mentah dari Worker:", d);
+    var rawResult = "";
+
+    if (d && typeof d === 'object') {
+      // Cari properti string di dalam objek respon Worker kamu
+      rawResult = d.result || d.response || d.text || d.output || (d.data ? d.data.result : null);
+      
+      // Jika di dalam d.result ternyata masih berupa objek lagi, bongkar lagi level berikutnya
+      if (rawResult && typeof rawResult === 'object') {
+        rawResult = rawResult.text || rawResult.response || JSON.stringify(rawResult);
+      }
+      
+      // Jika bener-bener mentok gak nemu properti, jadikan seluruh isi JSON sebagai teks string
+      if (!rawResult) {
+        rawResult = JSON.stringify(d);
+      }
     } else {
-      lastResultText = String(rawResult);
+      rawResult = String(d);
     }
     
-    // Tampilkan hasil rangkuman yang sudah diubah jadi HTML oleh marked
-    document.getElementById('resultBody').innerHTML = marked.parse(lastResultText);
-    result.classList.add('show');
+    lastResultText = rawResult;
     
-    // Jalankan render matematika jika ada rumus
-    MathJax.contentDocument = document;
-    MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e => console.log(e));
+    // Kirim data murni string ke parser marked agar tidak terjadi error [object Object]
+    var resultBody = document.getElementById('resultBody');
+    if (resultBody) {
+      resultBody.innerHTML = marked.parse(lastResultText);
+    }
+    if(result) result.classList.add('show');
+    
+    // Render matematika MathJax jika ada rumus
+    if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
+      MathJax.contentDocument = document;
+      MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e => console.log(e));
+    }
   })
-  .catch(e=>{
-    // 🚨 TAMPILKAN POPUP BIAR KELIHAN MASALAHNYA DI MANA
-    loading.classList.remove('show');
+  .catch(e => {
+    if(loading) loading.classList.remove('show');
     lastResultText = 'Gagal memproses rangkuman: ' + e.message;
-    alert(lastResultText); // Ini akan memunculkan popup biar kamu langsung tahu erornya apa
-    document.getElementById('resultBody').textContent = lastResultText;
-    result.classList.add('show');
+    alert(lastResultText); // Munculkan pop up agar kita tahu detail kegagalannya jika ada
+    var resultBody = document.getElementById('resultBody');
+    if (resultBody) resultBody.textContent = lastResultText;
+    if(result) result.classList.add('show');
   });
-}
+} 
   
 async function doKuis() {
   var txt = document.getElementById('kuisInput').value.trim();
