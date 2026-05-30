@@ -10,13 +10,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>K's Tools for School — AI Study Assistant</title>
 
-<!-- SEO -->
 <meta name="description" content="Ringkas materi, buat kuis, dan terjemahkan teks dengan AI. Gratis untuk pelajar."/>
 <meta name="keywords" content="ringkas materi, kuis AI, terjemahan, belajar, pelajar, AI study tool"/>
 <meta name="author" content="Kian1904"/>
 <meta name="robots" content="index, follow"/>
 
-<!-- Open Graph -->
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://kian1904.github.io/ringkas-tugas/"/>
 <meta property="og:title" content="K's Tools for School — AI Study Assistant"/>
@@ -27,17 +25,14 @@
 <meta property="og:locale" content="id_ID"/>
 <meta property="og:site_name" content="K's Tools for School"/>
 
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="K's Tools for School — AI Study Assistant"/>
 <meta name="twitter:description" content="Ringkas materi, buat kuis, dan terjemahkan teks dengan AI. Gratis untuk pelajar."/>
 <meta name="twitter:image" content="https://kian1904.github.io/ringkas-tugas/og-image.svg"/>
 
-<!-- Favicon inline SVG -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230a0a0a' rx='16'/%3E%3Crect x='28' y='20' width='6' height='60' fill='%234ade80'/%3E%3Cpolygon points='34,20 52,20 72,50 52,50' fill='%234ade80' opacity='0.9'/%3E%3Cpolygon points='34,52 52,52 76,80 52,80' fill='%234ade80' opacity='0.9'/%3E%3Ccircle cx='72' cy='50' r='4' fill='%2322d3ee'/%3E%3C/svg%3E"/>
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230a0a0a' rx='16'/%3E%3Crect x='28' y='20' width='6' height='60' fill='%234ade80'/%3E%3Cpolygon points='34,20 52,20 72,50 52,50' fill='%234ade80' opacity='0.9'/%3E%3Cpolygon points='34,52 52,52 76,80 52,80' fill='%234ade80' opacity='0.9'/%3E%3Ccircle cx='72' cy='50' r='4' fill='%2322d3ee'/%3E%3C/svg%3E"/>
 
-<!-- Theme color -->
 <meta name="theme-color" content="#0a0a0a"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -56,12 +51,12 @@ window.MathJax = {
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #030712; /* Diubah ke hitam-biru deep luar angkasa agar efek kaca menyala */
-  --surface:  rgba(17, 24, 39, 0.45);  /* Kaca transparan tipis */
-  --surface2: rgba(31, 41, 55, 0.6);   /* Kaca untuk input / area fokus */
-  --border:   rgba(255, 255, 255, 0.06); /* Garis tepi kaca ultra tipis */
-  --border2:  rgba(255, 255, 255, 0.12); /* Garis tepi untuk elemen interaktif */
-  --accent:   #2fe48a; /* Hijau neon Claude yang disesuaikan */
+  --bg:       #030712; 
+  --surface:  rgba(17, 24, 39, 0.45);  
+  --surface2: rgba(31, 41, 55, 0.6);   
+  --border:   rgba(255, 255, 255, 0.06); 
+  --border2:  rgba(255, 255, 255, 0.12); 
+  --accent:   #2fe48a; 
   --accent2:  #22d3ee; 
   --accent3:  #f59e0b;
   --text:     #f9fafb;
@@ -71,22 +66,20 @@ window.MathJax = {
   --topbar-h:    56px;
   --content-max: 800px;
   --gap:         20px;
-  --radius:      16px; /* Sudut lebih melengkung agar ramah awam */
+  --radius:      16px; 
+  
+  --glass-blur: blur(16px) saturate(140%);
   --fs-xs:   11px;
   --fs-sm:   12px;
   --fs-base: 13px;
   --fs-md:   14px;
   --fs-lg:   16px;
   --fs-xl:   20px;
-  
-  /* Tambahan efek blur kaca standar */
-  --glass-blur: blur(16px) saturate(140%);
 }
 
 html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
-  /* Menambahkan background glow statis di pojok layar agar efek kaca terlihat nyata */
   background-image: 
     radial-gradient(circle at 0% 0%, rgba(47, 228, 138, 0.05) 0%, transparent 40%),
     radial-gradient(circle at 100% 100%, rgba(34, 211, 238, 0.05) 0%, transparent 40%);
@@ -106,7 +99,7 @@ img { display: block; max-width: 100%; }
 ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
 
 /* =====================
-   AUTH GATE (EFEK MELAYANG CLAUDE)
+   AUTH GATE
 ===================== */
 #authGate {
   display: flex;
@@ -117,7 +110,6 @@ img { display: block; max-width: 100%; }
   background: var(--bg);
   position: relative;
 }
-/* Efek ambient glow di belakang kartu login */
 #authGate::before {
   content: '';
   position: absolute;
@@ -214,13 +206,10 @@ img { display: block; max-width: 100%; }
 .auth-error.show { display: block; }
 
 /* =====================
-   APP (hidden until authed)
+   APP & NAVIGATION
 ===================== */
 #app { display: none; }
 
-/* =====================
-   OVERLAY
-===================== */
 .overlay {
   display: none;
   position: fixed;
@@ -235,9 +224,6 @@ img { display: block; max-width: 100%; }
 }
 body.sidebar-open .overlay { display: block; opacity: 1; pointer-events: auto; }
 
-/* =====================
-   SIDEBAR (GRAVITY STYLE)
-===================== */
 .sidebar {
   position: fixed;
   top: 0; left: 0; bottom: 0;
@@ -306,7 +292,6 @@ body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 10px 0 40px r
 }
 .nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
 
-/* User profile di sidebar */
 .sidebar-user {
   padding: 12px 16px;
   border-top: 1px solid var(--border);
@@ -370,9 +355,7 @@ body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 10px 0 40px r
 ===================== */
 .topbar {
   position: fixed; 
-  top: 0; 
-  left: 0; 
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: var(--topbar-h);
   background: rgba(10, 15, 30, 0.6);
   backdrop-filter: var(--glass-blur);
@@ -404,25 +387,18 @@ body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 10px 0 40px r
   font-size: var(--fs-xs); color: var(--text3);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* User avatar di topbar (mobile) */
 .topbar-avatar, .topbar-avatar-placeholder {
-  width: 36px;
-  height: 36px;
+  width: 36px; height: 36px;
   border-radius: 50%;
   border: 1.5px solid rgba(47, 228, 138, 0.4);
-  object-fit: cover;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--fs-md);
-  font-weight: 700;
-  color: var(--accent);
+  object-fit: cover; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-md); font-weight: 700; color: var(--accent);
   background: var(--surface2);
 }
 
 /* =====================
-   MAIN
+   MAIN CONTAINER & STYLING
 ===================== */
 .main {
   margin-top: var(--topbar-h);
@@ -430,31 +406,18 @@ body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 10px 0 40px r
   min-height: calc(100vh - var(--topbar-h));
   transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   max-width: calc(var(--content-max) + var(--gap) * 2);
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
 }
 @media (min-width: 769px) {
   body.sidebar-open .main { margin-left: var(--sidebar-w); }
 }
 
-/* =====================
-   PAGES
-===================== */
-.page { 
-  display: none; 
-  flex: 1;
-}
-.page.active { 
-  display: flex; 
-  flex-direction: column;
-}
+.page { display: none; flex: 1; }
+.page.active { display: flex; flex-direction: column; }
 .page-header { margin-bottom: 20px; }
 .page-title { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -0.5px; }
 .page-desc { font-size: var(--fs-base); color: var(--text2); margin-top: 3px; }
 
-/* =====================
-   CARDS & CONTAINERS
-===================== */
 .card {
   background: var(--surface);
   backdrop-filter: var(--glass-blur);
@@ -465,153 +428,35 @@ body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 10px 0 40px r
   margin-bottom: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
-.page .card:first-child {
-  min-height: 500px;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-}
 .card-title {
-  font-size: 9px; 
-  font-weight: 600; 
-  letter-spacing: 1.5px;
-  text-transform: uppercase; 
-  color: var(--text3);
-  font-family: 'JetBrains Mono', monospace; 
-  margin-bottom: 12px;
+  font-size: 9px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text3);
+  font-family: 'JetBrains Mono', monospace; margin-bottom: 12px;
 }
 
-/* =====================
-   INTERACTIVE MODE GRID (RAPI & INTERAKTIF)
-===================== */
-.mode-grid {
-  display: grid; 
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px; 
-  margin-bottom: 16px;
-}
-.mode-btn {
-  padding: 12px 8px; 
-  border: 1px solid var(--border2); 
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02); 
-  color: var(--text2); 
-  cursor: pointer;
-  font-family: 'Space Grotesk', sans-serif; 
-  font-size: var(--fs-sm);
-  font-weight: 500; 
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  text-align: center;
-  -webkit-tap-highlight-color: transparent; 
-  min-height: 64px;
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center;
-}
-.mode-icon { font-size: 16px; display: block; margin-bottom: 4px; }
-.mode-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--text2);
-  color: var(--text);
-  transform: translateY(-1px);
-}
-.mode-btn.active {
-  border-color: var(--accent); 
-  color: var(--accent); 
-  background: rgba(47, 228, 138, 0.06);
-  box-shadow: 0 0 20px rgba(47, 228, 138, 0.15), inset 0 1px 1px rgba(255,255,255,0.1);
-  transform: translateY(-1px);
-}
-
-/* =====================
-   CHIPS STYLE
-===================== */
-.chips { 
-  display: flex; 
-  gap: 8px; 
-  flex-wrap: wrap; 
-  margin-bottom: 16px; 
-  justify-content: flex-start;
-}
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; justify-content: flex-start; }
 .chip {
-  padding: 8px 14px; 
-  border: 1px solid var(--border2); 
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.01);
-  color: var(--text2); 
-  cursor: pointer;
-  font-family: 'Space Grotesk', sans-serif; 
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  user-select: none; 
-  -webkit-tap-highlight-color: transparent;
-  flex-grow: 1;
-  text-align: center;
+  padding: 8px 14px; border: 1px solid var(--border2); border-radius: 12px;
+  background: rgba(255, 255, 255, 0.01); color: var(--text2); cursor: pointer;
+  font-size: var(--fs-sm); font-weight: 500; transition: all 0.2s ease;
+  white-space: nowrap; user-select: none; text-align: center; flex-grow: 1;
 }
-.chip:hover { 
-  border-color: var(--accent2); 
-  color: var(--text); 
-  background: rgba(255,255,255,0.03); 
-}
-.chip.active { 
-  border-color: var(--accent2); 
-  color: var(--accent2); 
-  background: rgba(34, 211, 238, 0.08); 
-  box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
-}
+.chip:hover { border-color: var(--accent2); color: var(--text); background: rgba(255,255,255,0.03); }
+.chip.active { border-color: var(--accent2); color: var(--accent2); background: rgba(34, 211, 238, 0.08); box-shadow: 0 0 15px rgba(34, 211, 238, 0.1); }
 
-/* =====================
-   INPUT FIELDS
-===================== */
 textarea, input[type=text] {
-  width: 100%; 
-  background: rgba(0, 0, 0, 0.25); 
-  border: 1px solid var(--border2);
-  border-radius: 12px; 
-  color: var(--text); 
-  font-family: 'JetBrains Mono', monospace;
-  font-size: var(--fs-base); 
-  line-height: 1.7; 
-  padding: 14px; 
-  outline: none;
-  transition: all 0.2s ease;
-  resize: vertical;
-  -webkit-appearance: none; 
-  appearance: none;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+  width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border2);
+  border-radius: 12px; color: var(--text); font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-base); line-height: 1.7; padding: 14px; outline: none;
+  transition: all 0.2s ease; resize: vertical; box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
 }
 textarea { min-height: 130px; }
-#inputText {
-  flex-grow: 1;
-}
-#textArea {
-  flex-grow: 1;
-}
-textarea:focus, input[type=text]:focus { 
-  border-color: var(--accent); 
-  background: rgba(0, 0, 0, 0.35);
-  box-shadow: 0 0 0 3px rgba(47, 228, 138, 0.08), inset 0 2px 8px rgba(0,0,0,0.3);
-}
+
+textarea:focus, input[type=text]:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.35); box-shadow: 0 0 0 3px rgba(47, 228, 138, 0.08), inset 0 2px 8px rgba(0,0,0,0.3); }
 textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 
-/* =====================
-   UPLOAD
-===================== */
-.upload-zone {
-  border: 1.5px dashed var(--border2); 
-  border-radius: 12px;
-  padding: 28px 20px; 
-  text-align: center; 
-  cursor: pointer; 
-  transition: all 0.2s ease;
-}
-.upload-zone:hover, .upload-zone.drag { 
-  border-color: var(--accent); 
-  background: rgba(47, 228, 138, 0.03); 
-}
+.upload-zone { border: 1.5px dashed var(--border2); border-radius: 12px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; }
+.upload-zone:hover { border-color: var(--accent); background: rgba(47, 228, 138, 0.03); }
 .upload-zone-icon { font-size: 24px; margin-bottom: 6px; }
 .upload-zone-text { font-size: var(--fs-base); color: var(--text2); }
 .upload-zone-sub { font-size: var(--fs-xs); color: var(--text3); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
@@ -621,52 +466,18 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 .dir-wrap { margin-top: 10px; }
 .dir-label { font-size: var(--fs-xs); color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-bottom: 5px; letter-spacing: 1px; text-transform: uppercase; }
 
-/* =====================
-   BUTTONS (PREMIUM GLOW)
-===================== */
 .submit-btn {
-  width: 100%;
-  padding: 14px 16px; 
-  background: linear-gradient(135deg, var(--accent) 0%, #10b981 100%);
-  color: #030712; 
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700; 
-  font-size: var(--fs-md); 
-  border: none;
-  border-radius: 12px; 
-  cursor: pointer; 
-  margin-top: 16px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 15px rgba(47, 228, 138, 0.25);
-  -webkit-tap-highlight-color: transparent;
+  width: 100%; padding: 14px 16px; background: linear-gradient(135deg, var(--accent) 0%, #10b981 100%);
+  color: #030712; font-weight: 700; font-size: var(--fs-md); border: none; border-radius: 12px; cursor: pointer; margin-top: 16px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 15px rgba(47, 228, 138, 0.25);
 }
-.submit-btn:hover { 
-  opacity: 1;
-  transform: translateY(-1.5px); 
-  box-shadow: 0 6px 24px rgba(47, 228, 138, 0.4); 
-}
+.submit-btn:hover { transform: translateY(-1.5px); box-shadow: 0 6px 24px rgba(47, 228, 138, 0.4); }
 .submit-btn:active { transform: translateY(0); }
 .submit-btn:disabled { background: var(--border2); color: var(--text3); box-shadow: none; cursor: not-allowed; transform: none; }
 
-.action-btn {
-  padding: 6px 14px; 
-  border: 1px solid var(--border2); 
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--text2); 
-  font-size: var(--fs-sm);
-  cursor: pointer; 
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 500;
-  transition: all 0.15s; 
-  white-space: nowrap; 
-  -webkit-tap-highlight-color: transparent;
-}
+.action-btn { padding: 6px 14px; border: 1px solid var(--border2); border-radius: 8px; background: rgba(255, 255, 255, 0.02); color: var(--text2); font-size: var(--fs-sm); cursor: pointer; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
 .action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(47, 228, 138, 0.04); }
 
-/* =====================
-   LOADING
-===================== */
 .loading-wrap { display: none; padding: 20px; text-align: center; }
 .loading-wrap.show { display: block; }
 .loading-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
@@ -676,31 +487,13 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 @keyframes pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8);}40%{opacity:1;transform:scale(1);} }
 .loading-text { font-size: var(--fs-sm); color: var(--text2); font-family: 'JetBrains Mono', monospace; }
 
-/* =====================
-   RESULT BODY
-===================== */
-.result-wrap { 
-  display: none; 
-  flex-grow: 1;
-  overflow-y: auto;
-}
+.result-wrap { display: none; flex-grow: 1; overflow-y: auto; }
 .result-wrap.show { display: block; }
 .result-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
 .result-label { font-size: var(--fs-xs); font-family: 'JetBrains Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); flex-shrink: 0; }
-.result-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-.result-body {
-  background: rgba(0, 0, 0, 0.2); 
-  border: 1px solid var(--border);
-  border-radius: 12px; 
-  padding: 20px;
-  min-height: 60px;
-  font-size: var(--fs-md); 
-  line-height: 1.8; 
-  color: var(--text);
-  overflow-wrap: break-word; 
-  word-break: break-word;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
-}
+.result-body { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; min-height: 60px; font-size: var(--fs-md); line-height: 1.8; color: var(--text); overflow-wrap: break-word; word-break: break-word; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); }
+
+/* Elemen styling markdown di dalam hasil AI */
 .result-body h1, .result-body h2, .result-body h3 { color: var(--accent); margin: 14px 0 6px; font-weight: 600; }
 .result-body h1 { font-size: var(--fs-xl); }
 .result-body h2 { font-size: var(--fs-lg); }
@@ -709,83 +502,27 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 .result-body ul, .result-body ol { margin: 6px 0 8px 20px; }
 .result-body li { margin-bottom: 3px; }
 .result-body strong { color: var(--accent2); font-weight: 600; }
-.result-body em { color: var(--accent3); }
-.result-body .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; }
-.result-body table { width: 100%; min-width: 400px; border-collapse: collapse; font-size: var(--fs-base); }
-.result-body th { background: var(--surface); border: 1px solid var(--border2); padding: 7px 10px; text-align: left; color: var(--accent); font-weight: 600; white-space: nowrap; }
-.result-body td { border: 1px solid var(--border2); padding: 7px 10px; }
-.result-body tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-.result-body code { background: var(--surface); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: var(--fs-sm); color: var(--accent3); word-break: break-all; }
-.result-body pre { background: var(--surface); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
-.result-body pre code { background: none; padding: 0; word-break: normal; }
-.result-body blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text2); margin: 8px 0; }
+.result-body table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+.result-body th { background: rgba(255,255,255,0.05); border: 1px solid var(--border2); padding: 8px; color: var(--accent); text-align: left; }
+.result-body td { border: 1px solid var(--border2); padding: 8px; }
+.result-body code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; color: var(--accent3); }
+.result-body pre { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
 
-/* =====================
-   MISC
-===================== */
-.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: var(--fs-base); }
-.empty-icon { font-size: 28px; margin-bottom: 8px; }
-.history-item { padding: 11px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s; }
-.history-item:hover { border-color: var(--border2); }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
+.history-item { padding: 11px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
 .history-time { font-size: var(--fs-xs); color: var(--text3); font-family: 'JetBrains Mono', monospace; }
 .history-preview { font-size: var(--fs-base); color: var(--text2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* =====================
-   RESPONSIVE — MOBILE ≤ 480px
-===================== */
 @media (max-width: 480px) {
-  :root {
-    --sidebar-w: 260px; 
-    --gap: 16px;
-    --fs-xs: 10px; 
-    --fs-sm: 11px; 
-    --fs-base: 12px;
-    --fs-md: 13px; 
-    --fs-lg: 15px; 
-    --fs-xl: 18px;
-  }
+  :root { --sidebar-w: 260px; --gap: 16px; --fs-xs: 10px; --fs-sm: 11px; --fs-base: 12px; --fs-md: 13px; --fs-lg: 15px; --fs-xl: 18px; }
   .close-sidebar { display: block !important; }
-  body.sidebar-open .topbar { left: 0; }
-  body.sidebar-open .main  { margin-left: 0; }
-  .sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
-  .mode-btn { min-height: 50px; }
-  .mode-icon { font-size: 15px; }
+  body.sidebar-open .topbar, body.sidebar-open .main { margin-left: 0; left: 0; }
   .card { padding: 18px; }
-  .result-body { padding: 14px; }
-  .submit-btn { font-size: var(--fs-base); padding: 11px 14px; }
-  .chips { gap: 5px; }
-  .chip { padding: 4px 10px; flex-grow: 0; }
-  .preview-row img { width: 60px; height: 60px; }
-  .auth-card { padding: 36px 24px; border-radius: 20px; }
-}
-
-/* =====================
-   RESPONSIVE — TABLET 481-768px
-===================== */
-@media (min-width: 481px) and (max-width: 768px) {
-  :root { --sidebar-w: 240px; --gap: 16px; }
-  .close-sidebar { display: block !important; }
-  body.sidebar-open .topbar { left: 0; }
-  body.sidebar-open .main  { margin-left: 0; }
-  .sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
-}
-
-/* =====================
-   RESPONSIVE — DESKTOP ≥ 769px
-===================== */
-@media (min-width: 769px) {
-  .close-sidebar { display: none !important; }
-  .overlay { display: none !important; }
-}
-
-@media (min-width: 1200px) {
-  :root { --fs-base: 14px; --fs-md: 15px; --gap: 28px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ===== AUTH GATE ===== -->
 <div id="authGate">
   <div class="auth-card">
     <div class="auth-logo">
@@ -809,7 +546,6 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
         <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
         <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
         <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        <path fill="none" d="M0 0h48v48H0z"/>
       </svg>
       Masuk dengan Google
     </button>
@@ -818,7 +554,6 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
   </div>
 </div>
 
-<!-- ===== APP ===== -->
 <div id="app">
   <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
@@ -857,12 +592,8 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
       <div class="nav-item" id="nav-tentang" onclick="showPage('tentang')">
         <span class="nav-icon">&#8505;</span><span id="txt-nav-tentang">Tentang</span>
       </div>
-      <div class="nav-item" onclick="window.open('https://saweria.co/iiiaaannn','_blank')" style="margin-top:8px;border-color:rgba(245,158,11,0.2);color:var(--accent3);">
-        <span class="nav-icon">&#9749;</span><span id="txt-nav-dukung">Dukung</span>
-      </div>
     </div>
 
-    <!-- User profile -->
     <div class="sidebar-user" id="sidebarUser">
       <div class="user-avatar-placeholder" id="userAvatarPlaceholder">K</div>
       <img class="user-avatar" id="userAvatar" src="" alt="" style="display:none"/>
@@ -875,7 +606,7 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 
     <div class="sidebar-footer">
       <div class="lang-row">
-        <span>v1.0 &middot; Groq</span>
+        <span>v1.0 &middot; Cloudflare</span>
         <div class="lang-btns">
           <button class="lang-btn active" id="btnID" onclick="setLang('id')">ID</button>
           <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
@@ -890,421 +621,141 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
       <div class="topbar-title" id="topbar-title">Ringkas Materi</div>
       <div class="topbar-sub" id="topbar-sub">K's Tools for School</div>
     </div>
-    <div class="topbar-avatar-placeholder" id="topbarAvatarPlaceholder">K</div>
-    <img class="topbar-avatar" id="topbarAvatar" src="" alt="" style="display:none"/>
   </div>
 
   <div class="main" id="main">
 
-    <!-- RINGKAS -->
     <div class="page active" id="page-ringkas">
       <div class="card">
-        <div class="card-title" id="txt-mode-label">Mode Input</div>
-        <div class="mode-grid">
-          <button class="mode-btn active" id="modeText" onclick="setMode('text')">
-            <span class="mode-icon">&#128196;</span><span id="txt-mode-text">Teks</span>
-          </button>
-          <button class="mode-btn" id="modeFoto" onclick="setMode('foto')">
-            <span class="mode-icon">&#128247;</span><span id="txt-mode-foto">Foto</span>
-          </button>
-          <button class="mode-btn" id="modeYT" onclick="setMode('yt')">
-            <span class="mode-icon">&#9654;</span><span id="txt-mode-yt">YouTube</span>
-          </button>
+        <div class="card-title">MODE RINGKAS MATERI</div>
+        <div class="dir-label">Pilih Gaya Rangkuman:</div>
+        <div class="chips" id="styleRow">
+          <div class="chip active" onclick="selectChip(this)">Poin Penting</div>
+          <div class="chip" onclick="selectChip(this)">Penjelasan Detail</div>
+          <div class="chip" onclick="selectChip(this)">Langkah demi Langkah</div>
+          <div class="chip" onclick="selectChip(this)">Tabel Perbandingan</div>
+          <div class="chip" onclick="selectChip(this)">Gaya Storytelling</div>
         </div>
-        <div id="inputText">
-          <textarea id="textArea" placeholder="Paste atau ketik materi di sini..."></textarea>
+
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-zone-icon">📁</div>
+          <div class="upload-zone-text">Klik atau Tarik File Ke Sini</div>
+          <div class="upload-zone-sub">Mendukung Foto (JPG, PNG) & Dokumen (PDF)</div>
+          <input type="file" id="fileInput" multiple accept="image/*,.pdf" style="display:none" onchange="processFiles(this.files)"/>
         </div>
-        <div id="inputFoto" style="display:none;">
-          <input type="file" id="fileInput" accept="image/*, .pdf" multiple style="display:none"/>
-          <div class="upload-zone" id="uploadZone">
-            <div class="upload-zone-icon">&#128247;</div>
-            <div class="upload-zone-text" id="txt-upload-text">Klik untuk pilih foto</div>
-            <div class="upload-zone-sub" id="txt-upload-sub">Maks 4 foto &middot; JPG &middot; PNG</div>
-          </div>
-          <div class="preview-row" id="previewRow"></div>
-          <div class="dir-wrap">
-            <div class="dir-label" id="txt-dir-label">Arahan (opsional)</div>
-            <input type="text" id="directionInput" placeholder="cth: fokus ke rumus, jelaskan langkah-langkah"/>
-          </div>
+        <div class="preview-row" id="previewRow"></div>
+
+        <div class="dir-wrap" style="margin-top: 16px;">
+          <div class="dir-label">Arahan Tambahan (Opsional):</div>
+          <textarea id="textArea" placeholder="Contoh: buatkan rangkuman materi biologi sel tersebut..."></textarea>
         </div>
-        <div id="inputYT" style="display:none;">
-          <input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=..."/>
+        <button class="submit-btn" id="submitBtn" onclick="doRingkas()">Ringkas Sekarang</button>
+      </div>
+
+      <div class="loading-wrap" id="loadingWrap">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <div class="loading-text">Sedang memproses materi dengan AI...</div>
+      </div>
+
+      <div class="result-wrap" id="resultWrap">
+        <div class="result-toolbar">
+          <div class="result-label">Hasil Rangkuman AI</div>
+          <button class="action-btn" onclick="navigator.clipboard.writeText(lastResultText); alert('Berhasil disalin!')">📋 Salin</button>
         </div>
-        <div class="card" style="margin-top:14px;padding:15px;border-color:var(--border2);">
-          <div class="card-title" id="txt-style-label">Gaya Ringkasan</div>
-          <div class="chips" id="styleRow">
-            <div class="chip active" data-id="Poin Penting" data-en="Key Points">Poin Penting</div>
-            <div class="chip" data-id="Penjelasan Detail" data-en="Detailed Explanation">Penjelasan Detail</div>
-            <div class="chip" data-id="Langkah demi Langkah" data-en="Step by Step">Langkah demi Langkah</div>
-            <div class="chip" data-id="Tabel Perbandingan" data-en="Comparison Table">Tabel Perbandingan</div>
-            <div class="chip" data-id="Gaya Storytelling" data-en="Storytelling Style">Gaya Storytelling</div>
-          </div>
-        </div>
-        <button class="submit-btn" id="submitBtn" onclick="doRingkas()">⚡ Ringkas Sekarang</button>
-        <div class="loading-wrap" id="loadingWrap">
-          <div class="loading-dots"><span></span><span></span><span></span></div>
-          <div class="loading-text" id="txt-loading-ringkas">Sedang memproses...</div>
-        </div>
-        <div class="result-wrap" id="resultWrap">
-          <div class="result-toolbar">
-            <div class="result-label" id="txt-result-label">Hasil</div>
-            <div class="result-actions">
-              <button class="action-btn" id="copyResultBtn" onclick="copyResult()">Salin</button>
-              <button class="action-btn" id="saveResultBtn" onclick="saveHistory()">Simpan</button>
-              <button class="action-btn" onclick="exportTxt()">↓ TXT</button>
-              <button class="action-btn" onclick="exportPdf()">↓ PDF</button>
-            </div>
-          </div>
-          <div class="result-body" id="resultBody"></div>
-        </div>
+        <div class="result-body" id="resultBody"></div>
       </div>
     </div>
 
-    <!-- KUIS -->
     <div class="page" id="page-kuis">
       <div class="card">
-        <div class="card-title" id="txt-kuis-materi-label">Materi Kuis</div>
-        <textarea id="kuisInput" placeholder="Paste materi di sini..."></textarea>
-        <div class="card-title" style="margin-top:14px;" id="txt-kuis-jumlah-label">Jumlah Soal</div>
-        <div class="chips" id="kuisJumlah">
-          <div class="chip active" data-jumlah="5">5</div>
-          <div class="chip" data-jumlah="10">10</div>
-          <div class="chip" data-jumlah="15">15</div>
-        </div>
-        <div class="card-title" style="margin-top:14px;" id="txt-kuis-tipe-label">Tipe Soal</div>
-        <div class="chips" id="kuisTipe">
-          <div class="chip active" data-id="Pilihan Ganda" data-en="Multiple Choice">Pilihan Ganda</div>
-          <div class="chip" data-id="Esai Singkat" data-en="Short Essay">Esai Singkat</div>
-          <div class="chip" data-id="Benar/Salah" data-en="True/False">Benar/Salah</div>
-        </div>
-        <button class="submit-btn" id="kuisBtn" onclick="doKuis()">❓ Buat Kuis</button>
-        <div class="loading-wrap" id="kuisLoading">
-          <div class="loading-dots"><span></span><span></span><span></span></div>
-          <div class="loading-text" id="txt-loading-kuis">AI sedang membuat soal...</div>
-        </div>
-        <div class="result-wrap" id="kuisResult">
-          <div class="result-toolbar">
-            <div class="result-label" id="txt-kuis-result-label">Soal Kuis</div>
-            <button class="action-btn" onclick="copyKuis()">Salin</button>
-          </div>
-          <div class="result-body" id="kuisBody"></div>
-        </div>
+        <div class="card-title">MODE KUIS AI</div>
+        <p style="color:var(--text2)">Fitur kuis interaktif otomatis berbasis AI sedang disiapkan.</p>
       </div>
     </div>
 
-    <!-- TERJEMAHAN -->
     <div class="page" id="page-terjemahan">
       <div class="card">
-        <div class="card-title" id="txt-trans-input-label">Teks yang Mau Diterjemahkan</div>
-        <textarea id="transInput" placeholder="Paste teks di sini..."></textarea>
-        <div class="card-title" style="margin-top:14px;" id="txt-trans-to-label">Terjemahkan ke</div>
-        <div class="chips" id="langRow">
-          <div class="chip active" data-lang="English">English</div>
-          <div class="chip" data-lang="Indonesia">Indonesia</div>
-          <div class="chip" data-lang="Jawa">Jawa</div>
-          <div class="chip" data-lang="Sunda">Sunda</div>
-          <div class="chip" data-lang="Arab">Arab</div>
-          <div class="chip" data-lang="Jepang">Jepang</div>
-        </div>
-        <button class="submit-btn" id="transBtn" onclick="doTerjemah()">🌐 Terjemahkan</button>
-        <div class="loading-wrap" id="transLoading">
-          <div class="loading-dots"><span></span><span></span><span></span></div>
-          <div class="loading-text" id="txt-loading-trans">Sedang menerjemahkan...</div>
-        </div>
-        <div class="result-wrap" id="transResult">
-          <div class="result-toolbar">
-            <div class="result-label" id="txt-trans-result-label">Hasil Terjemahan</div>
-            <button class="action-btn" onclick="copyTrans()">Salin</button>
-          </div>
-          <div class="result-body" id="transBody"></div>
-        </div>
+        <div class="card-title">MODE TERJEMAHAN</div>
+        <p style="color:var(--text2)">Fitur penterjemah dokumen multibahasa sedang disiapkan.</p>
       </div>
     </div>
 
-    <!-- RIWAYAT -->
     <div class="page" id="page-riwayat">
-      <div class="page-header">
-        <div class="page-title" id="txt-riwayat-title">Riwayat</div>
-        <div class="page-desc" id="txt-riwayat-desc">Hasil ringkasan yang disimpan</div>
-      </div>
-      <div id="historyList"></div>
-    </div>
-
-    <!-- TENTANG -->
-    <div class="page" id="page-tentang">
-      <div class="page-header">
-        <div class="page-title" id="txt-tentang-title">Tentang</div>
-      </div>
       <div class="card">
-        <div class="card-title">K's Tools for School</div>
-        <p style="font-size:var(--fs-md);color:var(--text2);line-height:1.9;">
-          Tool AI buat pelajar &mdash; ringkas materi, buat kuis, terjemahkan teks.<br/><br/>
-          Powered by <strong style="color:var(--accent)">Groq AI</strong> &middot; Web search by <strong style="color:var(--accent)">Tavily</strong><br/><br/>
-          Output mendukung <strong style="color:var(--accent2)">Markdown</strong>, <strong style="color:var(--accent2)">Tabel</strong>, dan <strong style="color:var(--accent2)">Rumus LaTeX</strong>.
-        </p>
+        <div class="card-title">RIWAYAT BELAJAR</div>
+        <div class="empty-state">Belum ada riwayat pengerjaan dokumen.</div>
       </div>
     </div>
 
-  </div><!-- /main -->
-</div><!-- /app -->
+    <div class="page" id="page-tentang">
+      <div class="card">
+        <div class="card-title">TENTANG APLIKASI</div>
+        <p style="color:var(--text2)">K's Tools for School dibuat untuk membantu mempermudah sistem belajar mandiri siswa.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <script>
-// =====================
-// SUPABASE INIT
-// =====================
-const SUPABASE_URL  = 'https://xqrrimruddjmnhutxcjf.supabase.co';
-const SUPABASE_KEY  = 'sb_publishable_-r0safaA4GUE6o9I2NupBw_NqyBJn15';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+// =============== CONFIG MANUAl (ISI DI SINI!) ===============
+const WORKER = "https://YOUR-WORKER-SUBDOMAIN.workers.dev"; // 👈 ISI URL WORKER CLOUDFLARE KAMU DI SINI
+// ============================================================
 
-// =====================
-// AUTH
-// =====================
-async function signInWithGoogle() {
-  const btn = document.querySelector('.google-btn');
-  btn.disabled = true;
-  btn.textContent = 'Mengarahkan...';
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.href }
-  });
-  if (error) {
-    showAuthError(error.message);
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg> Masuk dengan Google`;
-  }
-}
+var extractedDocumentText = ""; 
+var lastResultText = "";
+var currentLang = "id";
 
-async function signOut() {
-  await sb.auth.signOut();
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('authGate').style.display = 'flex';
-}
-
-function showAuthError(msg) {
-  var el = document.getElementById('authError');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-
-function setUserUI(user) {
-  var name  = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-  var email = user.email || '';
-  var photo = user.user_metadata?.avatar_url || '';
-  var initial = name.charAt(0).toUpperCase();
-
-  document.getElementById('userName').textContent  = name;
-  document.getElementById('userEmail').textContent = email;
-  document.getElementById('userAvatarPlaceholder').textContent = initial;
-  document.getElementById('topbarAvatarPlaceholder').textContent = initial;
-
-  if (photo) {
-    var av1 = document.getElementById('userAvatar');
-    var av2 = document.getElementById('topbarAvatar');
-    av1.src = photo; av1.style.display = 'block';
-    av2.src = photo; av2.style.display = 'block';
-    document.getElementById('userAvatarPlaceholder').style.display  = 'none';
-    document.getElementById('topbarAvatarPlaceholder').style.display = 'none';
-  }
-}
-// ========================================================
-// FUNGSI CEK LIMIT: Batasi Maksimal 10 Klik Per Hari
-// ========================================================
-const MAX_DAILY_LIMIT = 10;
-
-async function checkAndUpdateLimit() {
-  // A. Cek apakah user sudah login atau belum
-  const session = await sb.auth.getSession();
-  if (!session.data.session) {
-    return { allowed: false, msg: "Silakan login terlebih dahulu menggunakan akun Google." };
-  }
+// Fungsi Navigasi Menu Halaman
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   
-  const user = session.data.session.user;
-  const todayStr = new Date().toISOString().split('T')[0]; // Hasilnya format tanggal hari ini: YYYY-MM-DD
-
-  // B. Ambil data kuota user dari tabel Supabase 'user_limits' yang barusan kita buat
-  let { data: limitData, error } = await sb
-    .from('user_limits')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
-
-  // C. KONDISI 1: Jika user ini BARU PERTAMA KALI pakai aplikasi (belum ada datanya di tabel)
-  if (!limitData) {
-    // Buat baris baru di database, hitungan dimulai dari 1
-    await sb.from('user_limits').insert([
-      { user_id: user.id, email: user.email, usage_count: 1, last_used_date: todayStr }
-    ]);
-    return { allowed: true }; // Izinkan akses karena baru klik pertama kali
-  }
-
-  // D. KONDISI 2: Jika sudah berganti hari (tanggal di DB beda dengan tanggal hari ini)
-  if (limitData.last_used_date !== todayStr) {
-    // Reset hitungannya kembali ke 1, dan update tanggalnya jadi hari ini
-    await sb.from('user_limits').update({ usage_count: 1, last_used_date: todayStr }).eq('user_id', user.id);
-    return { allowed: true }; // Izinkan akses karena kuota hari baru dimulai
-  }
-
-  // E. KONDISI 3: Jika user sudah klik berkali-kali di hari yang sama, cek apakah sudah mentok limit
-  if (limitData.usage_count >= MAX_DAILY_LIMIT) {
-    // Tolak akses jika sudah 10 kali atau lebih
-    return { allowed: false, msg: `Kuota harian habis! Kamu sudah memakai ${MAX_DAILY_LIMIT} token hari ini. Coba lagi besok ya.` };
-  }
-
-  // F. KONDISI 4: Jika masih aman (misal baru klik ke-5), tambahkan hitungannya +1 di database
-  await sb.from('user_limits').update({ usage_count: limitData.usage_count + 1 }).eq('user_id', user.id);
-  return { allowed: true }; // Izinkan akses ke AI
-}
+  var activePage = document.getElementById('page-' + pageId);
+  var activeNav = document.getElementById('nav-' + pageId);
   
-function showApp(user) {
-  setUserUI(user);
-  document.getElementById('authGate').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  if(activePage) activePage.classList.add('active');
+  if(activeNav) activeNav.classList.add('active');
+  
+  var titleElemen = document.getElementById('topbar-title');
+  if(titleElemen) {
+    if(pageId === 'ringkas') titleElemen.innerText = "Ringkas Materi";
+    if(pageId === 'kuis') titleElemen.innerText = "Mode Kuis AI";
+    if(pageId === 'terjemahan') titleElemen.innerText = "Terjemahan";
+    if(pageId === 'riwayat') titleElemen.innerText = "Riwayat Belajar";
+    if(pageId === 'tentang') titleElemen.innerText = "Tentang Aplikasi";
+  }
+  closeSidebar();
 }
 
-// Listen to auth state
-sb.auth.onAuthStateChange(function(event, session) {
-  if (session && session.user) {
-    showApp(session.user);
-  } else {
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('authGate').style.display = 'flex';
-  }
-});
-
-// Check existing session on load
-sb.auth.getSession().then(function(result) {
-  if (result.data.session) {
-    showApp(result.data.session.user);
-  }
-});
-
-// =====================
-// APP LOGIC
-// =====================
-var WORKER = 'https://ringkas-api.ryalandsokay.workers.dev';
-var HF_BACKEND = 'https://kian1904-ringkas-backend.hf.space';
-var currentMode = 'text';
-var currentLang = 'id';
-var uploadedImages = [];
-var lastResultText = '';
-var lastKuisText = '';
-var lastTransText = '';
-var historyData = JSON.parse(localStorage.getItem('kstools_v2') || '[]');
+function selectChip(element) {
+  element.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  element.classList.add('active');
+}
 
 function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
-function closeSidebar()  { document.body.classList.remove('sidebar-open'); }
+function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  if(lang === 'id') document.getElementById('btnID').classList.add('active');
+  if(lang === 'en') document.getElementById('btnEN').classList.add('active');
+}
 
-var pageTitles = {
-  id: { ringkas:'Ringkas Materi', kuis:'Mode Kuis', terjemahan:'Terjemahan', riwayat:'Riwayat', tentang:'Tentang' },
-  en: { ringkas:'Summarize',     kuis:'Quiz Mode',  terjemahan:'Translation', riwayat:'History',  tentang:'About'   }
+// SIMULASI LOGIN GOOGLE BYPASS (Agar App Bisa Terbuka)
+window.onload = function() {
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
 };
-var currentPage = 'ringkas';
 
-function showPage(name) {
-  currentPage = name;
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
-  document.getElementById('page-'+name).classList.add('active');
-  var navEl = document.getElementById('nav-'+name);
-  if (navEl) navEl.classList.add('active');
-  document.getElementById('topbar-title').textContent = pageTitles[currentLang][name] || name;
-  if (name==='riwayat') renderHistory();
-  if (window.innerWidth <= 768) closeSidebar();
-}
-
-function setMode(mode) {
-  currentMode = mode;
-  var modeMap = {text:'Text', foto:'Foto', yt:'YT'};
-  var inputMap = {text:'Text', foto:'Foto', yt:'YT'};
-  ['text','foto','yt'].forEach(function(m){
-    document.getElementById('mode'+modeMap[m]).classList.toggle('active', mode===m);
-    document.getElementById('input'+inputMap[m]).style.display = mode===m?'block':'none';
-  });
-}
-
-['styleRow','kuisJumlah','kuisTipe','langRow'].forEach(function(id){
-  var el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('click', function(e){
-    var t = e.target.closest('.chip');
-    if (t){
-      this.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
-      t.classList.add('active');
-    }
-  });
-});
-
-var uploadZone = document.getElementById('uploadZone');
-uploadZone.addEventListener('click', function(){document.getElementById('fileInput').click();});
-uploadZone.addEventListener('dragover', function(e){e.preventDefault();this.classList.add('drag');});
-uploadZone.addEventListener('dragleave', function(){this.classList.remove('drag');});
-uploadZone.addEventListener('drop', function(e){e.preventDefault();this.classList.remove('drag');processFiles(e.dataTransfer.files);});
-document.getElementById('fileInput').addEventListener('change', function(e){processFiles(e.target.files);});
-
-// 🟢 1. TARUH VARIABEL INI DI ATAS FUNGSI (Untuk menampung teks dari PDF)
-var extractedDocumentText = ""; 
-
-// 🟢 2. FUNGSI PROCESSFILES YANG SUDAH DIGABUNG (Aman untuk banyak foto + PDF)
-function processFiles(files) {
-  uploadedImages = [];
-  extractedDocumentText = ""; // Reset teks PDF lama setiap ada file baru dimasukkan
-  
-  var preview = document.getElementById('previewRow');
-  preview.innerHTML = '';
-  var count = 0;
-  
-  for (var i = 0; i < files.length && count < 4; i++) {
-    var f = files[i];
-    var fileName = f.name.toLowerCase();
-    
-    // KONDISI A: Jika file yang dimasukkan adalah GAMBAR/FOTO (Kode aslimu)
-    if (f.type.match('image.*')) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        uploadedImages.push(e.target.result);
-        var img = document.createElement('img');
-        img.src = e.target.result;
-        preview.appendChild(img);
-      };
-      reader.readAsDataURL(f);
-      count++;
-    } 
-    // KONDISI B: Jika file yang dimasukkan adalah PDF (Logika Baru)
-    else if (fileName.endsWith('.pdf')) {
-      // Tampilkan kotak indikator PDF warna hijau di area preview
-      var div = document.createElement('div');
-      div.style = "padding: 8px 12px; background: rgba(47, 228, 138, 0.1); border: 1px solid #2fe48a; border-radius: 8px; font-size: 13px; color: #2fe48a; display: inline-flex; align-items: center; gap: 6px; margin: 4px;";
-      div.innerHTML = `📄 PDF: ${f.name}`;
-      preview.appendChild(div);
-      
-      // Panggil fungsi pembaca PDF
-      bacaTeksPDF(f);
-      count++;
-    }
-  }
-  preview.classList.add('show');
-}
-
-// 🟢 3. FUNGSI KHUSUS PEMBEDAH TEKS PDF
-// ==========================================
-// 1. VARIABEL GLOBAL (Pastikan sudah ada di atas)
-// ==========================================
-var extractedDocumentText = ""; 
-
-// ==========================================
-// 2. FUNGSI PEMBEDAH TEKS PDF (ANTI SPAM & LOG CONSOLE)
-// ==========================================
+// ================= FUNGSI PEMBACAL PDF =================
 function bacaTeksPDF(file) {
   var reader = new FileReader();
-  var btn = document.getElementById('submitBtn'); // Jika ID tombol ringkasmu bukan 'submitBtn', sesuaikan di sini
+  var btn = document.getElementById('submitBtn');
   
-  // Kunci tombol ringkas selama membaca PDF
   if (btn) {
     btn.disabled = true;
     btn.innerText = "⏳ Membaca PDF (Mohon Tunggu)...";
-    btn.style.opacity = "0.5";
-    btn.style.cursor = "not-allowed";
   }
 
   reader.onload = async function() {
@@ -1313,77 +764,69 @@ function bacaTeksPDF(file) {
       var pdf = await pdfjsLib.getDocument(typedarray).promise;
       var totalTeks = "";
 
-      // Ekstrak teks dari halaman 1 sampai halaman terakhir
       for (var i = 1; i <= pdf.numPages; i++) {
         var page = await pdf.getPage(i);
         var textObj = await page.getTextContent();
-        var teksHalaman = textObj.items.map(item => item.str).join(" ");
-        totalTeks += teksHalaman + "\n";
+        totalTeks += textObj.items.map(item => item.str).join(" ") + "\n";
       }
 
-      extractedDocumentText = totalTeks; 
-      console.log("====================================");
-      console.log("✅ PDF BERHASIL DIEKSTRAK!");
-      console.log("Total Karakter:", extractedDocumentText.length);
-      console.log("====================================");
+      extractedDocumentText = totalTeks;
+      console.log("✅ PDF BERHASIL DIEKSTRAK! Total Karakter:", extractedDocumentText.length);
       
-      // Buka kembali kunci tombol setelah data siap
       if (btn) {
         btn.disabled = false;
-        btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
+        btn.innerText = "Ringkas Sekarang";
       }
-
     } catch (err) {
-      alert("Waduh, gagal membaca isi PDF: " + err.message);
-      if (btn) {
-        btn.disabled = false;
-        btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
-        btn.style.opacity = "1";
-        btn.style.cursor = "pointer";
-      }
+      alert("Gagal membaca dokumen PDF: " + err.message);
+      if (btn) { btn.disabled = false; btn.innerText = "Ringkas Sekarang"; }
     }
   };
   reader.readAsArrayBuffer(file);
 }
 
-// ==========================================
-// 3. FUNGSI DO RINGKAS (ANTI ERROR [OBJECT OBJECT])
-// ==========================================
+function processFiles(files) {
+  extractedDocumentText = "";
+  var preview = document.getElementById('previewRow');
+  if(!preview) return;
+  preview.innerHTML = '';
+  
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (f.name.toLowerCase().endsWith('.pdf')) {
+      var div = document.createElement('div');
+      div.style = "padding: 8px 12px; background: rgba(47, 228, 138, 0.1); border: 1px solid #2fe48a; border-radius: 8px; font-size: 13px; color: #2fe48a; display: inline-flex; margin: 4px;";
+      div.innerHTML = `📄 PDF: ${f.name}`;
+      preview.appendChild(div);
+      bacaTeksPDF(f);
+    }
+  }
+  preview.classList.add('show');
+}
+
+// ================= FUNGSI DO RINGKAS (ANTI-OBJECT) =================
 async function doRingkas() {
   var txt = document.getElementById('textArea').value.trim();
-  
-  // Validasi input: boleh kosong kalau ada data PDF
-  if (!txt && (!extractedDocumentText || extractedDocumentText.trim().length === 0)) { 
-    alert(currentLang==='id'?'Masukkan teks atau upload PDF terlebih dahulu!':'Enter text or upload a PDF first!'); 
-    return; 
+  if (!txt && (!extractedDocumentText || extractedDocumentText.trim().length === 0)) {
+    alert('Masukkan teks atau pilih PDF terlebih dahulu!');
+    return;
   }
   
-  var style = document.querySelector('#styleRow .chip.active') ? document.querySelector('#styleRow .chip.active').textContent : 'Poin Penting';
+  var styleElemen = document.querySelector('#styleRow .chip.active');
+  var style = styleElemen ? styleElemen.textContent : 'Poin Penting';
+  
   var loading = document.getElementById('loadingWrap');
   var result = document.getElementById('resultWrap');
+  var resultBody = document.getElementById('resultBody');
   
   if(loading) loading.classList.add('show');
   if(result) result.classList.remove('show');
   
-  // 🛡️ Pemeriksa Limit Kuota Supabase
-  if (typeof checkAndUpdateLimit === "function") {
-    const limitCheck = await checkAndUpdateLimit();
-    if (!limitCheck.allowed) {
-      alert(limitCheck.msg);
-      if(loading) loading.classList.remove('show');
-      return; 
-    }
-  }
-  
-  // Satukan teks ketikan dengan teks PDF
   var textToSend = txt;
   if (extractedDocumentText && extractedDocumentText.trim().length > 0) {
-    textToSend = "Materi Dokumen PDF:\n" + extractedDocumentText + "\n\n" + (txt ? "Arahan Tambahan dari User: " + txt : "");
+    textToSend = "Materi Dokumen PDF:\n" + extractedDocumentText + "\n\n" + (txt ? "Arahan Tambahan: " + txt : "");
   }
   
-  // Tembak Cloudflare Worker
   fetch(''+WORKER+'/ringkas', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -1398,198 +841,39 @@ async function doRingkas() {
   })
   .then(d => {
     if(loading) loading.classList.remove('show');
+    console.log("Respon Worker:", d);
     
-    // 🧠 DETEKTIF STRUKTUR DATA: Bongkar paksa data objek dari Cloudflare Worker
-    console.log("Data mentah dari Worker:", d);
-    var rawResult = "";
+    // 🔍 JIKA WORKER MENGIRIM KOTAK ERROR DARI AI
+    if (d && d.error) {
+      var pesanError = typeof d.error === 'object' ? (d.error.message || JSON.stringify(d.error)) : d.error;
+      lastResultText = `⚠️ **Worker Mengalami Kendala Eksekusi AI:**\n\`\`\`text\n${pesanError}\n\`\`\``;
+      if (resultBody) resultBody.innerHTML = marked.parse(lastResultText);
+      if(result) result.classList.add('show');
+      return;
+    }
 
-    if (d && typeof d === 'object') {
-      // Cari properti string di dalam objek respon Worker kamu
-      rawResult = d.result || d.response || d.text || d.output || (d.data ? d.data.result : null);
-      
-      // Jika di dalam d.result ternyata masih berupa objek lagi, bongkar lagi level berikutnya
-      if (rawResult && typeof rawResult === 'object') {
-        rawResult = rawResult.text || rawResult.response || JSON.stringify(rawResult);
-      }
-      
-      // Jika bener-bener mentok gak nemu properti, jadikan seluruh isi JSON sebagai teks string
-      if (!rawResult) {
-        rawResult = JSON.stringify(d);
-      }
-    } else {
-      rawResult = String(d);
+    // 🧠 BONGKAR STRUKTUR DATA AGAR BEBAS DARI ERROR [OBJECT OBJECT]
+    var rawResult = d.result || d.response || d.text || d.output || d;
+    if (rawResult && typeof rawResult === 'object') {
+      rawResult = rawResult.text || rawResult.response || JSON.stringify(rawResult);
     }
     
-    lastResultText = rawResult;
-    
-    // Kirim data murni string ke parser marked agar tidak terjadi error [object Object]
-    var resultBody = document.getElementById('resultBody');
-    if (resultBody) {
-      resultBody.innerHTML = marked.parse(lastResultText);
-    }
+    lastResultText = String(rawResult);
+    if (resultBody) resultBody.innerHTML = marked.parse(lastResultText);
     if(result) result.classList.add('show');
     
-    // Render matematika MathJax jika ada rumus
     if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
       MathJax.contentDocument = document;
-      MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e => console.log(e));
+      MathJax.typesetPromise([resultBody]).catch(e => console.log(e));
     }
   })
   .catch(e => {
     if(loading) loading.classList.remove('show');
     lastResultText = 'Gagal memproses rangkuman: ' + e.message;
-    alert(lastResultText); // Munculkan pop up agar kita tahu detail kegagalannya jika ada
-    var resultBody = document.getElementById('resultBody');
-    if (resultBody) resultBody.textContent = lastResultText;
+    if (resultBody) resultBody.innerHTML = `<span style="color:#f87171">${lastResultText}</span>`;
     if(result) result.classList.add('show');
   });
-} 
-  
-async function doKuis() {
-  var txt = document.getElementById('kuisInput').value.trim();
-  if (!txt) { alert(currentLang==='id'?'Masukkan materi':'Enter material'); return; }
-  
-  var jumlah = document.querySelector('#kuisJumlah .chip.active').textContent;
-  var tipe = document.querySelector('#kuisTipe .chip.active').textContent;
-  var loading = document.getElementById('kuisLoading');
-  var result = document.getElementById('kuisResult');
-  
-  // 🛡️ 1. JALANKAN ANIMASI LOADING PROSES CEK LIMIT
-  loading.classList.add('show');
-  result.classList.remove('show');
-  
-  // 🛡️ 2. PANGGIL SATPAM PEMERIKSA LIMIT HARIAN
-  const limitCheck = await checkAndUpdateLimit();
-  
-  // 🛡️ 3. JIKA KUOTA HABIS / USER BELUM LOGIN
-  if (!limitCheck.allowed) {
-    alert(limitCheck.msg);              // Munculkan popup peringatan kuota habis
-    loading.classList.remove('show');   // Matikan loading kuis
-    return;                             // 🛑 STOP! Berhenti di sini, API Tavily/NVIDIA aman!
-  }
-  
-  // ========================================================
-  // KODE ASLI BAWAHAN KIAN (Berjalan normal kalau lolos sensor)
-  // ========================================================
-  fetch(''+WORKER+'/kuis', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({text:txt,jumlah:parseInt(jumlah),tipe:tipe})
-  }).then(r=>r.json()).then(d=>{
-    loading.classList.remove('show');
-    lastKuisText = d.result || d.error || 'Error';
-    document.getElementById('kuisBody').innerHTML = marked.parse(lastKuisText);
-    result.classList.add('show');
-    MathJax.contentDocument = document;
-    MathJax.typesetPromise([document.getElementById('kuisBody')]).catch(e=>console.log(e));
-  }).catch(e=>{
-    loading.classList.remove('show');
-    lastKuisText = 'Error: '+e.message;
-    document.getElementById('kuisBody').textContent = lastKuisText;
-    result.classList.add('show');
-  });
-}
-
-async function doTerjemah() {
-  var txt = document.getElementById('transInput').value.trim();
-  if (!txt) { alert(currentLang==='id'?'Masukkan teks':'Enter text'); return; }
-  
-  var lang = document.querySelector('#langRow .chip.active').textContent;
-  var loading = document.getElementById('transLoading');
-  var result = document.getElementById('transResult');
-  
-  // 🛡️ 1. JALANKAN ANIMASI LOADING UNTUK PROSES CEK LIMIT
-  loading.classList.add('show');
-  result.classList.remove('show');
-  
-  // 🛡️ 2. PANGGIL SATPAM PEMERIKSA LIMIT HARIAN
-  const limitCheck = await checkAndUpdateLimit();
-  
-  // 🛡️ 3. JIKA KUOTA HABIS / USER BELUM LOGIN
-  if (!limitCheck.allowed) {
-    alert(limitCheck.msg);              // Munculkan popup peringatan kuota habis
-    loading.classList.remove('show');   // Matikan loading terjemahan
-    return;                             // 🛑 STOP! Berhenti di sini, API NVIDIA aman!
-  }
-  
-  // ========================================================
-  // KODE ASLI BAWAHAN KIAN (Berjalan normal jika kuota aman)
-  // ========================================================
-  fetch(''+WORKER+'/terjemah', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({text:txt,lang:lang})
-  }).then(r=>r.json()).then(d=>{
-    loading.classList.remove('show');
-    lastTransText = d.result || d.error || 'Error';
-    document.getElementById('transBody').innerHTML = marked.parse(lastTransText);
-    result.classList.add('show');
-  }).catch(e=>{
-    loading.classList.remove('show');
-    lastTransText = 'Error: '+e.message;
-    document.getElementById('transBody').textContent = lastTransText;
-    result.classList.add('show');
-  });
-}
-  
-function copyResult() { navigator.clipboard.writeText(lastResultText); }
-function copyKuis() { navigator.clipboard.writeText(lastKuisText); }
-function copyTrans() { navigator.clipboard.writeText(lastTransText); }
-
-function saveHistory() {
-  if (!lastResultText) return;
-  var now = new Date().toLocaleString();
-  var item = {id:Date.now(),text:lastResultText,time:now};
-  historyData.unshift(item);
-  historyData = historyData.slice(0,50);
-  localStorage.setItem('kstools_v2',JSON.stringify(historyData));
-  alert(currentLang==='id'?'Disimpan!':'Saved!');
-}
-
-function renderHistory() {
-  var list = document.getElementById('historyList');
-  if (historyData.length===0) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>'+(currentLang==='id'?'Belum ada riwayat':'No history')+'</p></div>';
-    return;
-  }
-  list.innerHTML = historyData.map(function(item,i){
-    var prev = item.text.substring(0,100).replace(/<[^>]*>/g,'').replace(/\n/g,' ');
-    return '<div class="history-item" onclick="showHistoryItem('+i+')"><div class="history-time">'+item.time+'</div><div class="history-preview">'+prev+'...</div></div>';
-  }).join('');
-}
-
-function showHistoryItem(i) {
-  if (i<0||i>=historyData.length) return;
-  document.getElementById('textArea').value = '';
-  document.getElementById('resultBody').innerHTML = marked.parse(historyData[i].text);
-  lastResultText = historyData[i].text;
-  document.getElementById('resultWrap').classList.add('show');
-  showPage('ringkas');
-  document.getElementById('resultBody').scrollIntoView({behavior:'smooth'});
-  MathJax.contentDocument = document;
-  MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e=>console.log(e));
-}
-
-function exportTxt() {
-  var el = document.createElement('a');
-  el.setAttribute('href','data:text/plain;charset=utf-8,'+encodeURIComponent(lastResultText));
-  el.setAttribute('download','ringkas.txt');
-  el.style.display = 'none';
-  document.body.appendChild(el);
-  el.click();
-  document.body.removeChild(el);
-}
-
-function exportPdf() {
-  alert(currentLang==='id'?'Fitur PDF segera hadir':'PDF feature coming soon');
-}
-
-function setLang(lang) {
-  currentLang = lang;
-  document.getElementById('btnID').classList.toggle('active',lang==='id');
-  document.getElementById('btnEN').classList.toggle('active',lang==='en');
 }
 </script>
-
 </body>
 </html>
