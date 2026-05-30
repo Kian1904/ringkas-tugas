@@ -1415,21 +1415,33 @@ function bacaTeksPDF(file) {
     textToSend = "Materi Dokumen PDF:\n" + extractedDocumentText + "\n\n" + (txt ? "Arahan Tambahan dari User: " + txt : "");
   }
   
-  // Kirim data string bersih ke Cloudflare Worker milikmu
+  // Kirim data ke Cloudflare Worker
   fetch(''+WORKER+'/ringkas', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({text:textToSend, style:style}) // Kirim textToSend (bisa isi PDF atau ketikan manual)
-  }).then(r=>r.json()).then(d=>{
+    body:JSON.stringify({text:textToSend, style:style})
+  })
+  .then(async r => {
+    // 🔍 JIKA WORKER ERROR (Misal status 500 / 404 / 400)
+    if (!r.ok) {
+      var errorText = await r.text();
+      throw new Error(`Worker Error (${r.status}): ${errorText}`);
+    }
+    return r.json();
+  })
+  .then(d=>{
     loading.classList.remove('show');
-    lastResultText = d.result || d.error || 'Error';
+    lastResultText = d.result || d.error || 'Error: Tidak ada hasil dari AI';
     document.getElementById('resultBody').innerHTML = marked.parse(lastResultText);
     result.classList.add('show');
     MathJax.contentDocument = document;
     MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e=>console.log(e));
-  }).catch(e=>{
+  })
+  .catch(e=>{
+    // 🚨 TAMPILKAN POPUP BIAR KELIHAN MASALAHNYA DI MANA
     loading.classList.remove('show');
-    lastResultText = 'Error: '+e.message;
+    lastResultText = 'Gagal memproses rangkuman: ' + e.message;
+    alert(lastResultText); // Ini akan memunculkan popup biar kamu langsung tahu erornya apa
     document.getElementById('resultBody').textContent = lastResultText;
     result.classList.add('show');
   });
