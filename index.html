@@ -46,38 +46,46 @@ window.MathJax = {
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
 /* =====================
-   RESET & ROOT
+   RESET & ROOT (ROMBAK TOTAL GLASSMORPHISM)
 ===================== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #0a0a0a;
-  --surface:  #111111;
-  --surface2: #181818;
-  --border:   #222222;
-  --border2:  #2d2d2d;
-  --accent:   #4ade80;
-  --accent2:  #22d3ee;
+  --bg:       #030712; /* Diubah ke hitam-biru deep luar angkasa agar efek kaca menyala */
+  --surface:  rgba(17, 24, 39, 0.45);  /* Kaca transparan tipis */
+  --surface2: rgba(31, 41, 55, 0.6);   /* Kaca untuk input / area fokus */
+  --border:   rgba(255, 255, 255, 0.06); /* Garis tepi kaca ultra tipis */
+  --border2:  rgba(255, 255, 255, 0.12); /* Garis tepi untuk elemen interaktif */
+  --accent:   #2fe48a; /* Hijau neon Claude yang disesuaikan */
+  --accent2:  #22d3ee; 
   --accent3:  #f59e0b;
-  --text:     #f1f5f9;
-  --text2:    #94a3b8;
-  --text3:    #475569;
-  --sidebar-w:   220px;
-  --topbar-h:    52px;
+  --text:     #f9fafb;
+  --text2:    #9ca3af;
+  --text3:    #4b5563;
+  --sidebar-w:   240px;
+  --topbar-h:    56px;
   --content-max: 800px;
   --gap:         20px;
-  --radius:      10px;
+  --radius:      16px; /* Sudut lebih melengkung agar ramah awam */
   --fs-xs:   11px;
   --fs-sm:   12px;
   --fs-base: 13px;
   --fs-md:   14px;
   --fs-lg:   16px;
   --fs-xl:   20px;
+  
+  /* Tambahan efek blur kaca standar */
+  --glass-blur: blur(16px) saturate(140%);
 }
 
 html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
+  /* Menambahkan background glow statis di pojok layar agar efek kaca terlihat nyata */
+  background-image: 
+    radial-gradient(circle at 0% 0%, rgba(47, 228, 138, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(34, 211, 238, 0.05) 0%, transparent 40%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: 'Space Grotesk', sans-serif;
   font-size: var(--fs-base);
@@ -88,12 +96,12 @@ body {
 }
 button { font-family: inherit; }
 img { display: block; max-width: 100%; }
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
 
 /* =====================
-   AUTH GATE
+   AUTH GATE (EFEK MELAYANG CLAUDE)
 ===================== */
 #authGate {
   display: flex;
@@ -102,15 +110,30 @@ img { display: block; max-width: 100%; }
   min-height: 100vh;
   padding: 24px;
   background: var(--bg);
+  position: relative;
+}
+/* Efek ambient glow di belakang kartu login */
+#authGate::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(47, 228, 138, 0.12) 0%, transparent 70%);
+  z-index: 0;
 }
 .auth-card {
-  background: var(--surface);
+  position: relative;
+  z-index: 1;
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 40px 36px;
+  border-radius: 24px;
+  padding: 44px 36px;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.1);
 }
 .auth-logo {
   display: flex;
@@ -120,7 +143,7 @@ img { display: block; max-width: 100%; }
   margin-bottom: 28px;
 }
 .auth-logo-text { text-align: left; }
-.auth-logo-title { font-size: 20px; font-weight: 700; color: var(--accent); line-height: 1; }
+.auth-logo-title { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; line-height: 1; }
 .auth-logo-sub {
   font-size: 9px;
   color: var(--text3);
@@ -141,27 +164,30 @@ img { display: block; max-width: 100%; }
   margin-bottom: 32px;
   line-height: 1.6;
 }
+
 .google-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   width: 100%;
-  padding: 13px 20px;
-  background: #fff;
-  color: #1f1f1f;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
   font-family: 'Space Grotesk', sans-serif;
   font-size: var(--fs-md);
   font-weight: 600;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: opacity 0.15s, transform 0.1s;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   -webkit-tap-highlight-color: transparent;
 }
-.google-btn:hover { opacity: 0.93; }
-.google-btn:active { transform: scale(0.98); }
+.google-btn:hover { background: #ffffff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(74,222,128,0.2); }
+.google-btn:active { transform: translateY(0); }
 .google-btn svg { flex-shrink: 0; }
+
 .auth-note {
   font-size: var(--fs-xs);
   color: var(--text3);
@@ -194,35 +220,38 @@ img { display: block; max-width: 100%; }
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(3, 7, 18, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 150;
   opacity: 0;
   transition: opacity 0.25s ease;
   pointer-events: none;
-  backdrop-filter: blur(2px);
 }
 body.sidebar-open .overlay { display: block; opacity: 1; pointer-events: auto; }
 
 /* =====================
-   SIDEBAR
+   SIDEBAR (GRAVITY STYLE)
 ===================== */
 .sidebar {
   position: fixed;
   top: 0; left: 0; bottom: 0;
   width: var(--sidebar-w);
-  background: var(--surface);
+  background: rgba(10, 15, 30, 0.7);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   z-index: 200;
   transform: translateX(calc(-1 * var(--sidebar-w)));
-  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
 }
-body.sidebar-open .sidebar { transform: translateX(0); }
+body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 10px 0 40px rgba(0,0,0,0.5); }
 
 .sidebar-logo {
-  padding: 16px 18px;
+  padding: 20px 18px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -251,14 +280,25 @@ body.sidebar-open .sidebar { transform: translateX(0); }
 }
 .nav-item {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 10px; border-radius: 6px; cursor: pointer;
-  color: var(--text2); font-size: var(--fs-base); font-weight: 500;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  border: 1px solid transparent; margin-bottom: 2px;
-  user-select: none; -webkit-tap-highlight-color: transparent;
+  padding: 11px 12px; 
+  border-radius: 10px; 
+  border: 1px solid transparent; 
+  margin-bottom: 4px;
+  cursor: pointer;
+  color: var(--text2); 
+  font-size: var(--fs-base); 
+  font-weight: 500;
+  transition: all 0.2s ease;
+  user-select: none; 
+  -webkit-tap-highlight-color: transparent;
 }
-.nav-item:hover { background: var(--surface2); color: var(--text); }
-.nav-item.active { background: rgba(74,222,128,0.08); color: var(--accent); border-color: rgba(74,222,128,0.15); }
+.nav-item:hover { background: rgba(255, 255, 255, 0.04); color: var(--text); border-color: rgba(255,255,255,0.02); }
+.nav-item.active { 
+  background: rgba(47, 228, 138, 0.06); 
+  color: var(--accent); 
+  border-color: rgba(47, 228, 138, 0.15);
+  box-shadow: inset 0 1px 10px rgba(47, 228, 138, 0.05);
+}
 .nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
 
 /* User profile di sidebar */
@@ -282,7 +322,7 @@ body.sidebar-open .sidebar { transform: translateX(0); }
   width: 32px; height: 32px;
   border-radius: 50%;
   border: 1px solid var(--border2);
-  background: rgba(74,222,128,0.1);
+  background: rgba(47, 228, 138, 0.1);
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 700; color: var(--accent);
   flex-shrink: 0;
@@ -318,18 +358,27 @@ body.sidebar-open .sidebar { transform: translateX(0); }
   transition: all 0.15s; border: 1px solid var(--border2);
   background: transparent; color: var(--text3);
 }
-.lang-btn.active { border-color: var(--accent); background: rgba(74,222,128,0.1); color: var(--accent); }
+.lang-btn.active { border-color: var(--accent); background: rgba(47, 228, 138, 0.1); color: var(--accent); }
 
 /* =====================
    TOPBAR
 ===================== */
 .topbar {
-  position: fixed; top: 0; left: 0; right: 0;
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  right: 0;
   height: var(--topbar-h);
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; padding: 0 16px;
-  z-index: 100; gap: 10px;
-  transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
+  background: rgba(10, 15, 30, 0.6);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border);
+  display: flex; 
+  align-items: center; 
+  padding: 0 16px;
+  z-index: 100; 
+  gap: 10px;
+  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @media (min-width: 769px) {
   body.sidebar-open .topbar { left: var(--sidebar-w); }
@@ -358,8 +407,8 @@ body.sidebar-open .sidebar { transform: translateX(0); }
 }
 .topbar-avatar-placeholder {
   width: 28px; height: 28px; border-radius: 50%;
-  border: 1px solid rgba(74,222,128,0.3);
-  background: rgba(74,222,128,0.1);
+  border: 1px solid rgba(47, 228, 138, 0.3);
+  background: rgba(47, 228, 138, 0.1);
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 700; color: var(--accent); flex-shrink: 0;
 }
@@ -371,7 +420,7 @@ body.sidebar-open .sidebar { transform: translateX(0); }
   margin-top: var(--topbar-h);
   padding: var(--gap);
   min-height: calc(100vh - var(--topbar-h));
-  transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1);
+  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   max-width: calc(var(--content-max) + var(--gap) * 2);
 }
 @media (min-width: 769px) {
@@ -388,74 +437,150 @@ body.sidebar-open .sidebar { transform: translateX(0); }
 .page-desc { font-size: var(--fs-base); color: var(--text2); margin-top: 3px; }
 
 /* =====================
-   CARDS
+   CARDS & CONTAINERS
 ===================== */
 .card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px; margin-bottom: 14px;
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: 20px; /* Diperhalus */
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 .card-title {
-  font-size: 9px; font-weight: 600; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--text3);
-  font-family: 'JetBrains Mono', monospace; margin-bottom: 12px;
+  font-size: 9px; 
+  font-weight: 600; 
+  letter-spacing: 1.5px;
+  text-transform: uppercase; 
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace; 
+  margin-bottom: 12px;
 }
 
 /* =====================
-   MODE GRID
+   INTERACTIVE MODE GRID (RAPI & INTERAKTIF)
 ===================== */
 .mode-grid {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 8px; margin-bottom: 14px;
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px; 
+  margin-bottom: 16px;
 }
 .mode-btn {
-  padding: 10px 6px; border: 1px solid var(--border2); border-radius: 8px;
-  background: transparent; color: var(--text2); cursor: pointer;
-  font-family: 'Space Grotesk', sans-serif; font-size: var(--fs-sm);
-  font-weight: 500; transition: all 0.15s; text-align: center;
-  -webkit-tap-highlight-color: transparent; min-height: 56px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 12px 8px; 
+  border: 1px solid var(--border2); 
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02); 
+  color: var(--text2); 
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif; 
+  font-size: var(--fs-sm);
+  font-weight: 500; 
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  -webkit-tap-highlight-color: transparent; 
+  min-height: 64px;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center;
 }
 .mode-icon { font-size: 16px; display: block; margin-bottom: 4px; }
-.mode-btn:hover, .mode-btn.active {
-  border-color: var(--accent); color: var(--accent); background: rgba(74,222,128,0.05);
+.mode-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--text2);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+.mode-btn.active {
+  border-color: var(--accent); 
+  color: var(--accent); 
+  background: rgba(47, 228, 138, 0.06);
+  box-shadow: 0 0 20px rgba(47, 228, 138, 0.15), inset 0 1px 1px rgba(255,255,255,0.1);
+  transform: translateY(-1px);
 }
 
 /* =====================
-   CHIPS
+   CHIPS STYLE
 ===================== */
-.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-.chip {
-  padding: 5px 11px; border: 1px solid var(--border2); border-radius: 20px;
-  background: transparent; color: var(--text2); cursor: pointer;
-  font-family: 'Space Grotesk', sans-serif; font-size: var(--fs-sm);
-  transition: all 0.15s; white-space: nowrap;
-  user-select: none; -webkit-tap-highlight-color: transparent;
+.chips { 
+  display: flex; 
+  gap: 8px; 
+  flex-wrap: wrap; 
+  margin-bottom: 16px; 
 }
-.chip:hover { border-color: var(--accent2); color: var(--accent2); }
-.chip.active { border-color: var(--accent2); color: var(--accent2); background: rgba(34,211,238,0.08); }
+.chip {
+  padding: 6px 14px; 
+  border: 1px solid var(--border2); 
+  border-radius: 12px; /* Lebih modern dibanding lonjong biasa */
+  background: rgba(255, 255, 255, 0.01);
+  color: var(--text2); 
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif; 
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none; 
+  -webkit-tap-highlight-color: transparent;
+}
+.chip:hover { 
+  border-color: var(--accent2); 
+  color: var(--text); 
+  background: rgba(255,255,255,0.03); 
+}
+.chip.active { 
+  border-color: var(--accent2); 
+  color: var(--accent2); 
+  background: rgba(34, 211, 238, 0.08); 
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
+}
 
 /* =====================
-   INPUTS
+   INPUT FIELDS
 ===================== */
 textarea, input[type=text] {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 8px; color: var(--text); font-family: 'JetBrains Mono', monospace;
-  font-size: var(--fs-base); line-height: 1.7; padding: 12px; outline: none;
-  transition: border-color 0.15s; resize: vertical;
-  -webkit-appearance: none; appearance: none;
+  width: 100%; 
+  background: rgba(0, 0, 0, 0.25); 
+  border: 1px solid var(--border2);
+  border-radius: 12px; 
+  color: var(--text); 
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--fs-base); 
+  line-height: 1.7; 
+  padding: 14px; 
+  outline: none;
+  transition: all 0.2s ease;
+  resize: vertical;
+  -webkit-appearance: none; 
+  appearance: none;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
 }
 textarea { min-height: 130px; }
-textarea:focus, input[type=text]:focus { border-color: var(--accent); }
+textarea:focus, input[type=text]:focus { 
+  border-color: var(--accent); 
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 3px rgba(47, 228, 138, 0.08), inset 0 2px 8px rgba(0,0,0,0.3);
+}
 textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 
 /* =====================
    UPLOAD
 ===================== */
 .upload-zone {
-  border: 1.5px dashed var(--border2); border-radius: 8px;
-  padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.15s;
+  border: 1.5px dashed var(--border2); 
+  border-radius: 12px;
+  padding: 28px 20px; 
+  text-align: center; 
+  cursor: pointer; 
+  transition: all 0.2s ease;
 }
-.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: rgba(74,222,128,0.03); }
+.upload-zone:hover, .upload-zone.drag { 
+  border-color: var(--accent); 
+  background: rgba(47, 228, 138, 0.03); 
+}
 .upload-zone-icon { font-size: 24px; margin-bottom: 6px; }
 .upload-zone-text { font-size: var(--fs-base); color: var(--text2); }
 .upload-zone-sub { font-size: var(--fs-xs); color: var(--text3); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
@@ -466,25 +591,47 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 .dir-label { font-size: var(--fs-xs); color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-bottom: 5px; letter-spacing: 1px; text-transform: uppercase; }
 
 /* =====================
-   BUTTONS
+   BUTTONS (PREMIUM GLOW)
 ===================== */
 .submit-btn {
-  width: 100%; padding: 12px 16px; background: var(--accent);
-  color: #0a0a0a; font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700; font-size: var(--fs-md); border: none;
-  border-radius: 8px; cursor: pointer; margin-top: 12px;
-  transition: opacity 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent;
+  width: 100%;
+  padding: 14px 16px; 
+  background: linear-gradient(135deg, var(--accent) 0%, #10b981 100%);
+  color: #030712; 
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700; 
+  font-size: var(--fs-md); 
+  border: none;
+  border-radius: 12px; 
+  cursor: pointer; 
+  margin-top: 16px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(47, 228, 138, 0.25);
+  -webkit-tap-highlight-color: transparent;
 }
-.submit-btn:hover { opacity: 0.9; }
-.submit-btn:active { transform: scale(0.99); }
-.submit-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.submit-btn:hover { 
+  opacity: 1;
+  transform: translateY(-1.5px); 
+  box-shadow: 0 6px 24px rgba(47, 228, 138, 0.4); 
+}
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled { background: var(--border2); color: var(--text3); box-shadow: none; cursor: not-allowed; transform: none; }
+
 .action-btn {
-  padding: 4px 11px; border: 1px solid var(--border2); border-radius: 5px;
-  background: transparent; color: var(--text2); font-size: var(--fs-xs);
-  cursor: pointer; font-family: 'Space Grotesk', sans-serif;
-  transition: all 0.15s; white-space: nowrap; -webkit-tap-highlight-color: transparent;
+  padding: 6px 14px; 
+  border: 1px solid var(--border2); 
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text2); 
+  font-size: var(--fs-sm);
+  cursor: pointer; 
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  transition: all 0.15s; 
+  white-space: nowrap; 
+  -webkit-tap-highlight-color: transparent;
 }
-.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+.action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(47, 228, 138, 0.04); }
 
 /* =====================
    LOADING
@@ -499,7 +646,7 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 .loading-text { font-size: var(--fs-sm); color: var(--text2); font-family: 'JetBrains Mono', monospace; }
 
 /* =====================
-   RESULT
+   RESULT BODY
 ===================== */
 .result-wrap { display: none; }
 .result-wrap.show { display: block; }
@@ -507,12 +654,19 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 .result-label { font-size: var(--fs-xs); font-family: 'JetBrains Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); flex-shrink: 0; }
 .result-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .result-body {
-  background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 8px; padding: 18px; min-height: 60px;
-  font-size: var(--fs-md); line-height: 1.8; color: var(--text);
-  overflow-wrap: break-word; word-break: break-word;
+  background: rgba(0, 0, 0, 0.2); 
+  border: 1px solid var(--border);
+  border-radius: 12px; 
+  padding: 20px;
+  min-height: 60px;
+  font-size: var(--fs-md); 
+  line-height: 1.8; 
+  color: var(--text);
+  overflow-wrap: break-word; 
+  word-break: break-word;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
 }
-.result-body h1,.result-body h2,.result-body h3 { color: var(--accent); margin: 14px 0 6px; font-weight: 600; }
+.result-body h1, .result-body h2, .result-body h3 { color: var(--accent); margin: 14px 0 6px; font-weight: 600; }
 .result-body h1 { font-size: var(--fs-xl); }
 .result-body h2 { font-size: var(--fs-lg); }
 .result-body h3 { font-size: var(--fs-md); }
@@ -546,9 +700,14 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
 ===================== */
 @media (max-width: 480px) {
   :root {
-    --sidebar-w: 260px; --gap: 12px;
-    --fs-xs: 10px; --fs-sm: 11px; --fs-base: 12px;
-    --fs-md: 13px; --fs-lg: 15px; --fs-xl: 18px;
+    --sidebar-w: 260px; 
+    --gap: 16px;
+    --fs-xs: 10px; 
+    --fs-sm: 11px; 
+    --fs-base: 12px;
+    --fs-md: 13px; 
+    --fs-lg: 15px; 
+    --fs-xl: 18px;
   }
   .close-sidebar { display: block !important; }
   body.sidebar-open .topbar { left: 0; }
@@ -556,13 +715,13 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
   .sidebar { box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
   .mode-btn { min-height: 50px; }
   .mode-icon { font-size: 15px; }
-  .card { padding: 14px; }
+  .card { padding: 18px; }
   .result-body { padding: 14px; }
   .submit-btn { font-size: var(--fs-base); padding: 11px 14px; }
   .chips { gap: 5px; }
   .chip { padding: 4px 10px; }
   .preview-row img { width: 60px; height: 60px; }
-  .auth-card { padding: 28px 20px; }
+  .auth-card { padding: 36px 24px; border-radius: 20px; }
 }
 
 /* =====================
@@ -998,246 +1157,167 @@ uploadZone.addEventListener('click', function(){document.getElementById('fileInp
 uploadZone.addEventListener('dragover', function(e){e.preventDefault();this.classList.add('drag');});
 uploadZone.addEventListener('dragleave', function(){this.classList.remove('drag');});
 uploadZone.addEventListener('drop', function(e){e.preventDefault();this.classList.remove('drag');processFiles(e.dataTransfer.files);});
-document.getElementById('fileInput').addEventListener('change', function(){processFiles(this.files);});
+document.getElementById('fileInput').addEventListener('change', function(e){processFiles(e.target.files);});
 
-function processFiles(files){
-  var arr = Array.from(files).slice(0,4);
-  if (!arr.length) return;
-  uploadedImages=[];
-  var row=document.getElementById('previewRow');
-  row.innerHTML=''; row.classList.add('show');
-  document.getElementById('txt-upload-text').textContent=arr.length+(currentLang==='en'?' photos selected':' foto dipilih');
-  arr.forEach(function(file){
-    var reader=new FileReader();
-    reader.onload=function(e){
-      var full=e.target.result, parts=full.split(',');
-      uploadedImages.push({base64:parts[1],mediaType:parts[0].match(/:(.*?);/)[1]});
-      var img=document.createElement('img'); img.src=full; row.appendChild(img);
+function processFiles(files) {
+  uploadedImages = [];
+  var preview = document.getElementById('previewRow');
+  preview.innerHTML = '';
+  var count = 0;
+  for (var i=0; i<files.length && count<4; i++) {
+    var f = files[i];
+    if (!f.type.match('image.*')) continue;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      uploadedImages.push(e.target.result);
+      var img = document.createElement('img');
+      img.src = e.target.result;
+      preview.appendChild(img);
     };
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(f);
+    count++;
+  }
+  preview.classList.add('show');
+}
+
+function doRingkas() {
+  var txt = document.getElementById('textArea').value.trim();
+  if (!txt) { alert(currentLang==='id'?'Masukkan teks':'Enter text'); return; }
+  var style = document.querySelector('#styleRow .chip.active').textContent;
+  var loading = document.getElementById('loadingWrap');
+  var result = document.getElementById('resultWrap');
+  loading.classList.add('show');
+  result.classList.remove('show');
+  fetch(''+WORKER+'/ringkas', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({text:txt,style:style})
+  }).then(r=>r.json()).then(d=>{
+    loading.classList.remove('show');
+    lastResultText = d.result || d.error || 'Error';
+    document.getElementById('resultBody').innerHTML = marked.parse(lastResultText);
+    result.classList.add('show');
+    MathJax.contentDocument = document;
+    MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e=>console.log(e));
+  }).catch(e=>{
+    loading.classList.remove('show');
+    lastResultText = 'Error: '+e.message;
+    document.getElementById('resultBody').textContent = lastResultText;
+    result.classList.add('show');
   });
 }
 
-async function callAPI(messages){
-  var res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:messages})});
-  var data=await res.json();
-  if(data.error) return 'Error: '+JSON.stringify(data.error);
-  return (data.choices&&data.choices[0])?data.choices[0].message.content:JSON.stringify(data);
-}
-
-function renderMD(text,elId){
-  var el=document.getElementById(elId);
-  el.innerHTML=marked.parse(text);
-  el.querySelectorAll('table').forEach(function(tbl){
-    if(!tbl.parentNode.classList.contains('table-wrap')){
-      var wrap=document.createElement('div'); wrap.className='table-wrap';
-      tbl.parentNode.insertBefore(wrap,tbl); wrap.appendChild(tbl);
-    }
+function doKuis() {
+  var txt = document.getElementById('kuisInput').value.trim();
+  if (!txt) { alert(currentLang==='id'?'Masukkan materi':'Enter material'); return; }
+  var jumlah = document.querySelector('#kuisJumlah .chip.active').textContent;
+  var tipe = document.querySelector('#kuisTipe .chip.active').textContent;
+  var loading = document.getElementById('kuisLoading');
+  var result = document.getElementById('kuisResult');
+  loading.classList.add('show');
+  result.classList.remove('show');
+  fetch(''+WORKER+'/kuis', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({text:txt,jumlah:parseInt(jumlah),tipe:tipe})
+  }).then(r=>r.json()).then(d=>{
+    loading.classList.remove('show');
+    lastKuisText = d.result || d.error || 'Error';
+    document.getElementById('kuisBody').innerHTML = marked.parse(lastKuisText);
+    result.classList.add('show');
+    MathJax.contentDocument = document;
+    MathJax.typesetPromise([document.getElementById('kuisBody')]).catch(e=>console.log(e));
+  }).catch(e=>{
+    loading.classList.remove('show');
+    lastKuisText = 'Error: '+e.message;
+    document.getElementById('kuisBody').textContent = lastKuisText;
+    result.classList.add('show');
   });
-  if(window.MathJax&&MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(function(){});
 }
 
-async function doRingkas(){
-  var lang=currentLang;
-  var chip=document.querySelector('#styleRow .chip.active');
-  var style=chip?(lang==='en'?chip.dataset.en:chip.dataset.id):'Poin Penting';
-  var sys=lang==='en'
-    ?'You are a smart student assistant. Answer in English. Use Markdown: **bold**, headings (##), bullets, tables, LaTeX math. Output ONLY in the requested style.'
-    :'Kamu adalah asisten pelajar. Jawab dalam Bahasa Indonesia. Gunakan Markdown: **bold**, heading (##), bullet, tabel, LaTeX math. Output HANYA sesuai gaya yang diminta.';
-  var msgContent=[];
-  if(currentMode==='text'){
-    var txt=document.getElementById('textArea').value.trim();
-    if(!txt){alert(lang==='en'?'Enter text first.':'Isi dulu teksnya.');return;}
-    msgContent=[{type:'text',text:(lang==='en'?'Summarize in "'+style+'" style:\n\n':'Ringkas dengan gaya "'+style+'":\n\n')+txt}];
-  } else if(currentMode==='foto'){
-    if(!uploadedImages.length){alert(lang==='en'?'Upload photos first.':'Upload foto dulu.');return;}
-    var dir=document.getElementById('directionInput').value.trim();
-    var p=lang==='en'?'Read images and summarize in "'+style+'" style.'+(dir?' Instruction: '+dir:''):'Baca gambar dan ringkas dengan gaya "'+style+'".'+(dir?' Arahan: '+dir:'');
-    uploadedImages.forEach(function(img){msgContent.push({type:'image_url',image_url:{url:'data:'+img.mediaType+';base64,'+img.base64}});});
-    msgContent.push({type:'text',text:p});
-  } else {
-    var yt=document.getElementById('ytUrl').value.trim();
-    if(!yt){alert(lang==='en'?'Enter YouTube link.':'Masukkan link YouTube.');return;}
-    // Fetch transcript dari HF backend dulu
-    setLoading('submitBtn','loadingWrap','resultWrap',true);
-    document.getElementById('txt-loading-ringkas').textContent=lang==='en'?'Fetching transcript...':'Mengambil transcript...';
-    try {
-      var trRes=await fetch(HF_BACKEND+'/transcript?url='+encodeURIComponent(yt));
-      var trData=await trRes.json();
-      if(trData.error){
-        document.getElementById('resultBody').textContent='Error transcript: '+trData.error;
-        document.getElementById('resultWrap').classList.add('show');
-        setLoading('submitBtn','loadingWrap','resultWrap',false);
-        return;
-      }
-      document.getElementById('txt-loading-ringkas').textContent=lang==='en'?'Processing...':'Sedang memproses...';
-      msgContent=[{type:'text',text:(lang==='en'?'Summarize this YouTube transcript in "'+style+'" style:\n\n':'Ringkas transcript YouTube ini dengan gaya "'+style+'":\n\n')+trData.transcript}];
-    } catch(e){
-      document.getElementById('resultBody').textContent='Gagal ambil transcript: '+e.message;
-      document.getElementById('resultWrap').classList.add('show');
-      setLoading('submitBtn','loadingWrap','resultWrap',false);
-      return;
-    }
-  }
-  setLoading('submitBtn','loadingWrap','resultWrap',true);
-  try {
-    lastResultText=await callAPI([{role:'system',content:sys},{role:'user',content:msgContent}]);
-    renderMD(lastResultText,'resultBody');
-    document.getElementById('resultWrap').classList.add('show');
-  } catch(e){
-    document.getElementById('resultBody').textContent='Error: '+e.message;
-    document.getElementById('resultWrap').classList.add('show');
-  }
-  setLoading('submitBtn','loadingWrap','resultWrap',false);
+function doTerjemah() {
+  var txt = document.getElementById('transInput').value.trim();
+  if (!txt) { alert(currentLang==='id'?'Masukkan teks':'Enter text'); return; }
+  var lang = document.querySelector('#langRow .chip.active').textContent;
+  var loading = document.getElementById('transLoading');
+  var result = document.getElementById('transResult');
+  loading.classList.add('show');
+  result.classList.remove('show');
+  fetch(''+WORKER+'/terjemah', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({text:txt,lang:lang})
+  }).then(r=>r.json()).then(d=>{
+    loading.classList.remove('show');
+    lastTransText = d.result || d.error || 'Error';
+    document.getElementById('transBody').innerHTML = marked.parse(lastTransText);
+    result.classList.add('show');
+  }).catch(e=>{
+    loading.classList.remove('show');
+    lastTransText = 'Error: '+e.message;
+    document.getElementById('transBody').textContent = lastTransText;
+    result.classList.add('show');
+  });
 }
 
-async function doKuis(){
-  var lang=currentLang;
-  var txt=document.getElementById('kuisInput').value.trim();
-  if(!txt){alert(lang==='en'?'Enter material first.':'Isi dulu materinya.');return;}
-  var j=document.querySelector('#kuisJumlah .chip.active');
-  var t=document.querySelector('#kuisTipe .chip.active');
-  var jumlah=j?j.dataset.jumlah:'5';
-  var tipe=t?(lang==='en'?t.dataset.en:t.dataset.id):'Pilihan Ganda';
-  var sys=lang==='en'?'You are a teacher. Create '+jumlah+' "'+tipe+'" questions. Include answer key at the end. Use Markdown.':'Kamu adalah guru. Buat '+jumlah+' soal tipe "'+tipe+'". Sertakan kunci jawaban di akhir. Gunakan Markdown.';
-  setLoading('kuisBtn','kuisLoading','kuisResult',true);
-  try {
-    lastKuisText=await callAPI([{role:'system',content:sys},{role:'user',content:[{type:'text',text:(lang==='en'?'Material:\n\n':'Materi:\n\n')+txt}]}]);
-    renderMD(lastKuisText,'kuisBody');
-    document.getElementById('kuisResult').classList.add('show');
-  } catch(e){
-    document.getElementById('kuisBody').textContent='Error: '+e.message;
-    document.getElementById('kuisResult').classList.add('show');
-  }
-  setLoading('kuisBtn','kuisLoading','kuisResult',false);
-}
+function copyResult() { navigator.clipboard.writeText(lastResultText); }
+function copyKuis() { navigator.clipboard.writeText(lastKuisText); }
+function copyTrans() { navigator.clipboard.writeText(lastTransText); }
 
-async function doTerjemah(){
-  var txt=document.getElementById('transInput').value.trim();
-  if(!txt){alert(currentLang==='en'?'Enter text first.':'Isi dulu teksnya.');return;}
-  var tl=document.querySelector('#langRow .chip.active');
-  var targetLang=tl?tl.dataset.lang:'English';
-  var sys='You are a professional translator. Translate to '+targetLang+'. Only the translation, no explanation.';
-  setLoading('transBtn','transLoading','transResult',true);
-  try {
-    lastTransText=await callAPI([{role:'system',content:sys},{role:'user',content:[{type:'text',text:txt}]}]);
-    renderMD(lastTransText,'transBody');
-    document.getElementById('transResult').classList.add('show');
-  } catch(e){
-    document.getElementById('transBody').textContent='Error: '+e.message;
-    document.getElementById('transResult').classList.add('show');
-  }
-  setLoading('transBtn','transLoading','transResult',false);
-}
-
-function setLoading(btnId,loadingId,resultId,isLoading){
-  document.getElementById(btnId).disabled=isLoading;
-  document.getElementById(loadingId).classList.toggle('show',isLoading);
-  if(isLoading) document.getElementById(resultId).classList.remove('show');
-}
-
-function copyText(text){navigator.clipboard.writeText(text);}
-function copyResult(){copyText(lastResultText);flashBtn('copyResultBtn',currentLang==='en'?'Copied!':'Disalin!');}
-function copyKuis(){copyText(lastKuisText);}
-function copyTrans(){copyText(lastTransText);}
-function flashBtn(id,txt){
-  var el=document.getElementById(id); if(!el) return;
-  var orig=el.textContent; el.textContent=txt;
-  setTimeout(function(){el.textContent=orig;},2000);
-}
-
-function saveHistory(){
-  if(!lastResultText) return;
-  historyData.unshift({time:new Date().toLocaleString('id-ID'),preview:lastResultText.slice(0,120),full:lastResultText});
-  if(historyData.length>30) historyData.pop();
+function saveHistory() {
+  if (!lastResultText) return;
+  var now = new Date().toLocaleString();
+  var item = {id:Date.now(),text:lastResultText,time:now};
+  historyData.unshift(item);
+  historyData = historyData.slice(0,50);
   localStorage.setItem('kstools_v2',JSON.stringify(historyData));
-  flashBtn('saveResultBtn',currentLang==='en'?'Saved!':'Tersimpan!');
+  alert(currentLang==='id'?'Disimpan!':'Saved!');
 }
 
-function renderHistory(){
-  var list=document.getElementById('historyList');
-  if(!historyData.length){
-    list.innerHTML='<div class="empty-state"><div class="empty-icon">&#128338;</div>'+(currentLang==='en'?'No saved history yet':'Belum ada riwayat tersimpan')+'</div>';
+function renderHistory() {
+  var list = document.getElementById('historyList');
+  if (historyData.length===0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>'+(currentLang==='id'?'Belum ada riwayat':'No history')+'</p></div>';
     return;
   }
-  list.innerHTML=historyData.map(function(item,i){
-    return '<div class="history-item" onclick="viewHistory('+i+')"><div class="history-time">'+item.time+'</div><div class="history-preview">'+item.preview+'</div></div>';
+  list.innerHTML = historyData.map(function(item,i){
+    var prev = item.text.substring(0,100).replace(/<[^>]*>/g,'').replace(/\n/g,' ');
+    return '<div class="history-item" onclick="showHistoryItem('+i+')"><div class="history-time">'+item.time+'</div><div class="history-preview">'+prev+'...</div></div>';
   }).join('');
 }
 
-function viewHistory(i){
-  lastResultText=historyData[i].full;
-  showPage('ringkas');
-  renderMD(historyData[i].full,'resultBody');
+function showHistoryItem(i) {
+  if (i<0||i>=historyData.length) return;
+  document.getElementById('textArea').value = '';
+  document.getElementById('resultBody').innerHTML = marked.parse(historyData[i].text);
+  lastResultText = historyData[i].text;
   document.getElementById('resultWrap').classList.add('show');
+  showPage('ringkas');
+  document.getElementById('resultBody').scrollIntoView({behavior:'smooth'});
+  MathJax.contentDocument = document;
+  MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e=>console.log(e));
 }
 
-var i18n={
-  id:{'txt-nav-ringkas':'Ringkas','txt-nav-kuis':'Mode Kuis','txt-nav-terjemahan':'Terjemahan','txt-nav-riwayat':'Riwayat','txt-nav-tentang':'Tentang','txt-nav-dukung':'Dukung','txt-mode-label':'Mode Input','txt-mode-text':'Teks','txt-mode-foto':'Foto','txt-mode-yt':'YouTube','txt-style-label':'Gaya Ringkasan','txt-upload-text':'Klik untuk pilih foto','txt-upload-sub':'Maks 4 foto \u00b7 JPG \u00b7 PNG','txt-dir-label':'Arahan (opsional)','txt-loading-ringkas':'Sedang memproses...','txt-result-label':'Hasil','copyResultBtn':'Salin','saveResultBtn':'Simpan','submitBtn':'⚡ Ringkas Sekarang','txt-kuis-materi-label':'Materi Kuis','txt-kuis-jumlah-label':'Jumlah Soal','txt-kuis-tipe-label':'Tipe Soal','txt-loading-kuis':'AI sedang membuat soal...','txt-kuis-result-label':'Soal Kuis','kuisBtn':'❓ Buat Kuis','txt-trans-input-label':'Teks yang Mau Diterjemahkan','txt-trans-to-label':'Terjemahkan ke','txt-loading-trans':'Sedang menerjemahkan...','txt-trans-result-label':'Hasil Terjemahan','transBtn':'🌐 Terjemahkan','txt-riwayat-title':'Riwayat','txt-riwayat-desc':'Hasil ringkasan yang disimpan','txt-tentang-title':'Tentang'},
-  en:{'txt-nav-ringkas':'Summarize','txt-nav-kuis':'Quiz Mode','txt-nav-terjemahan':'Translation','txt-nav-riwayat':'History','txt-nav-tentang':'About','txt-nav-dukung':'Support','txt-mode-label':'Input Mode','txt-mode-text':'Text','txt-mode-foto':'Photo','txt-mode-yt':'YouTube','txt-style-label':'Summary Style','txt-upload-text':'Click to select photos','txt-upload-sub':'Max 4 photos \u00b7 JPG \u00b7 PNG','txt-dir-label':'Direction (optional)','txt-loading-ringkas':'Processing...','txt-result-label':'Result','copyResultBtn':'Copy','saveResultBtn':'Save','submitBtn':'⚡ Summarize Now','txt-kuis-materi-label':'Quiz Material','txt-kuis-jumlah-label':'Number of Questions','txt-kuis-tipe-label':'Question Type','txt-loading-kuis':'Generating questions...','txt-kuis-result-label':'Quiz Questions','kuisBtn':'❓ Generate Quiz','txt-trans-input-label':'Text to Translate','txt-trans-to-label':'Translate to','txt-loading-trans':'Translating...','txt-trans-result-label':'Translation Result','transBtn':'🌐 Translate','txt-riwayat-title':'History','txt-riwayat-desc':'Saved summaries','txt-tentang-title':'About'}
-};
-
-function exportTxt(){
-  if(!lastResultText) return;
-  var blob=new Blob([lastResultText],{type:'text/plain;charset=utf-8'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='ringkasan-kstools.txt';
-  a.click();
-  URL.revokeObjectURL(a.href);
+function exportTxt() {
+  var el = document.createElement('a');
+  el.setAttribute('href','data:text/plain;charset=utf-8,'+encodeURIComponent(lastResultText));
+  el.setAttribute('download','ringkas.txt');
+  el.style.display = 'none';
+  document.body.appendChild(el);
+  el.click();
+  document.body.removeChild(el);
 }
 
-function exportPdf(){
-  if(!lastResultText) return;
-  var win=window.open('','_blank');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
-<title>Ringkasan - K's Tools for School</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.8;color:#1a1a1a;padding:48px;max-width:760px;margin:0 auto;}
-h1,h2,h3{color:#166534;margin:20px 0 8px;font-weight:600;}
-h1{font-size:22px;}h2{font-size:18px;}h3{font-size:15px;}
-p{margin-bottom:10px;}
-ul,ol{margin:6px 0 10px 22px;}
-li{margin-bottom:4px;}
-table{width:100%;border-collapse:collapse;margin:12px 0;}
-th{background:#f0fdf4;border:1px solid #86efac;padding:8px 10px;text-align:left;color:#166534;}
-td{border:1px solid #d1fae5;padding:8px 10px;}
-tr:nth-child(even) td{background:#f9fafb;}
-code{background:#f3f4f6;padding:2px 5px;border-radius:3px;font-family:monospace;font-size:12px;}
-pre{background:#f3f4f6;padding:12px;border-radius:6px;overflow-x:auto;margin:8px 0;}
-blockquote{border-left:3px solid #4ade80;padding-left:12px;color:#555;margin:8px 0;}
-strong{color:#15803d;}
-.header{border-bottom:2px solid #4ade80;padding-bottom:12px;margin-bottom:24px;}
-.header h1{color:#15803d;font-size:18px;}
-.header p{color:#888;font-size:11px;font-family:monospace;}
-@media print{body{padding:24px;}@page{margin:1.5cm;}}
-</style></head><body>
-<div class="header">
-<h1>K's Tools for School</h1>
-<p>Diekspor pada ${new Date().toLocaleString('id-ID')}</p>
-</div>
-${marked.parse(lastResultText)}
-<script>window.onload=function(){window.print();}<\/script>
-</body></html>`);
-  win.document.close();
+function exportPdf() {
+  alert(currentLang==='id'?'Fitur PDF segera hadir':'PDF feature coming soon');
 }
 
-function setLang(lang){
-  currentLang=lang;
+function setLang(lang) {
+  currentLang = lang;
   document.getElementById('btnID').classList.toggle('active',lang==='id');
   document.getElementById('btnEN').classList.toggle('active',lang==='en');
-  var t=i18n[lang];
-  Object.keys(t).forEach(function(k){var el=document.getElementById(k);if(el)el.textContent=t[k];});
-  document.querySelectorAll('#styleRow .chip').forEach(function(c){c.textContent=lang==='en'?c.dataset.en:c.dataset.id;});
-  document.querySelectorAll('#kuisTipe .chip').forEach(function(c){c.textContent=lang==='en'?c.dataset.en:c.dataset.id;});
-  var ph={
-    id:{textArea:'Paste atau ketik materi di sini...',kuisInput:'Paste materi di sini...',transInput:'Paste teks di sini...',directionInput:'cth: fokus ke rumus, jelaskan langkah-langkah',ytUrl:'https://youtube.com/watch?v=...'},
-    en:{textArea:'Paste or type material here...',kuisInput:'Paste material here...',transInput:'Paste text here...',directionInput:'e.g: focus on formulas, step by step',ytUrl:'https://youtube.com/watch?v=...'}
-  };
-  Object.keys(ph[lang]).forEach(function(id){var el=document.getElementById(id);if(el)el.placeholder=ph[lang][id];});
-  document.getElementById('topbar-title').textContent=pageTitles[lang][currentPage]||currentPage;
 }
 </script>
+
 </body>
 </html>
