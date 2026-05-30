@@ -1336,10 +1336,15 @@ function processFiles(files) {
 // ==========================================
 function bacaTeksPDF(file) {
   var reader = new FileReader();
+  var btn = document.getElementById('submitBtn'); // Sesuaikan ID tombol ringkasmu
   
-  // Cari tombol ringkas biar teksnya bisa berubah sementara
-  var btn = document.getElementById('submitBtn'); 
-  if(btn) btn.innerText = "Membaca PDF..."; 
+  // 🔒 KUNCI TOMBOL: Matikan tombol dan ubah teksnya
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "⏳ Membaca PDF (Mohon Tunggu)...";
+    btn.style.opacity = "0.5";
+    btn.style.cursor = "not-allowed";
+  }
 
   reader.onload = async function() {
     try {
@@ -1357,16 +1362,26 @@ function bacaTeksPDF(file) {
       extractedDocumentText = totalTeks; 
       console.log("Mantap! PDF berhasil dibaca. Total karakter:", extractedDocumentText.length);
       
-      if(btn) btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
+      // 🔓 BUKA TOMBOL: Kembalikan tombol jadi normal karena data sudah siap!
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+      }
 
     } catch (err) {
       alert("Waduh, gagal membaca isi PDF: " + err.message);
-      if(btn) btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+      }
     }
   };
   reader.readAsArrayBuffer(file);
 }
-
   async function doRingkas() {
   var txt = document.getElementById('textArea').value.trim();
   
