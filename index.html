@@ -1287,15 +1287,66 @@ function processFiles(files) {
 }
 
 // 🟢 3. FUNGSI KHUSUS PEMBEDAH TEKS PDF
+// ==========================================
+// 1. VARIABEL GLOBAL (Paling Atas)
+// ==========================================
+var extractedDocumentText = ""; 
+
+// ==========================================
+// 2. FUNGSI PROCESSFILES (Tengah)
+// ==========================================
+function processFiles(files) {
+  uploadedImages = [];
+  extractedDocumentText = ""; 
+  
+  var preview = document.getElementById('previewRow');
+  preview.innerHTML = '';
+  var count = 0;
+  
+  for (var i = 0; i < files.length && count < 4; i++) {
+    var f = files[i];
+    var fileName = f.name.toLowerCase();
+    
+    if (f.type.match('image.*')) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        uploadedImages.push(e.target.result);
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(f);
+      count++;
+    } 
+    else if (fileName.endsWith('.pdf')) {
+      var div = document.createElement('div');
+      div.style = "padding: 8px 12px; background: rgba(47, 228, 138, 0.1); border: 1px solid #2fe48a; border-radius: 8px; font-size: 13px; color: #2fe48a; display: inline-flex; align-items: center; gap: 6px; margin: 4px;";
+      div.innerHTML = `📄 PDF: ${f.name}`;
+      preview.appendChild(div);
+      
+      bacaTeksPDF(f); // <--- Fungsi ini memanggil kode di bawahnya
+      count++;
+    }
+  }
+  preview.classList.add('show');
+}
+
+// ==========================================
+// 3. FUNGSI BACA TEKS PDF (Ganti di sini!)
+// ==========================================
 function bacaTeksPDF(file) {
   var reader = new FileReader();
+  
+  // Cari tombol ringkas biar teksnya bisa berubah sementara
+  var btn = document.getElementById('submitBtn'); 
+  if(btn) btn.innerText = "Membaca PDF..."; 
+
   reader.onload = async function() {
     try {
       var typedarray = new Uint8Array(this.result);
       var pdf = await pdfjsLib.getDocument(typedarray).promise;
       var totalTeks = "";
 
-      // Loop untuk membaca dari halaman 1 sampai halaman terakhir PDF
       for (var i = 1; i <= pdf.numPages; i++) {
         var page = await pdf.getPage(i);
         var textObj = await page.getTextContent();
@@ -1303,10 +1354,14 @@ function bacaTeksPDF(file) {
         totalTeks += teksHalaman + "\n";
       }
 
-      extractedDocumentText = totalTeks; // Simpan hasilnya ke variabel global
+      extractedDocumentText = totalTeks; 
       console.log("Mantap! PDF berhasil dibaca. Total karakter:", extractedDocumentText.length);
+      
+      if(btn) btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
+
     } catch (err) {
       alert("Waduh, gagal membaca isi PDF: " + err.message);
+      if(btn) btn.innerText = currentLang === 'id' ? "Ringkas Sekarang" : "Summarize Now";
     }
   };
   reader.readAsArrayBuffer(file);
