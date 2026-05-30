@@ -1429,13 +1429,26 @@ function bacaTeksPDF(file) {
     }
     return r.json();
   })
-  .then(d=>{
+  .then(d => {
     loading.classList.remove('show');
-    lastResultText = d.result || d.error || 'Error: Tidak ada hasil dari AI';
+    
+    // 🧠 LOGIKA PINTAR: Bongkar objek AI jika strukturnya bersarang
+    var rawResult = d.result || d.error || d;
+    
+    // Jika ternyata masih berupa objek beneran, kita ambil properti teks di dalamnya
+    if (typeof rawResult === 'object' && rawResult !== null) {
+      lastResultText = rawResult.text || rawResult.response || JSON.stringify(rawResult);
+    } else {
+      lastResultText = String(rawResult);
+    }
+    
+    // Tampilkan hasil rangkuman yang sudah diubah jadi HTML oleh marked
     document.getElementById('resultBody').innerHTML = marked.parse(lastResultText);
     result.classList.add('show');
+    
+    // Jalankan render matematika jika ada rumus
     MathJax.contentDocument = document;
-    MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e=>console.log(e));
+    MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e => console.log(e));
   })
   .catch(e=>{
     // 🚨 TAMPILKAN POPUP BIAR KELIHAN MASALAHNYA DI MANA
