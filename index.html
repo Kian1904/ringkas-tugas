@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>
+  // Konfigurasi wajib agar PDF.js tahu di mana letak mesin core worker-nya
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+</script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>K's Tools for School — AI Study Assistant</title>
@@ -910,7 +915,7 @@ textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
           <textarea id="textArea" placeholder="Paste atau ketik materi di sini..."></textarea>
         </div>
         <div id="inputFoto" style="display:none;">
-          <input type="file" id="fileInput" accept="image/*" multiple style="display:none"/>
+          <input type="file" id="fileInput" accept="image/*, .pdf" multiple style="display:none"/>
           <div class="upload-zone" id="uploadZone">
             <div class="upload-zone-icon">&#128247;</div>
             <div class="upload-zone-text" id="txt-upload-text">Klik untuk pilih foto</div>
@@ -1102,7 +1107,55 @@ function setUserUI(user) {
     document.getElementById('topbarAvatarPlaceholder').style.display = 'none';
   }
 }
+// ========================================================
+// FUNGSI CEK LIMIT: Batasi Maksimal 10 Klik Per Hari
+// ========================================================
+const MAX_DAILY_LIMIT = 10;
 
+async function checkAndUpdateLimit() {
+  // A. Cek apakah user sudah login atau belum
+  const session = await sb.auth.getSession();
+  if (!session.data.session) {
+    return { allowed: false, msg: "Silakan login terlebih dahulu menggunakan akun Google." };
+  }
+  
+  const user = session.data.session.user;
+  const todayStr = new Date().toISOString().split('T')[0]; // Hasilnya format tanggal hari ini: YYYY-MM-DD
+
+  // B. Ambil data kuota user dari tabel Supabase 'user_limits' yang barusan kita buat
+  let { data: limitData, error } = await sb
+    .from('user_limits')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+
+  // C. KONDISI 1: Jika user ini BARU PERTAMA KALI pakai aplikasi (belum ada datanya di tabel)
+  if (!limitData) {
+    // Buat baris baru di database, hitungan dimulai dari 1
+    await sb.from('user_limits').insert([
+      { user_id: user.id, email: user.email, usage_count: 1, last_used_date: todayStr }
+    ]);
+    return { allowed: true }; // Izinkan akses karena baru klik pertama kali
+  }
+
+  // D. KONDISI 2: Jika sudah berganti hari (tanggal di DB beda dengan tanggal hari ini)
+  if (limitData.last_used_date !== todayStr) {
+    // Reset hitungannya kembali ke 1, dan update tanggalnya jadi hari ini
+    await sb.from('user_limits').update({ usage_count: 1, last_used_date: todayStr }).eq('user_id', user.id);
+    return { allowed: true }; // Izinkan akses karena kuota hari baru dimulai
+  }
+
+  // E. KONDISI 3: Jika user sudah klik berkali-kali di hari yang sama, cek apakah sudah mentok limit
+  if (limitData.usage_count >= MAX_DAILY_LIMIT) {
+    // Tolak akses jika sudah 10 kali atau lebih
+    return { allowed: false, msg: `Kuota harian habis! Kamu sudah memakai ${MAX_DAILY_LIMIT} token hari ini. Coba lagi besok ya.` };
+  }
+
+  // F. KONDISI 4: Jika masih aman (misal baru klik ke-5), tambahkan hitungannya +1 di database
+  await sb.from('user_limits').update({ usage_count: limitData.usage_count + 1 }).eq('user_id', user.id);
+  return { allowed: true }; // Izinkan akses ke AI
+}
+  
 function showApp(user) {
   setUserUI(user);
   document.getElementById('authGate').style.display = 'none';
@@ -1189,39 +1242,114 @@ uploadZone.addEventListener('dragleave', function(){this.classList.remove('drag'
 uploadZone.addEventListener('drop', function(e){e.preventDefault();this.classList.remove('drag');processFiles(e.dataTransfer.files);});
 document.getElementById('fileInput').addEventListener('change', function(e){processFiles(e.target.files);});
 
+// 🟢 1. TARUH VARIABEL INI DI ATAS FUNGSI (Untuk menampung teks dari PDF)
+var extractedDocumentText = ""; 
+
+// 🟢 2. FUNGSI PROCESSFILES YANG SUDAH DIGABUNG (Aman untuk banyak foto + PDF)
 function processFiles(files) {
   uploadedImages = [];
+  extractedDocumentText = ""; // Reset teks PDF lama setiap ada file baru dimasukkan
+  
   var preview = document.getElementById('previewRow');
   preview.innerHTML = '';
   var count = 0;
-  for (var i=0; i<files.length && count<4; i++) {
+  
+  for (var i = 0; i < files.length && count < 4; i++) {
     var f = files[i];
-    if (!f.type.match('image.*')) continue;
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      uploadedImages.push(e.target.result);
-      var img = document.createElement('img');
-      img.src = e.target.result;
-      preview.appendChild(img);
-    };
-    reader.readAsDataURL(f);
-    count++;
+    var fileName = f.name.toLowerCase();
+    
+    // KONDISI A: Jika file yang dimasukkan adalah GAMBAR/FOTO (Kode aslimu)
+    if (f.type.match('image.*')) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        uploadedImages.push(e.target.result);
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(f);
+      count++;
+    } 
+    // KONDISI B: Jika file yang dimasukkan adalah PDF (Logika Baru)
+    else if (fileName.endsWith('.pdf')) {
+      // Tampilkan kotak indikator PDF warna hijau di area preview
+      var div = document.createElement('div');
+      div.style = "padding: 8px 12px; background: rgba(47, 228, 138, 0.1); border: 1px solid #2fe48a; border-radius: 8px; font-size: 13px; color: #2fe48a; display: inline-flex; align-items: center; gap: 6px; margin: 4px;";
+      div.innerHTML = `📄 PDF: ${f.name}`;
+      preview.appendChild(div);
+      
+      // Panggil fungsi pembaca PDF
+      bacaTeksPDF(f);
+      count++;
+    }
   }
   preview.classList.add('show');
 }
 
-function doRingkas() {
+// 🟢 3. FUNGSI KHUSUS PEMBEDAH TEKS PDF
+function bacaTeksPDF(file) {
+  var reader = new FileReader();
+  reader.onload = async function() {
+    try {
+      var typedarray = new Uint8Array(this.result);
+      var pdf = await pdfjsLib.getDocument(typedarray).promise;
+      var totalTeks = "";
+
+      // Loop untuk membaca dari halaman 1 sampai halaman terakhir PDF
+      for (var i = 1; i <= pdf.numPages; i++) {
+        var page = await pdf.getPage(i);
+        var textObj = await page.getTextContent();
+        var teksHalaman = textObj.items.map(item => item.str).join(" ");
+        totalTeks += teksHalaman + "\n";
+      }
+
+      extractedDocumentText = totalTeks; // Simpan hasilnya ke variabel global
+      console.log("Mantap! PDF berhasil dibaca. Total karakter:", extractedDocumentText.length);
+    } catch (err) {
+      alert("Waduh, gagal membaca isi PDF: " + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+  async function doRingkas() {
   var txt = document.getElementById('textArea').value.trim();
-  if (!txt) { alert(currentLang==='id'?'Masukkan teks':'Enter text'); return; }
+  
+  // 🛡️ MODIFIKASI INPUT CHECK: Boleh kosong kalau user sudah upload PDF
+  if (!txt && extractedDocumentText.trim().length === 0) { 
+    alert(currentLang==='id'?'Masukkan teks atau upload PDF terlebih dahulu!':'Enter text or upload a PDF first!'); 
+    return; 
+  }
+  
   var style = document.querySelector('#styleRow .chip.active').textContent;
   var loading = document.getElementById('loadingWrap');
   var result = document.getElementById('resultWrap');
+  
+  // Nyalakan animasi loading
   loading.classList.add('show');
   result.classList.remove('show');
+  
+  // 🛡️ PANGGIL SATPAM PEMERIKSA LIMIT HARIAN (Supabase)
+  const limitCheck = await checkAndUpdateLimit();
+  if (!limitCheck.allowed) {
+    alert(limitCheck.msg);
+    loading.classList.remove('remove'); // Matikan loading
+    return; // STOP!
+  }
+  
+  // ⚡ LOGIKA PENENTUAN TEKS YANG AKAN DIKIRIM KE AI
+  var textToSend = txt; // Default-nya adalah teks ketikan di textarea
+  
+  // Jika ada teks hasil bongkar PDF, kita bungkus teksnya dengan rapi
+  if (extractedDocumentText.trim().length > 0) {
+    textToSend = "Materi Dokumen PDF:\n" + extractedDocumentText + "\n\n" + (txt ? "Arahan Tambahan dari User: " + txt : "");
+  }
+  
+  // Kirim data string bersih ke Cloudflare Worker milikmu
   fetch(''+WORKER+'/ringkas', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({text:txt,style:style})
+    body:JSON.stringify({text:textToSend, style:style}) // Kirim textToSend (bisa isi PDF atau ketikan manual)
   }).then(r=>r.json()).then(d=>{
     loading.classList.remove('show');
     lastResultText = d.result || d.error || 'Error';
@@ -1236,16 +1364,33 @@ function doRingkas() {
     result.classList.add('show');
   });
 }
-
-function doKuis() {
+  
+async function doKuis() {
   var txt = document.getElementById('kuisInput').value.trim();
   if (!txt) { alert(currentLang==='id'?'Masukkan materi':'Enter material'); return; }
+  
   var jumlah = document.querySelector('#kuisJumlah .chip.active').textContent;
   var tipe = document.querySelector('#kuisTipe .chip.active').textContent;
   var loading = document.getElementById('kuisLoading');
   var result = document.getElementById('kuisResult');
+  
+  // 🛡️ 1. JALANKAN ANIMASI LOADING PROSES CEK LIMIT
   loading.classList.add('show');
   result.classList.remove('show');
+  
+  // 🛡️ 2. PANGGIL SATPAM PEMERIKSA LIMIT HARIAN
+  const limitCheck = await checkAndUpdateLimit();
+  
+  // 🛡️ 3. JIKA KUOTA HABIS / USER BELUM LOGIN
+  if (!limitCheck.allowed) {
+    alert(limitCheck.msg);              // Munculkan popup peringatan kuota habis
+    loading.classList.remove('show');   // Matikan loading kuis
+    return;                             // 🛑 STOP! Berhenti di sini, API Tavily/NVIDIA aman!
+  }
+  
+  // ========================================================
+  // KODE ASLI BAWAHAN KIAN (Berjalan normal kalau lolos sensor)
+  // ========================================================
   fetch(''+WORKER+'/kuis', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -1265,14 +1410,31 @@ function doKuis() {
   });
 }
 
-function doTerjemah() {
+async function doTerjemah() {
   var txt = document.getElementById('transInput').value.trim();
   if (!txt) { alert(currentLang==='id'?'Masukkan teks':'Enter text'); return; }
+  
   var lang = document.querySelector('#langRow .chip.active').textContent;
   var loading = document.getElementById('transLoading');
   var result = document.getElementById('transResult');
+  
+  // 🛡️ 1. JALANKAN ANIMASI LOADING UNTUK PROSES CEK LIMIT
   loading.classList.add('show');
   result.classList.remove('show');
+  
+  // 🛡️ 2. PANGGIL SATPAM PEMERIKSA LIMIT HARIAN
+  const limitCheck = await checkAndUpdateLimit();
+  
+  // 🛡️ 3. JIKA KUOTA HABIS / USER BELUM LOGIN
+  if (!limitCheck.allowed) {
+    alert(limitCheck.msg);              // Munculkan popup peringatan kuota habis
+    loading.classList.remove('show');   // Matikan loading terjemahan
+    return;                             // 🛑 STOP! Berhenti di sini, API NVIDIA aman!
+  }
+  
+  // ========================================================
+  // KODE ASLI BAWAHAN KIAN (Berjalan normal jika kuota aman)
+  // ========================================================
   fetch(''+WORKER+'/terjemah', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -1289,7 +1451,7 @@ function doTerjemah() {
     result.classList.add('show');
   });
 }
-
+  
 function copyResult() { navigator.clipboard.writeText(lastResultText); }
 function copyKuis() { navigator.clipboard.writeText(lastKuisText); }
 function copyTrans() { navigator.clipboard.writeText(lastTransText); }
