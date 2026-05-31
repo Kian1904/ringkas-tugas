@@ -352,6 +352,7 @@
 
     // --- SISTEM PEMBATASAN (LIMIT) & RIWAYAT AKTIVITAS ---
     function getTodayKey() {
+      if (!currentUser) return 'guest_limit';
       const d = new Date();
       return `${currentUser.id}_limit_${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     }
@@ -365,12 +366,14 @@
       return true;
     }
 
+    // Perbaikan pelindung tampilan limit
     function updateLimitUI() {
-      if(!currentUser) return;
+      const badge = document.getElementById('limit-badge');
+      if(!badge) return;
       const key = getTodayKey();
       const used = parseInt(localStorage.getItem(key) || "0", 10);
       const remaining = Math.max(0, DAILY_LIMIT_MAX - used);
-      document.getElementById('limit-badge').innerText = `${remaining} / ${DAILY_LIMIT_MAX}`;
+      badge.innerText = `${remaining} / ${DAILY_LIMIT_MAX}`;
     }
 
     function saveToHistory(mode, inputSummary, outputData) {
@@ -425,7 +428,7 @@
       });
     });
 
-    // --- PENANGANAN BERKAS PDF (ROBUSTED BY CLAUDE) ---
+    // --- PENANGANAN BERKAS PDF ---
     async function bacaTeksPDF(file) {
       var btn = document.getElementById('submitBtn');
       if (file.size > 50 * 1024 * 1024) { alert('File terlalu besar, maksimal 50MB'); return; }
@@ -521,7 +524,7 @@
       }
     }
 
-    // --- INTERKONEKSI INTEGRASI FITUR RINGKAS ---
+    // --- INTEGRASI FITUR RINGKAS (FIXED DATA TEXT VARIABLE) ---
     async function doRingkas() {
       var txt = document.getElementById('textArea').value.trim();
       var hasPDF = extractedDocumentText && extractedDocumentText.trim().length > 0;
@@ -530,14 +533,15 @@
       if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis! (Maksimal 20 request per hari).");
 
       var style = document.querySelector('#styleRow .chip.active')?.textContent || 'Poin Penting';
-      var ArrayText = hasPDF ? `Ringkas dokumen PDF ini dengan gaya "${style}":\n\n${extractedDocumentText.slice(0, 15000)}` : `Ringkas dengan gaya "${style}":\n\n${txt}`;
-      if (hasPDF && txt) ArrayText += '\n\nArahan tambahan: ' + txt;
+      // Diperbaiki dari ArrayText kembali ke format teks string tujuan asli
+      var finalText = hasPDF ? `Ringkas dokumen PDF ini dengan gaya "${style}":\n\n${extractedDocumentText.slice(0, 15000)}` : `Ringkas dengan gaya "${style}":\n\n${txt}`;
+      if (hasPDF && txt) finalText += '\n\nArahan tambahan: ' + txt;
 
       var sys = 'Kamu adalah asisten pelajar yang membantu. Jawab dalam Bahasa Indonesia. Gunakan susunan Markdown komplit (tabel, list, heading) & LaTeX math jika relevan.';
-      await requestCoreAI(sys, ArrayText, "Ringkas");
+      await requestCoreAI(sys, finalText, "Ringkas");
     }
 
-    // --- INTEGRASI SEMPURNA HALAMAN YOUTUBE ➔ HUGGING FACE ➔ WORKER ---
+    // --- INTEGRASI MODUL YOUTUBE ➔ HUGGING FACE ➔ WORKER ---
     async function doProcessYouTube() {
       var url = document.getElementById('ytUrl').value.trim();
       var notes = document.getElementById('ytNotes').value.trim();
@@ -554,15 +558,13 @@
       loaderText.innerText = "⏳ Langkah 1: Meminta Hugging Face Space menarik transkrip video...";
 
       try {
-        // Ekstraksi Transkrip Asli dari Hugging Face API Space Kamu
         var hfRes = await fetch(HF_SPACE_API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: [url] }) // Format standar Gradio API API JSON data array
+          body: JSON.stringify({ data: [url] })
         });
         
         var hfData = await hfRes.json();
-        // Membaca kembalian Gradio Space (biasanya ada di data[0])
         var transkripTeks = hfData.data ? hfData.data[0] : (hfData.result || JSON.stringify(hfData));
         
         if(!transkripTeks || transkripTeks.trim().length === 0 || transkripTeks.includes("error")) {
@@ -575,8 +577,6 @@
         if(notes) promptUser += `\n\nCatatan Tambahan Pengguna: ${notes}`;
         
         var sys = 'Kamu adalah bot edukasi spesialis transkripsi dan analisis video. Bedah poin penting isi video tersebut dengan sangat detail dalam Bahasa Indonesia menggunakan Markdown.';
-        
-        // Oper ke engine utama Worker API
         await requestCoreAI(sys, promptUser, "YouTube");
 
       } catch(e) {
@@ -588,7 +588,7 @@
       }
     }
 
-    // --- EKSEKUTOR MODUL KUIS ---
+    // --- EKSEKUTOR MODUL KUIS (FIXED) ---
     async function doGenerateQuiz() {
       var src = document.getElementById('quizSource').value.trim();
       if(!src) return alert('Masukkan materi fondasi soal kuis terlebih dahulu!');
@@ -600,7 +600,7 @@
       await requestCoreAI(sys, src, "Buat Kuis");
     }
 
-    // --- EKSEKUTOR MODUL TRANSLATION ---
+    // --- EKSEKUTOR MODUL TRANSLATION (FIXED) ---
     async function doTranslate() {
       var src = document.getElementById('transSource').value.trim();
       if(!src) return alert('Teks asal bahasa yang mau diterjemahkan masih kosong!');
