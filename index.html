@@ -670,14 +670,10 @@
       if (ytInput) {
         if (loaderText) loaderText.textContent = '⏳ Menarik transkrip YouTube...';
         try {
-          // Coba ambil dari Hugging Face Space dulu
-          var hfRes = await fetch(HF_SPACE_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: [ytInput] })
-          });
-          var hfData = await hfRes.json();
-          var ytTranscript = hfData.data ? hfData.data[0] : "";
+         // Ganti dengan ini agar sesuai dengan endpoint FastAPI kamu:
+         var hfRes = await fetch(`${HF_SPACE_API.replace('/api/predict', '')}/transcript?url=${encodeURIComponent(ytInput)}`);
+         var hfData = await hfRes.json();
+         var ytTranscript = hfData.transcript ? hfData.transcript : "";
 
           // Jika HF Gagal atau Not Found, lempar ke Worker sebagai Fallback
           if (!ytTranscript || ytTranscript.includes("Not Found")) {
