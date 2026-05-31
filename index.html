@@ -240,7 +240,7 @@
             <div class="chip">Rangkuman Narasi</div>
             <div class="chip">Struktur Silabus</div>
           </div>
-          <input type="file" id="fileInput" accept=".pdf" onchange="processFiles(this.files)" style="margin-bottom:16px; display:block;"/>
+          <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" onchange="processFiles(this.files)" style="margin-bottom:16px; display:block;"/>
           <div id="previewRow" class="chip-container" style="display:none;"></div>
           <textarea id="textArea" rows="6" placeholder="Tempel teks materi kuliah atau berikan instruksi tambahan di sini..."></textarea>
           <button class="submit-btn" id="submitBtn" onclick="doRingkas()">Proses Rangkuman</button>
@@ -313,12 +313,15 @@
      
     // Global State
     let currentUser = null;
-    let extractedDocumentText = "";
+    let currentMode = 'text'; 
+    let uploadedImages = [];  
+    let extractedDocumentText = ""; 
+    let currentLang = 'id';   
     let lastResultText = "";
     const DAILY_LIMIT_MAX = 20;
 
     // =========================================================
-    // ENGINE UTAMA GOOGLE OAUTH FLOW (KODE ASLI KIAN YANG DISINKRONKAN)
+    // ENGINE UTAMA GOOGLE OAUTH FLOW
     // =========================================================
     async function signInWithGoogle() {
       const btn = document.querySelector('.google-btn');
@@ -382,7 +385,6 @@
       document.body.classList.remove('logged-in');
     }
      
-    // Listen to Auth State Changes
     sb.auth.onAuthStateChange(function(event, session) {
       if (session && session.user) {
         showApp(session.user);
@@ -391,7 +393,6 @@
       }
     });
      
-    // Check Existing Session on Initial Load
     sb.auth.getSession().then(function(result) {
       if (result.data.session) {
         showApp(result.data.session.user);
@@ -513,67 +514,60 @@
       }
     }
 
-   function processFiles(files) {
-  // Reset state setiap kali user memilih file baru
-  extractedDocumentText = "";
-  uploadedImages = [];
-  
-  const preview = document.getElementById('previewRow');
-  if (preview) {
-    preview.innerHTML = '';
-    preview.style.display = 'none';
-  }
-
-  if (files.length === 0) return;
-
-  const file = files[0];
-  const fileName = file.name.toLowerCase();
-  const btn = document.getElementById('submitBtn');
-
-  // 1. JIKA FILE ADALAH PDF
-  if (fileName.endsWith('.pdf')) {
-    currentMode = 'text'; // PDF diekstrak menjadi teks
-    if (preview) {
-      preview.innerHTML = `<div style="padding:8px 12px; background:rgba(47,228,138,0.1); border:1px solid #2fe48a; border-radius:8px; font-size:13px; color:#2fe48a; display:inline-flex; margin:4px;">📄 PDF: ${file.name}</div>`;
-      preview.style.display = 'block';
-    }
-    bacaTeksPDF(file); // Panggil fungsi pembaca PDF yang sudah ada di index.html kamu
-  } 
-  
-  // 2. JIKA FILE ADALAH GAMBAR / FOTO (JPG, JPEG, PNG)
-  else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png')) {
-    currentMode = 'foto';
-    if (btn) { btn.disabled = true; btn.innerText = '⏳ Membaca Gambar...'; }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const base64Data = e.target.result.split(',')[1];
-      const mediaType = file.type;
+    function processFiles(files) {
+      extractedDocumentText = "";
+      uploadedImages = [];
       
-      // Simpan ke array sesuai struktur yang diminta sistem Claude
-      uploadedImages.push({
-        base64: base64Data,
-        mediaType: mediaType
-      });
-
+      const preview = document.getElementById('previewRow');
       if (preview) {
-        preview.innerHTML = `<div style="padding:8px 12px; background:rgba(34,211,238,0.1); border:1px solid #22d3ee; border-radius:8px; font-size:13px; color:#22d3ee; display:inline-flex; margin:4px;">🖼️ Foto: ${file.name}</div>`;
-        preview.style.display = 'block';
+        preview.innerHTML = '';
+        preview.style.display = 'none';
       }
-      if (btn) { btn.disabled = false; btn.innerText = '✅ Gambar Siap — Ringkas Sekarang'; }
-    };
-    reader.onerror = function() {
-      alert('Gagal membaca file gambar.');
-      if (btn) { btn.disabled = false; btn.innerText = 'Proses Rangkuman'; }
-    };
-    reader.readAsDataURL(file);
-  } 
-  
-  // 3. FORMAT TIDAK DIDUKUNG
-  else {
-    alert('Format file tidak didukung! Harap masukkan file PDF atau Gambar (JPG/PNG).');
-  }
-}
+
+      if (files.length === 0) return;
+
+      const file = files[0];
+      const fileName = file.name.toLowerCase();
+      const btn = document.getElementById('submitBtn');
+
+      if (fileName.endsWith('.pdf')) {
+        currentMode = 'text'; 
+        if (preview) {
+          preview.innerHTML = `<div style="padding:8px 12px; background:rgba(47,228,138,0.1); border:1px solid #2fe48a; border-radius:8px; font-size:13px; color:#2fe48a; display:inline-flex; margin:4px;">📄 PDF: ${file.name}</div>`;
+          preview.style.display = 'block';
+        }
+        bacaTeksPDF(file); 
+      } 
+      else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png')) {
+        currentMode = 'foto';
+        if (btn) { btn.disabled = true; btn.innerText = '⏳ Membaca Gambar...'; }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64Data = e.target.result.split(',')[1];
+          const mediaType = file.type;
+          
+          uploadedImages.push({
+            base64: base64Data,
+            mediaType: mediaType
+          });
+
+          if (preview) {
+            preview.innerHTML = `<div style="padding:8px 12px; background:rgba(34,211,238,0.1); border:1px solid #22d3ee; border-radius:8px; font-size:13px; color:#22d3ee; display:inline-flex; margin:4px;">🖼️ Foto: ${file.name}</div>`;
+            preview.style.display = 'block';
+          }
+          if (btn) { btn.disabled = false; btn.innerText = '✅ Gambar Siap — Ringkas Sekarang'; }
+        };
+        reader.onerror = function() {
+          alert('Gagal membaca file gambar.');
+          if (btn) { btn.disabled = false; btn.innerText = 'Proses Rangkuman'; }
+        };
+        reader.readAsDataURL(file);
+      } 
+      else {
+        alert('Format file tidak didukung! Harap masukkan file PDF atau Gambar (JPG/PNG).');
+      }
+    }
  
     // --- ENGINE API REQUEST ---
     async function requestCoreAI(sysPrompt, userContent, fallbackTitle) {
@@ -621,193 +615,198 @@
     }
 
     // --- ACTIONS ---
-   // =========================================================
-// STATE BARU UNTUK MENAMPUNG DATA FILE & MODE
-// =========================================================
-let currentMode = 'text'; // Default mode: text, foto, atau youtube
-let uploadedImages = [];  // Menampung array objek { base64, mediaType }
-let extractedDocumentText = ""; // Menampung hasil ekstrak teks PDF
-let currentLang = 'id';   // Default bahasa Indonesia
-
-// =========================================================
-// FUNGSI PENGOLAHAN DAN INPUT FILE (PDF & FOTO)
-// =========================================================
-// FUNGSI UTAMA ALL-IN-ONE: RINGKAS (TEXT, PDF, FOTO, YOUTUBE)
-// =========================================================
-async function doRingkas() {
-  // Cek batasan kuota harian terlebih dahulu sebelum eksekusi API
-  if (typeof checkAndIncrementLimit === 'function') {
-    if (!checkAndIncrementLimit()) {
-      alert("🚨 Batas kuota harian habis! (Maksimal 20 request per hari).");
-      return;
-    }
-  }
-
-  var lang = currentLang;
-  var chip = document.querySelector('#styleRow .chip.active');
-  var style = chip ? (lang === 'en' ? chip.dataset.en || chip.textContent : chip.dataset.id || chip.textContent) : 'Poin Penting';
-  
-  var sys = lang === 'en'
-    ? 'You are a smart student assistant. Answer in English. Use Markdown: **bold**, headings (##), bullets, tables, LaTeX math. Output ONLY in the requested style.'
-    : 'Kamu adalah asisten pelajar. Jawab dalam Bahasa Indonesia. Gunakan Markdown: **bold**, heading (##), bullet, tabel, LaTeX math. Output HANYA sesuai gaya yang diminta.';
-  
-  var msgContent = [];
-
-  // --- KONDISI A: MODE TEKS / DOKUMEN PDF ---
-  if (currentMode === 'text') {
-    var txt = document.getElementById('textArea').value.trim();
-    var hasPDF = extractedDocumentText && extractedDocumentText.trim().length > 0;
-    
-    if (!txt && !hasPDF) {
-      alert(lang === 'en' ? 'Enter text or upload a PDF first.' : 'Isi teks atau upload file PDF dulu.');
-      return;
-    }
-    
-    // Gabungkan teks PDF dan instruksi teks manual jika ada
-    var combinedText = hasPDF ? `Materi dari PDF:\n\n${extractedDocumentText}` : txt;
-    if (hasPDF && txt) {
-      combinedText += `\n\nArahan tambahan dari user: ${txt}`;
-    }
-    
-    var promptPrefix = lang === 'en' ? 'Summarize in "' + style + '" style:\n\n' : 'Ringkas dengan gaya "' + style + '":\n\n';
-    msgContent = [{ type: 'text', text: promptPrefix + combinedText }];
-  } 
-  
-  // --- KONDISI B: MODE FOTO (MENGGUNAKAN MULTI-PART IMAGE URL) ---
-  else if (currentMode === 'foto') {
-    if (!uploadedImages.length) {
-      alert(lang === 'en' ? 'Upload photos first.' : 'Upload foto dulu.');
-      return;
-    }
-    // Mengambil instruksi dari textArea sebagai arahan tambahan foto
-    var dir = document.getElementById('textArea').value.trim();
-    var p = lang === 'en' 
-      ? 'Read images and summarize in "' + style + '" style.' + (dir ? ' Instruction: ' + dir : '') 
-      : 'Baca gambar dan ringkas dengan gaya "' + style + '".' + (dir ? ' Arahan: ' + dir : '');
-    
-    // Dorong data base64 gambar ke payload request
-    uploadedImages.forEach(function(img) {
-      msgContent.push({
-        type: 'image_url',
-        image_url: { url: 'data:' + img.mediaType + ';base64,' + img.base64 }
-      });
-    });
-    msgContent.push({ type: 'text', text: p });
-  } 
-  
-  // --- KONDISI C: MODE LINK YOUTUBE ---
-  else {
-    var yt = document.getElementById('ytUrl').value.trim();
-    if (!yt) {
-      alert(lang === 'en' ? 'Enter YouTube link.' : 'Masukkan link YouTube.');
-      return;
-    }
-    
-    var loadingWrap = document.getElementById('loadingWrap');
-    var loaderText = document.querySelector('#loadingWrap span');
-    if (loadingWrap) loadingWrap.classList.add('show');
-    if (loaderText) loaderText.textContent = lang === 'en' ? 'Fetching transcript...' : 'Mengambil transcript...';
-    
-    try {
-      // Menggunakan router HF_SPACE_API atau WORKER transcript yang kamu miliki
-      var targetUrl = typeof WORKER !== 'undefined' ? WORKER : "https://ringkas-api.ryalandsokay.workers.dev";
-      var trRes = await fetch(targetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'transcript', url: yt }) // Menyesuaikan router backend Anda
-      });
-      
-      // Jika endpoint Anda menggunakan skema GET lama dari kode Claude, aktifkan baris ini:
-      // var trRes = await fetch(HF_BACKEND + '/transcript?url=' + encodeURIComponent(yt));
-      
-      var trData = await trRes.json();
-      if (trData.error) {
-        throw new Error(trData.error);
+    async function doRingkas() {
+      if (typeof checkAndIncrementLimit === 'function') {
+        if (!checkAndIncrementLimit()) {
+          alert("🚨 Batas kuota harian habis! (Maksimal 20 request per hari).");
+          return;
+        }
       }
+
+      var lang = currentLang;
+      var chip = document.querySelector('#styleRow .chip.active');
+      var style = chip ? (lang === 'en' ? chip.dataset.en || chip.textContent : chip.dataset.id || chip.textContent) : 'Poin Penting';
       
-      if (loaderText) loaderText.textContent = lang === 'en' ? 'Processing...' : 'Sedang memproses...';
-      var ytTranscript = trData.transcript || trData.data?.[0] || "";
+      var sys = lang === 'en'
+        ? 'You are a smart student assistant. Answer in English. Use Markdown: **bold**, headings (##), bullets, tables, LaTeX math. Output ONLY in the requested style.'
+        : 'Kamu adalah asisten pelajar. Jawab dalam Bahasa Indonesia. Gunakan Markdown: **bold**, heading (##), bullet, tabel, LaTeX math. Output HANYA sesuai gaya yang diminta.';
       
-      var promptYt = lang === 'en' 
-        ? 'Summarize this YouTube transcript in "' + style + '" style:\n\n' 
-        : 'Ringkas transcript YouTube ini dengan gaya "' + style + '":\n\n';
+      var msgContent = [];
+
+      if (currentMode === 'text') {
+        var txt = document.getElementById('textArea').value.trim();
+        var hasPDF = extractedDocumentText && extractedDocumentText.trim().length > 0;
         
-      msgContent = [{ type: 'text', text: promptYt + ytTranscript }];
-    } catch (e) {
-      var resultBody = document.getElementById('resultBody');
-      if (resultBody) resultBody.textContent = 'Gagal ambil transcript: ' + e.message;
-      document.getElementById('resultWrap').classList.add('show');
-      if (loadingWrap) loadingWrap.classList.remove('show');
-      return;
-    }
-  }
+        if (!txt && !hasPDF) {
+          alert(lang === 'en' ? 'Enter text or upload a PDF first.' : 'Isi teks atau upload file PDF dulu.');
+          return;
+        }
+        
+        var combinedText = hasPDF ? `Materi dari PDF:\n\n${extractedDocumentText}` : txt;
+        if (hasPDF && txt) {
+          combinedText += `\n\nArahan tambahan dari user: ${txt}`;
+        }
+        
+        var promptPrefix = lang === 'en' ? 'Summarize in "' + style + '" style:\n\n' : 'Ringkas dengan gaya "' + style + '":\n\n';
+        msgContent = [{ type: 'text', text: promptPrefix + combinedText }];
+      } 
+      else if (currentMode === 'foto') {
+        if (!uploadedImages.length) {
+          alert(lang === 'en' ? 'Upload photos first.' : 'Upload foto dulu.');
+          return;
+        }
+        var dir = document.getElementById('textArea').value.trim();
+        var p = lang === 'en' 
+          ? 'Read images and summarize in "' + style + '" style.' + (dir ? ' Instruction: ' + dir : '') 
+          : 'Baca gambar dan ringkas dengan gaya "' + style + '".' + (dir ? ' Arahan: ' + dir : '');
+        
+        uploadedImages.forEach(function(img) {
+          msgContent.push({
+            type: 'image_url',
+            image_url: { url: 'data:' + img.mediaType + ';base64,' + img.base64 }
+          });
+        });
+        msgContent.push({ type: 'text', text: p });
+      } 
+      else {
+        var yt = document.getElementById('ytUrl').value.trim();
+        if (!yt) {
+          alert(lang === 'en' ? 'Enter YouTube link.' : 'Masukkan link YouTube.');
+          return;
+        }
+        
+        var loadingWrap = document.getElementById('loadingWrap');
+        var loaderText = document.querySelector('#loadingWrap span');
+        if (loadingWrap) loadingWrap.classList.add('show');
+        if (loaderText) loaderText.textContent = lang === 'en' ? 'Fetching transcript...' : 'Mengambil transcript...';
+        
+        try {
+          var targetUrl = typeof WORKER !== 'undefined' ? WORKER : "https://ringkas-api.ryalandsokay.workers.dev";
+          var trRes = await fetch(targetUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'transcript', url: yt }) 
+          });
+          
+          var trData = await trRes.json();
+          if (trData.error) {
+            throw new Error(trData.error);
+          }
+          
+          if (loaderText) loaderText.textContent = lang === 'en' ? 'Processing...' : 'Sedang memproses...';
+          var ytTranscript = trData.transcript || trData.data?.[0] || "";
+          
+          var promptYt = lang === 'en' 
+            ? 'Summarize this YouTube transcript in "' + style + '" style:\n\n' 
+            : 'Ringkas transcript YouTube ini dengan gaya "' + style + '":\n\n';
+            
+          msgContent = [{ type: 'text', text: promptYt + ytTranscript }];
+        } catch (e) {
+          var resultBody = document.getElementById('resultBody');
+          if (resultBody) resultBody.textContent = 'Gagal ambil transcript: ' + e.message;
+          document.getElementById('resultWrap').classList.add('show');
+          if (loadingWrap) loadingWrap.classList.remove('show');
+          return;
+        }
+      }
 
-  // --- INTEGRASI PENGIRIMAN DATA KE WORKER API ---
-  var loadingWrap = document.getElementById('loadingWrap');
-  if (loadingWrap) loadingWrap.classList.add('show');
-  document.getElementById('resultWrap').classList.remove('show');
+      var loadingWrap = document.getElementById('loadingWrap');
+      if (loadingWrap) loadingWrap.classList.add('show');
+      document.getElementById('resultWrap').classList.remove('show');
 
-  try {
-    // Memanggil fungsi requestCoreAI bawaan untuk memproses prompt system dan user array
-    // Jika fungsi callAPI() dari Claude ingin ditranslasikan ke Worker Anda:
-    var targetWorker = typeof WORKER !== 'undefined' ? WORKER : "https://ringkas-api.ryalandsokay.workers.dev";
-    var res = await fetch(targetWorker, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: sys },
-          { role: 'user', content: msgContent }
-        ]
-      })
-    });
-    
-    var d = await res.json();
-    var content = '';
-    
-    if (d.choices && d.choices[0] && d.choices[0].message) {
-      content = d.choices[0].message.content;
-    } else if (d.error) {
-      content = '⚠️ Error Server: ' + (typeof d.error === 'object' ? d.error.message : d.error);
-    } else {
-      content = '⚠️ Gagal membaca respon AI.';
+      try {
+        var targetWorker = typeof WORKER !== 'undefined' ? WORKER : "https://ringkas-api.ryalandsokay.workers.dev";
+        var res = await fetch(targetWorker, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [
+              { role: 'system', content: sys },
+              { role: 'user', content: msgContent }
+            ]
+          })
+        });
+        
+        var d = await res.json();
+        var content = '';
+        
+        if (d.choices && d.choices[0] && d.choices[0].message) {
+          content = d.choices[0].message.content;
+        } else if (d.error) {
+          content = '⚠️ Error Server: ' + (typeof d.error === 'object' ? d.error.message : d.error);
+        } else {
+          content = '⚠️ Gagal membaca respon AI.';
+        }
+
+        lastResultText = content;
+        
+        var resultBody = document.getElementById('resultBody');
+        if (resultBody && typeof marked !== 'undefined') {
+          resultBody.innerHTML = marked.parse(content);
+        } else if (resultBody) {
+          resultBody.textContent = content;
+        }
+        
+        document.getElementById('resultWrap').classList.add('show');
+        if (typeof saveToHistory === 'function') {
+          saveToHistory("Ringkas", "User Request Materi", content);
+        }
+        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+          MathJax.typesetPromise([resultBody]).catch(e => console.log(e));
+        }
+      } catch (e) {
+        document.getElementById('resultBody').textContent = 'Error: ' + e.message;
+        document.getElementById('resultWrap').classList.add('show');
+      } finally {
+        if (loadingWrap) loadingWrap.classList.remove('show');
+      }
     }
 
-    lastResultText = content;
-    
-    // Render markdown ke kontainer
-    var resultBody = document.getElementById('resultBody');
-    if (resultBody && typeof marked !== 'undefined') {
-      resultBody.innerHTML = marked.parse(content);
-    } else if (resultBody) {
-      resultBody.textContent = content;
-    }
-    
-    document.getElementById('resultWrap').classList.add('show');
-    
-    // Simpan ke riwayat jika fungsi tersedia
-    if (typeof saveToHistory === 'function') {
-      saveToHistory("Ringkas", "User Request Materi", content);
-    }
-    
-    // Trigger render MathJax jika ada formula matematika
-    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-      MathJax.typesetPromise([resultBody]).catch(e => console.log(e));
-    }
-
-  } catch (e) {
-    document.getElementById('resultBody').textContent = 'Error: ' + e.message;
-    document.getElementById('resultWrap').classList.add('show');
-  } finally {
-    if (loadingWrap) loadingWrap.classList.remove('show');
-  }
-}
-    async function doGenerateQuiz() {
-      var src = document.getElementById('quizSource').value.trim();
-      if(!src) return alert('Masukkan materi fondasi soal kuis terlebih dahulu!');
+    async function doProcessYouTube() {
+      // Fungsi YouTube Mode pembantu langsung ke HF Space API
+      var url = document.getElementById('ytUrl').value.trim();
+      var notes = document.getElementById('ytNotes').value.trim();
+      if(!url) return alert('Tautan video YouTube tidak boleh kosong!');
        
       if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis!");
 
+      var loading = document.getElementById('loadingWrap');
+      var result = document.getElementById('resultWrap');
+      var resultBody = document.getElementById('resultBody');
+       
+      loading.classList.add('show'); result.classList.remove('show');
+
+      try {
+        var hfRes = await fetch(HF_SPACE_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: [url] })
+        });
+         
+        var hfData = await hfRes.json();
+        var transkripTeks = hfData.data ? hfData.data[0] : (hfData.result || JSON.stringify(hfData));
+         
+        if(!transkripTeks || transkripTeks.trim().length === 0 || transkripTeks.includes("error")) {
+          throw new Error(transkripTeks || "Transkrip kosong/Gagal diekstrak.");
+        }
+         
+        var promptUser = `Berikut adalah transkrip lengkap dari video YouTube. Tolong bedah materi esensialnya secara mendalam:\n\n${transkripTeks}`;
+        if(notes) promptUser += `\n\nCatatan Tambahan Pengguna: ${notes}`;
+         
+        var sys = 'Kamu adalah bot edukasi spesialis transkripsi dan analisis video. Bedah poin penting isi video tersebut dengan sangat detail dalam Bahasa Indonesia menggunakan Markdown.';
+        await requestCoreAI(sys, promptUser, "YouTube");
+      } catch(e) {
+        resultBody.innerHTML = '<span style="color:#f87171">Gagal memproses Hugging Face: ' + e.message + '</span>';
+        result.classList.add('show');
+      } finally {
+        loading.classList.remove('show');
+      }
+    }
+
+    async function doGenerateQuiz() {
+      var src = document.getElementById('quizSource').value.trim();
+      if(!src) return alert('Masukkan materi fondasi soal kuis terlebih dahulu!');
+      if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis!");
       var tipe = document.querySelector('#quizTypeRow .chip.active')?.textContent || 'Pilihan Ganda';
       var sys = `Kamu adalah dosen akademis. Buat susunan instan kuis berbasis ${tipe} lengkap dengan kunci jawaban tersembunyi/penjelasan di bawahnya dari materi teks user.`;
       await requestCoreAI(sys, src, "Buat Kuis");
@@ -816,9 +815,7 @@ async function doRingkas() {
     async function doTranslate() {
       var src = document.getElementById('transSource').value.trim();
       if(!src) return alert('Teks asal bahasa yang mau diterjemahkan masih kosong!');
-       
       if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis!");
-
       var mode = document.querySelector('#langRow .chip.active')?.textContent || 'Inggris ➔ Indonesia';
       var sys = `Kamu adalah penerjemah profesional jurnal internasional. Terjemahkan teks masukan user secara natural, baku, dan sesuai konteks ilmiah arah: ${mode}.`;
       await requestCoreAI(sys, src, "Terjemahan");
