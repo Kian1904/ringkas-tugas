@@ -797,7 +797,25 @@ async function bacaTeksPDF(file) {
     if (btn) { btn.disabled = false; btn.innerText = 'Ringkas Sekarang'; }
   }
 }
-
+  
+function processFiles(files) {
+  extractedDocumentText = '';
+  var preview = document.getElementById('previewRow');
+  preview.innerHTML = '';
+  
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    if (f.name.toLowerCase().endsWith('.pdf')) {
+      var div = document.createElement('div');
+      div.style = "padding:8px 12px;background:rgba(47,228,138,0.1);border:1px solid #2fe48a;border-radius:8px;font-size:13px;color:#2fe48a;display:inline-flex;margin:4px;";
+      div.innerHTML = '📄 ' + f.name;
+      preview.appendChild(div);
+      bacaTeksPDF(f);
+    }
+  }
+  preview.classList.add('show');
+}
+  
 // ================= FUNGSI DO RINGKAS (ANTI-OBJECT) =================
 async function doRingkas() {
   var txt = document.getElementById('textArea').value.trim();
