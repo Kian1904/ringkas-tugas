@@ -1,897 +1,616 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-<script>
-  // Konfigurasi wajib agar PDF.js tahu di mana letak mesin core worker-nya
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-</script>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>K's Tools for School — AI Study Assistant</title>
-
-<meta name="description" content="Ringkas materi, buat kuis, dan terjemahkan teks dengan AI. Gratis untuk pelajar."/>
-<meta name="keywords" content="ringkas materi, kuis AI, terjemahan, belajar, pelajar, AI study tool"/>
-<meta name="author" content="Kian1904"/>
-<meta name="robots" content="index, follow"/>
-
-<meta property="og:type" content="website"/>
-<meta property="og:url" content="https://kian1904.github.io/ringkas-tugas/"/>
-<meta property="og:title" content="K's Tools for School — AI Study Assistant"/>
-<meta property="og:description" content="Ringkas materi, buat kuis, dan terjemahkan teks dengan AI. Gratis untuk pelajar."/>
-<meta property="og:image" content="https://kian1904.github.io/ringkas-tugas/og-image.svg"/>
-<meta property="og:image:width" content="1200"/>
-<meta property="og:image:height" content="630"/>
-<meta property="og:locale" content="id_ID"/>
-<meta property="og:site_name" content="K's Tools for School"/>
-
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="K's Tools for School — AI Study Assistant"/>
-<meta name="twitter:description" content="Ringkas materi, buat kuis, dan terjemahkan teks dengan AI. Gratis untuk pelajar."/>
-<meta name="twitter:image" content="https://kian1904.github.io/ringkas-tugas/og-image.svg"/>
-
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230a0a0a' rx='16'/%3E%3Crect x='28' y='20' width='6' height='60' fill='%234ade80'/%3E%3Cpolygon points='34,20 52,20 72,50 52,50' fill='%234ade80' opacity='0.9'/%3E%3Cpolygon points='34,52 52,52 76,80 52,80' fill='%234ade80' opacity='0.9'/%3E%3Ccircle cx='72' cy='50' r='4' fill='%2322d3ee'/%3E%3C/svg%3E"/>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230a0a0a' rx='16'/%3E%3Crect x='28' y='20' width='6' height='60' fill='%234ade80'/%3E%3Cpolygon points='34,20 52,20 72,50 52,50' fill='%234ade80' opacity='0.9'/%3E%3Cpolygon points='34,52 52,52 76,80 52,80' fill='%234ade80' opacity='0.9'/%3E%3Ccircle cx='72' cy='50' r='4' fill='%2322d3ee'/%3E%3C/svg%3E"/>
-
-<meta name="theme-color" content="#0a0a0a"/>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-window.MathJax = {
-  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
-  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<style>
-/* =====================
-   RESET & ROOT (ROMBAK TOTAL GLASSMORPHISM)
-===================== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg:       #030712; 
-  --surface:  rgba(17, 24, 39, 0.45);  
-  --surface2: rgba(31, 41, 55, 0.6);   
-  --border:   rgba(255, 255, 255, 0.06); 
-  --border2:  rgba(255, 255, 255, 0.12); 
-  --accent:   #2fe48a; 
-  --accent2:  #22d3ee; 
-  --accent3:  #f59e0b;
-  --text:     #f9fafb;
-  --text2:    #9ca3af;
-  --text3:    #4b5563;
-  --sidebar-w:   240px;
-  --topbar-h:    56px;
-  --content-max: 800px;
-  --gap:         20px;
-  --radius:      16px; 
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>K's Tools for School — AI Study Assistant</title>
   
-  --glass-blur: blur(16px) saturate(140%);
-  --fs-xs:   11px;
-  --fs-sm:   12px;
-  --fs-base: 13px;
-  --fs-md:   14px;
-  --fs-lg:   16px;
-  --fs-xl:   20px;
-}
+  <!-- CDNs & Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';</script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>window.MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']] } };</script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  background-image: 
-    radial-gradient(circle at 0% 0%, rgba(47, 228, 138, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(34, 211, 238, 0.05) 0%, transparent 40%);
-  background-attachment: fixed;
-  color: var(--text);
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: var(--fs-base);
-  line-height: 1.6;
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-text-size-adjust: 100%;
-}
-button { font-family: inherit; }
-img { display: block; max-width: 100%; }
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+  <style>
+    :root {
+      --bg: #030712; 
+      --surface: rgba(17, 24, 39, 0.45); 
+      --border: rgba(255, 255, 255, 0.06);
+      --accent: #2fe48a; 
+      --accent2: #22d3ee; 
+      --text: #f9fafb; 
+      --text2: #9ca3af; 
+      --text3: #4b5563;
+      --sidebar-w: 260px; 
+      --topbar-h: 64px; 
+      --gap: 20px; 
+      --glass-blur: blur(16px) saturate(140%);
+    }
 
-/* =====================
-   AUTH GATE
-===================== */
-#authGate {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
-  background: var(--bg);
-  position: relative;
-}
-#authGate::before {
-  content: '';
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(47, 228, 138, 0.12) 0%, transparent 70%);
-  z-index: 0;
-}
-.auth-card {
-  position: relative;
-  z-index: 1;
-  background: rgba(17, 24, 39, 0.6);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 44px 36px;
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255,255,255,0.1);
-}
-.auth-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 28px;
-}
-.auth-logo-text { text-align: left; }
-.auth-logo-title { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; line-height: 1; }
-.auth-logo-sub {
-  font-size: 9px;
-  color: var(--text3);
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-top: 3px;
-}
-.auth-heading {
-  font-size: var(--fs-xl);
-  font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
-}
-.auth-sub {
-  font-size: var(--fs-base);
-  color: var(--text2);
-  margin-bottom: 32px;
-  line-height: 1.6;
-}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      background: var(--bg); 
+      color: var(--text); 
+      font-family: 'Space Grotesk', sans-serif; 
+      min-height: 100vh; 
+      overflow-x: hidden; 
+    }
 
-.google-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  padding: 14px 20px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #0f172a;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: var(--fs-md);
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  -webkit-tap-highlight-color: transparent;
-}
-.google-btn:hover { background: #ffffff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(74,222,128,0.2); }
-.google-btn:active { transform: translateY(0); }
-.google-btn svg { flex-shrink: 0; }
+    /* Layar Login (Auth Screen) */
+    #auth-screen {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; z-index: 999; padding: 20px;
+    }
+    .auth-card {
+      background: var(--surface); backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border); border-radius: 24px; padding: 32px; width: 100%; max-width: 400px;
+    }
+    .auth-input {
+      width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); 
+      border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 16px;
+      font-family: inherit; outline: none;
+    }
+    .auth-input:focus { border-color: var(--accent2); }
+    .auth-btn {
+      width: 100%; padding: 12px; background: var(--accent); border: none;
+      border-radius: 12px; font-weight: 700; color: #030712; cursor: pointer; margin-bottom: 12px;
+      font-family: inherit;
+    }
 
-.auth-note {
-  font-size: var(--fs-xs);
-  color: var(--text3);
-  margin-top: 20px;
-  font-family: 'JetBrains Mono', monospace;
-  line-height: 1.7;
-}
-.auth-error {
-  display: none;
-  background: rgba(239,68,68,0.1);
-  border: 1px solid rgba(239,68,68,0.3);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: var(--fs-sm);
-  color: #f87171;
-  margin-top: 16px;
-  text-align: left;
-}
-.auth-error.show { display: block; }
+    /* Kontainer Aplikasi */
+    #app-container { display: none; }
+    body.logged-in #app-container { display: block; }
+    body.logged-in #auth-screen { display: none; }
 
-/* =====================
-   APP & NAVIGATION
-===================== */
-#app { display: none; }
+    .sidebar { 
+      position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); 
+      background: rgba(17, 24, 39, 0.6); backdrop-filter: var(--glass-blur); 
+      border-right: 1px solid var(--border); display: flex; flex-direction: column; 
+      z-index: 200; transform: translateX(-100%); transition: transform 0.3s ease; 
+    }
+    body.sidebar-open .sidebar { transform: translateX(0); }
+    @media(min-width: 1024px) {
+      .sidebar { transform: translateX(0); }
+      .main-content { margin-left: var(--sidebar-w); }
+      .topbar { left: var(--sidebar-w); }
+      .menu-toggle { display: none; }
+    }
 
-.overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(3, 7, 18, 0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 150;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
-body.sidebar-open .overlay { display: block; opacity: 1; pointer-events: auto; }
+    .topbar { 
+      position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h); 
+      background: rgba(10, 15, 30, 0.4); backdrop-filter: var(--glass-blur); 
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; 
+      justify-content: space-between; padding: 0 24px; z-index: 100; 
+    }
 
-.sidebar {
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
-  width: var(--sidebar-w);
-  background: rgba(17, 24, 39, 0.45);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  z-index: 200;
-  transform: translateX(calc(-1 * var(--sidebar-w)));
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
-}
-body.sidebar-open .sidebar { transform: translateX(0); box-shadow: 10px 0 40px rgba(0,0,0,0.5); }
+    .main-content { margin-top: var(--topbar-h); padding: var(--gap); max-width: 900px; }
+    
+    /* Navigasi */
+    .nav-item {
+      padding: 12px 20px; color: var(--text2); cursor: pointer; border-radius: 12px;
+      margin: 4px 12px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+    }
+    .nav-item:hover, .nav-item.active {
+      color: var(--text); background: rgba(255,255,255,0.05);
+    }
+    .nav-item.active { border-left: 3px solid var(--accent); }
 
-.sidebar-logo {
-  padding: 20px 18px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-.logo-wrap { display: flex; align-items: center; gap: 10px; }
-.logo-text { font-size: 15px; font-weight: 700; color: var(--accent); }
-.logo-sub {
-  font-size: 9px; color: var(--text3);
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 1px; text-transform: uppercase; margin-top: 1px;
-}
-.close-sidebar {
-  background: none; border: none; color: var(--text3);
-  cursor: pointer; font-size: 16px; padding: 4px 6px;
-  border-radius: 4px; transition: color 0.15s; display: none;
-}
-.close-sidebar:hover { color: var(--text); }
+    .card { 
+      background: var(--surface); backdrop-filter: var(--glass-blur); 
+      border: 1px solid var(--border); border-radius: 24px; padding: 24px; margin-bottom: 20px; 
+    }
+    
+    .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip { 
+      padding: 8px 16px; border: 1px solid rgba(255,255,255,0.08); 
+      border-radius: 14px; cursor: pointer; color: var(--text2); font-size: 14px; user-select: none;
+    }
+    .chip.active { 
+      border-color: var(--accent2); color: var(--accent2); background: rgba(34, 211, 238, 0.08); 
+    }
 
-.nav-section { padding: 12px; flex: 1; overflow-y: auto; overflow-x: hidden; }
-.nav-label {
-  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text3); padding: 0 8px; margin-bottom: 6px;
-  font-family: 'JetBrains Mono', monospace;
-}
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 12px; 
-  border-radius: 10px; 
-  border: 1px solid transparent; 
-  margin-bottom: 4px;
-  cursor: pointer;
-  color: var(--text2); 
-  font-size: var(--fs-base); 
-  font-weight: 500;
-  transition: all 0.2s ease;
-  user-select: none; 
-  -webkit-tap-highlight-color: transparent;
-}
-.nav-item:hover { background: rgba(255, 255, 255, 0.04); color: var(--text); border-color: rgba(255,255,255,0.02); }
-.nav-item.active { 
-  background: rgba(47, 228, 138, 0.06); 
-  color: var(--accent); 
-  border-color: rgba(47, 228, 138, 0.15);
-  box-shadow: inset 0 1px 10px rgba(47, 228, 138, 0.05);
-}
-.nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+    textarea, .input-url { 
+      width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.08); 
+      border-radius: 14px; color: var(--text); padding: 16px; font-family: 'JetBrains Mono', monospace; 
+      resize: vertical; outline: none; margin-bottom: 12px;
+    }
+    .input-url { font-family: inherit; }
+    textarea:focus, .input-url:focus { border-color: rgba(255,255,255,0.2); }
 
-.sidebar-user {
-  padding: 12px 16px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-.user-avatar {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--border2);
-  object-fit: cover;
-  flex-shrink: 0;
-  background: var(--surface2);
-}
-.user-avatar-placeholder {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--border2);
-  background: rgba(47, 228, 138, 0.1);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; color: var(--accent);
-  flex-shrink: 0;
-}
-.user-info { flex: 1; min-width: 0; }
-.user-name {
-  font-size: var(--fs-sm); font-weight: 600; color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.user-email {
-  font-size: 10px; color: var(--text3);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  font-family: 'JetBrains Mono', monospace;
-}
-.logout-btn {
-  background: none; border: none; color: var(--text3);
-  cursor: pointer; font-size: 14px; padding: 4px;
-  border-radius: 4px; transition: color 0.15s; flex-shrink: 0;
-}
-.logout-btn:hover { color: #f87171; }
+    .submit-btn { 
+      width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent) 0%, #10b981 100%); 
+      border: none; border-radius: 14px; font-weight: 700; cursor: pointer; color: #030712; 
+      font-family: inherit; font-size: 15px; transition: opacity 0.2s;
+    }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.sidebar-footer {
-  padding: 10px 16px;
-  border-top: 1px solid var(--border);
-  font-size: var(--fs-xs); color: var(--text3);
-  font-family: 'JetBrains Mono', monospace; flex-shrink: 0;
-}
-.lang-row { display: flex; justify-content: space-between; align-items: center; }
-.lang-btns { display: flex; gap: 4px; }
-.lang-btn {
-  padding: 2px 8px; font-size: var(--fs-xs); cursor: pointer;
-  border-radius: 3px; font-family: 'JetBrains Mono', monospace;
-  transition: all 0.15s; border: 1px solid var(--border2);
-  background: transparent; color: var(--text3);
-}
-.lang-btn.active { border-color: var(--accent); background: rgba(47, 228, 138, 0.1); color: var(--accent); }
+    /* Profil & Avatar */
+    .user-profile { display: flex; align-items: center; gap: 12px; position: relative; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent2), #3b82f6);
+      display: flex; align-items: center; justify-content: center; font-weight: 700; color: #030712;
+      cursor: pointer; font-size: 14px; user-select: none;
+    }
+    .logout-dropdown {
+      display: none; position: absolute; top: 44px; right: 0; background: #111827;
+      border: 1px solid var(--border); border-radius: 10px; padding: 8px; width: 120px; box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+    }
+    .logout-dropdown button {
+      width: 100%; padding: 6px; background: transparent; border: none; color: #f87171; text-align: left; cursor: pointer; font-family: inherit;
+    }
 
-/* =====================
-   TOPBAR
-===================== */
-.topbar {
-  position: fixed; 
-  top: 0; left: 0; right: 0;
-  height: var(--topbar-h);
-  background: rgba(10, 15, 30, 0.6);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 1px solid var(--border);
-  display: flex; 
-  align-items: center; 
-  padding: 0 16px;
-  z-index: 100; 
-  gap: 10px;
-  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-@media (min-width: 769px) {
-  body.sidebar-open .topbar { left: var(--sidebar-w); }
-}
-.hamburger {
-  background: none; border: none; color: var(--text2);
-  cursor: pointer; font-size: 18px; padding: 4px; flex-shrink: 0;
-  line-height: 1; border-radius: 4px; transition: color 0.15s;
-  -webkit-tap-highlight-color: transparent;
-}
-.hamburger:hover { color: var(--text); }
-.topbar-info { flex: 1; min-width: 0; }
-.topbar-title {
-  font-size: var(--fs-md); font-weight: 600; color: var(--text);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.topbar-sub {
-  font-size: var(--fs-xs); color: var(--text3);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.topbar-avatar, .topbar-avatar-placeholder {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(47, 228, 138, 0.4);
-  object-fit: cover; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: var(--fs-md); font-weight: 700; color: var(--accent);
-  background: var(--surface2);
-}
+    /* Tombol Saweria */
+    .saweria-btn {
+      margin: auto 16px 16px 16px; padding: 12px; border: 1px solid rgba(246, 190, 0, 0.3);
+      background: rgba(246, 190, 0, 0.1); border-radius: 12px; text-align: center;
+      text-decoration: none; color: #f6be00; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
 
-/* =====================
-   MAIN CONTAINER & STYLING
-===================== */
-.main {
-  margin-top: var(--topbar-h);
-  padding: var(--gap);
-  min-height: calc(100vh - var(--topbar-h));
-  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  max-width: calc(var(--content-max) + var(--gap) * 2);
-  display: flex; flex-direction: column;
-}
-@media (min-width: 769px) {
-  body.sidebar-open .main { margin-left: var(--sidebar-w); }
-}
+    /* Manajemen Halaman */
+    .app-page { display: none; }
+    .app-page.active { display: block; }
 
-.page { display: none; flex: 1; }
-.page.active { display: flex; flex-direction: column; }
-.page-header { margin-bottom: 20px; }
-.page-title { font-size: var(--fs-xl); font-weight: 700; letter-spacing: -0.5px; }
-.page-desc { font-size: var(--fs-base); color: var(--text2); margin-top: 3px; }
-
-.card {
-  background: var(--surface);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-.card-title {
-  font-size: 9px; font-weight: 600; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--text3);
-  font-family: 'JetBrains Mono', monospace; margin-bottom: 12px;
-}
-
-.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; justify-content: flex-start; }
-.chip {
-  padding: 8px 14px; border: 1px solid var(--border2); border-radius: 12px;
-  background: rgba(255, 255, 255, 0.01); color: var(--text2); cursor: pointer;
-  font-size: var(--fs-sm); font-weight: 500; transition: all 0.2s ease;
-  white-space: nowrap; user-select: none; text-align: center; flex-grow: 1;
-}
-.chip:hover { border-color: var(--accent2); color: var(--text); background: rgba(255,255,255,0.03); }
-.chip.active { border-color: var(--accent2); color: var(--accent2); background: rgba(34, 211, 238, 0.08); box-shadow: 0 0 15px rgba(34, 211, 238, 0.1); }
-
-textarea, input[type=text] {
-  width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border2);
-  border-radius: 12px; color: var(--text); font-family: 'JetBrains Mono', monospace;
-  font-size: var(--fs-base); line-height: 1.7; padding: 14px; outline: none;
-  transition: all 0.2s ease; resize: vertical; box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
-}
-textarea { min-height: 130px; }
-
-textarea:focus, input[type=text]:focus { border-color: var(--accent); background: rgba(0, 0, 0, 0.35); box-shadow: 0 0 0 3px rgba(47, 228, 138, 0.08), inset 0 2px 8px rgba(0,0,0,0.3); }
-textarea::placeholder, input[type=text]::placeholder { color: var(--text3); }
-
-.upload-zone { border: 1.5px dashed var(--border2); border-radius: 12px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.2s ease; }
-.upload-zone:hover { border-color: var(--accent); background: rgba(47, 228, 138, 0.03); }
-.upload-zone-icon { font-size: 24px; margin-bottom: 6px; }
-.upload-zone-text { font-size: var(--fs-base); color: var(--text2); }
-.upload-zone-sub { font-size: var(--fs-xs); color: var(--text3); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
-.preview-row { display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-.preview-row.show { display: flex; }
-.preview-row img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border2); flex-shrink: 0; }
-.dir-wrap { margin-top: 10px; }
-.dir-label { font-size: var(--fs-xs); color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-bottom: 5px; letter-spacing: 1px; text-transform: uppercase; }
-
-.submit-btn {
-  width: 100%; padding: 14px 16px; background: linear-gradient(135deg, var(--accent) 0%, #10b981 100%);
-  color: #030712; font-weight: 700; font-size: var(--fs-md); border: none; border-radius: 12px; cursor: pointer; margin-top: 16px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 15px rgba(47, 228, 138, 0.25);
-}
-.submit-btn:hover { transform: translateY(-1.5px); box-shadow: 0 6px 24px rgba(47, 228, 138, 0.4); }
-.submit-btn:active { transform: translateY(0); }
-.submit-btn:disabled { background: var(--border2); color: var(--text3); box-shadow: none; cursor: not-allowed; transform: none; }
-
-.action-btn { padding: 6px 14px; border: 1px solid var(--border2); border-radius: 8px; background: rgba(255, 255, 255, 0.02); color: var(--text2); font-size: var(--fs-sm); cursor: pointer; font-weight: 500; transition: all 0.15s; white-space: nowrap; }
-.action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(47, 228, 138, 0.04); }
-
-.loading-wrap { display: none; padding: 20px; text-align: center; }
-.loading-wrap.show { display: block; }
-.loading-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 8px; }
-.loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s infinite; }
-.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8);}40%{opacity:1;transform:scale(1);} }
-.loading-text { font-size: var(--fs-sm); color: var(--text2); font-family: 'JetBrains Mono', monospace; }
-
-.result-wrap { display: none; flex-grow: 1; overflow-y: auto; }
-.result-wrap.show { display: block; }
-.result-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; }
-.result-label { font-size: var(--fs-xs); font-family: 'JetBrains Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); flex-shrink: 0; }
-.result-body { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; min-height: 60px; font-size: var(--fs-md); line-height: 1.8; color: var(--text); overflow-wrap: break-word; word-break: break-word; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); }
-
-/* Elemen styling markdown di dalam hasil AI */
-.result-body h1, .result-body h2, .result-body h3 { color: var(--accent); margin: 14px 0 6px; font-weight: 600; }
-.result-body h1 { font-size: var(--fs-xl); }
-.result-body h2 { font-size: var(--fs-lg); }
-.result-body h3 { font-size: var(--fs-md); }
-.result-body p { margin-bottom: 8px; }
-.result-body ul, .result-body ol { margin: 6px 0 8px 20px; }
-.result-body li { margin-bottom: 3px; }
-.result-body strong { color: var(--accent2); font-weight: 600; }
-.result-body table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-.result-body th { background: rgba(255,255,255,0.05); border: 1px solid var(--border2); padding: 8px; color: var(--accent); text-align: left; }
-.result-body td { border: 1px solid var(--border2); padding: 8px; }
-.result-body code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; color: var(--accent3); }
-.result-body pre { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; }
-
-.empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
-.history-item { padding: 11px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
-.history-time { font-size: var(--fs-xs); color: var(--text3); font-family: 'JetBrains Mono', monospace; }
-.history-preview { font-size: var(--fs-base); color: var(--text2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-@media (max-width: 480px) {
-  :root { --sidebar-w: 260px; --gap: 16px; --fs-xs: 10px; --fs-sm: 11px; --fs-base: 12px; --fs-md: 13px; --fs-lg: 15px; --fs-xl: 18px; }
-  .close-sidebar { display: block !important; }
-  body.sidebar-open .topbar, body.sidebar-open .main { margin-left: 0; left: 0; }
-  .card { padding: 18px; }
-}
-</style>
+    .loading-wrap, .result-wrap { display: none; margin-top: 20px; }
+    .loading-wrap.show, .result-wrap.show { display: block; }
+    .result-body { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 16px; padding: 24px; line-height: 1.6; }
+    
+    /* Riwayat / History */
+    .history-item {
+      padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 8px; cursor: pointer; font-size: 13px; color: var(--text2);
+    }
+    .history-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  </style>
 </head>
 <body>
 
-<div id="authGate">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <svg width="36" height="36" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="100" fill="#111" rx="10"/>
-        <rect x="28" y="20" width="6" height="60" fill="#4ade80"/>
-        <polygon points="34,20 52,20 72,50 52,50" fill="#4ade80" opacity="0.9"/>
-        <polygon points="34,52 52,52 76,80 52,80" fill="#4ade80" opacity="0.9"/>
-        <circle cx="72" cy="50" r="4" fill="#22d3ee"/>
-      </svg>
-      <div class="auth-logo-text">
-        <div class="auth-logo-title">K's Tools</div>
-        <div class="auth-logo-sub">for School</div>
-      </div>
-    </div>
-    <div class="auth-heading">Selamat Datang</div>
-    <div class="auth-sub">Login dengan Google untuk mulai ringkas materi, buat kuis, dan terjemahkan teks.</div>
-    <button class="google-btn" onclick="signInWithGoogle()">
-      <svg width="20" height="20" viewBox="0 0 48 48">
-        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-      </svg>
-      Masuk dengan Google
-    </button>
-    <div class="auth-error" id="authError"></div>
-    <div class="auth-note">Hanya pengguna yang login yang bisa mengakses app ini.</div>
-  </div>
-</div>
-
-<div id="app">
-  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-wrap">
-        <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100" height="100" fill="#111" rx="8"/>
-          <rect x="28" y="20" width="6" height="60" fill="#4ade80"/>
-          <polygon points="34,20 52,20 72,50 52,50" fill="#4ade80" opacity="0.9"/>
-          <polygon points="34,52 52,52 76,80 52,80" fill="#4ade80" opacity="0.9"/>
-          <circle cx="72" cy="50" r="4" fill="#22d3ee"/>
-        </svg>
-        <div>
-          <div class="logo-text">K's Tools</div>
-          <div class="logo-sub">for School</div>
-        </div>
-      </div>
-      <button class="close-sidebar" onclick="closeSidebar()">&#10005;</button>
-    </div>
-
-    <div class="nav-section">
-      <div class="nav-label">Menu</div>
-      <div class="nav-item active" id="nav-ringkas" onclick="showPage('ringkas')">
-        <span class="nav-icon">&#9889;</span><span id="txt-nav-ringkas">Ringkas</span>
-      </div>
-      <div class="nav-item" id="nav-kuis" onclick="showPage('kuis')">
-        <span class="nav-icon">&#10067;</span><span id="txt-nav-kuis">Mode Kuis</span>
-      </div>
-      <div class="nav-item" id="nav-terjemahan" onclick="showPage('terjemahan')">
-        <span class="nav-icon">&#127760;</span><span id="txt-nav-terjemahan">Terjemahan</span>
-      </div>
-      <div class="nav-item" id="nav-riwayat" onclick="showPage('riwayat')">
-        <span class="nav-icon">&#128338;</span><span id="txt-nav-riwayat">Riwayat</span>
-      </div>
-      <div class="nav-item" id="nav-tentang" onclick="showPage('tentang')">
-        <span class="nav-icon">&#8505;</span><span id="txt-nav-tentang">Tentang</span>
-      </div>
-    </div>
-
-    <div class="sidebar-user" id="sidebarUser">
-      <div class="user-avatar-placeholder" id="userAvatarPlaceholder">K</div>
-      <img class="user-avatar" id="userAvatar" src="" alt="" style="display:none"/>
-      <div class="user-info">
-        <div class="user-name" id="userName">—</div>
-        <div class="user-email" id="userEmail">—</div>
-      </div>
-      <button class="logout-btn" onclick="signOut()" title="Logout">&#8594;</button>
-    </div>
-
-    <div class="sidebar-footer">
-      <div class="lang-row">
-        <span>v1.0 &middot; Cloudflare</span>
-        <div class="lang-btns">
-          <button class="lang-btn active" id="btnID" onclick="setLang('id')">ID</button>
-          <button class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
-        </div>
-      </div>
+  <!-- 1. LAYER AUTH SUPABASE -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <h2 style="margin-bottom: 8px; font-weight:700;">Welcome Student</h2>
+      <p style="color: var(--text2); font-size:14px; margin-bottom: 24px;">Masuk ke K's Tools untuk melanjutkan belajar.</p>
+      <input type="email" id="auth-email" class="auth-input" placeholder="Alamat Email..."/>
+      <input type="password" id="auth-password" class="auth-input" placeholder="Kata Sandi..."/>
+      <button class="auth-btn" onclick="handleAuth('login')">Masuk Aplikasi</button>
+      <button class="auth-btn" style="background:transparent; border:1px solid var(--border); color:var(--text2);" onclick="handleAuth('signup')">Daftar Akun Baru</button>
     </div>
   </div>
 
-  <div class="topbar" id="topbar">
-    <button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
-    <div class="topbar-info">
-      <div class="topbar-title" id="topbar-title">Ringkas Materi</div>
-      <div class="topbar-sub" id="topbar-sub">K's Tools for School</div>
-    </div>
-  </div>
-
-  <div class="main" id="main">
-
-    <div class="page active" id="page-ringkas">
-      <div class="card">
-        <div class="card-title">MODE RINGKAS MATERI</div>
-        <div class="dir-label">Pilih Gaya Rangkuman:</div>
-        <div class="chips" id="styleRow">
-          <div class="chip active" onclick="selectChip(this)">Poin Penting</div>
-          <div class="chip" onclick="selectChip(this)">Penjelasan Detail</div>
-          <div class="chip" onclick="selectChip(this)">Langkah demi Langkah</div>
-          <div class="chip" onclick="selectChip(this)">Tabel Perbandingan</div>
-          <div class="chip" onclick="selectChip(this)">Gaya Storytelling</div>
-        </div>
-
-        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-          <div class="upload-zone-icon">📁</div>
-          <div class="upload-zone-text">Klik atau Tarik File Ke Sini</div>
-          <div class="upload-zone-sub">Mendukung Foto (JPG, PNG) & Dokumen (PDF)</div>
-          <input type="file" id="fileInput" multiple accept="image/*,.pdf" style="display:none" onchange="processFiles(this.files)"/>
-        </div>
-        <div class="preview-row" id="previewRow"></div>
-
-        <div class="dir-wrap" style="margin-top: 16px;">
-          <div class="dir-label">Arahan Tambahan (Opsional):</div>
-          <textarea id="textArea" placeholder="Contoh: buatkan rangkuman materi biologi sel tersebut..."></textarea>
-        </div>
-        <button class="submit-btn" id="submitBtn" onclick="doRingkas()">Ringkas Sekarang</button>
+  <!-- 2. CONTAINER UTAMA APLIKASI -->
+  <div id="app-container">
+    <aside class="sidebar">
+      <div style="padding: 24px; color: var(--accent); font-weight: 700; font-size: 18px; border-bottom: 1px solid var(--border)">
+        K's Tools for School
+      </div>
+      <nav style="margin-top: 16px; flex-grow: 1;">
+        <div class="nav-item active" data-target="page-ringkas" onclick="switchPage(this)">⚡ Ringkas Materi</div>
+        <div class="nav-item" data-target="page-youtube" onclick="switchPage(this)">📺 Mode YouTube</div>
+        <div class="nav-item" data-target="page-kuis" onclick="switchPage(this)">✏️ Buat Kuis Otomatis</div>
+        <div class="nav-item" data-target="page-terjemahan" onclick="switchPage(this)">🌐 Terjemahan Pro</div>
+        <div class="nav-item" data-target="page-history" onclick="switchPage(this); renderHistory();">📜 Riwayat Aktivitas</div>
+      </nav>
+      
+      <!-- Informasi Limit -->
+      <div style="padding: 12px 20px; font-size: 12px; color: var(--text2); background: rgba(0,0,0,0.2); margin: 8px 16px; border-radius: 8px;">
+        Sisa Kuota Hari Ini: <span id="limit-badge" style="color:var(--accent2); font-weight:700;">20/20</span>
       </div>
 
+      <!-- Tombol Saweria -->
+      <a href="https://saweria.co/kian1904" target="_blank" class="saweria-btn">
+        👑 Dukung Proyek via Saweria
+      </a>
+    </aside>
+
+    <div class="topbar">
+      <button class="menu-toggle" onclick="document.body.classList.toggle('sidebar-open')" style="background:transparent; border:none; color:white; font-size:24px; cursor:pointer;">☰</button>
+      <h3 id="page-title" style="font-weight: 600;">Ringkas Materi</h3>
+      
+      <!-- Topbar Avatar -->
+      <div class="user-profile">
+        <div class="avatar" id="user-avatar" onclick="toggleLogoutMenu()">U</div>
+        <div class="logout-dropdown" id="logout-menu">
+          <button onclick="logout()">Keluar Akun</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="main-content">
+      
+      <!-- HALAMAN 1: RINGKAS -->
+      <section id="page-ringkas" class="app-page active">
+        <div class="card">
+          <div class="chip-container" id="styleRow">
+            <div class="chip active">Poin Penting</div>
+            <div class="chip">Rangkuman Narasi</div>
+            <div class="chip">Struktur Silabus</div>
+          </div>
+          <input type="file" id="fileInput" accept=".pdf" onchange="processFiles(this.files)" style="margin-bottom:16px; display:block;"/>
+          <div id="previewRow" class="chip-container" style="display:none;"></div>
+          <textarea id="textArea" rows="6" placeholder="Tempel teks materi kuliah atau berikan instruksi tambahan di sini..."></textarea>
+          <button class="submit-btn" id="submitBtn" onclick="doRingkas()">Proses Rangkuman</button>
+        </div>
+      </section>
+
+      <!-- HALAMAN 2: YOUTUBE -->
+      <section id="page-youtube" class="app-page">
+        <div class="card">
+          <h4 style="margin-bottom:12px; color:var(--accent2)">Analisis Materi Video via Hugging Face</h4>
+          <input type="text" id="ytUrl" class="input-url" placeholder="Tempel link video YouTube (Contoh: https://www.youtube.com/watch?v=...)"/>
+          <textarea id="ytNotes" rows="3" placeholder="Instruksi tambahan pengolahan video (opsional)..."></textarea>
+          <button class="submit-btn" id="ytBtn" onclick="doProcessYouTube()">Ekstrak & Bedah Video</button>
+        </div>
+      </section>
+
+      <!-- HALAMAN 3: KUIS -->
+      <section id="page-kuis" class="app-page">
+        <div class="card">
+          <div class="chip-container" id="quizTypeRow">
+            <div class="chip active">Pilihan Ganda (5 Soal)</div>
+            <div class="chip">Esai Komprehensif</div>
+          </div>
+          <textarea id="quizSource" rows="6" placeholder="Masukkan teks materi kuliah yang mau diubah jadi soal ujian kuis..."></textarea>
+          <button class="submit-btn" id="quizBtn" onclick="doGenerateQuiz()">Buat Instan Soal Kuis</button>
+        </div>
+      </section>
+
+      <!-- HALAMAN 4: TERJEMAHAN -->
+      <section id="page-terjemahan" class="app-page">
+        <div class="card">
+          <div class="chip-container" id="langRow">
+            <div class="chip active">Inggris ➔ Indonesia</div>
+            <div class="chip">Indonesia ➔ Inggris</div>
+          </div>
+          <textarea id="transSource" rows="6" placeholder="Tulis atau tempel teks bahasa akademik yang ingin diterjemahkan secara presisi..."></textarea>
+          <button class="submit-btn" id="transBtn" onclick="doTranslate()">Terjemahkan Sekarang</button>
+        </div>
+      </section>
+
+      <!-- HALAMAN 5: HISTORY -->
+      <section id="page-history" class="app-page">
+        <div class="card">
+          <h4 style="margin-bottom:16px;">Riwayat Penyimpanan Lokal</h4>
+          <div id="history-container"></div>
+        </div>
+      </section>
+
+      <!-- OUTPUT GLOBAL INTERFACE -->
       <div class="loading-wrap" id="loadingWrap">
-        <div class="loading-dots"><span></span><span></span><span></span></div>
-        <div class="loading-text">Sedang memproses materi dengan AI...</div>
-      </div>
-
-      <div class="result-wrap" id="resultWrap">
-        <div class="result-toolbar">
-          <div class="result-label">Hasil Rangkuman AI</div>
-          <button class="action-btn" onclick="navigator.clipboard.writeText(lastResultText); alert('Berhasil disalin!')">📋 Salin</button>
+        <div style="display:flex; align-items:center; gap:12px; color:var(--accent2);" id="loadingText">
+          <span>⏳ AI sedang merakit jawaban terbaik, mohon tunggu sebentar...</span>
         </div>
+      </div>
+      
+      <div class="result-wrap" id="resultWrap">
         <div class="result-body" id="resultBody"></div>
       </div>
-    </div>
 
-    <div class="page" id="page-kuis">
-      <div class="card">
-        <div class="card-title">MODE KUIS AI</div>
-        <p style="color:var(--text2)">Fitur kuis interaktif otomatis berbasis AI sedang disiapkan.</p>
-      </div>
-    </div>
-
-    <div class="page" id="page-terjemahan">
-      <div class="card">
-        <div class="card-title">MODE TERJEMAHAN</div>
-        <p style="color:var(--text2)">Fitur penterjemah dokumen multibahasa sedang disiapkan.</p>
-      </div>
-    </div>
-
-    <div class="page" id="page-riwayat">
-      <div class="card">
-        <div class="card-title">RIWAYAT BELAJAR</div>
-        <div class="empty-state">Belum ada riwayat pengerjaan dokumen.</div>
-      </div>
-    </div>
-
-    <div class="page" id="page-tentang">
-      <div class="card">
-        <div class="card-title">TENTANG APLIKASI</div>
-        <p style="color:var(--text2)">K's Tools for School dibuat untuk membantu mempermudah sistem belajar mandiri siswa.</p>
-      </div>
-    </div>
-
+    </main>
   </div>
-</div>
 
-<script>
-// =============== CONFIG MANUAl (ISI DI SINI!) ===============
-const WORKER = "https://ringkas-api.ryalandsokay.workers.dev/";
-// ============================================================
+  <script>
+    // =========================================================
+    // KREDENSIAL UTAMA DAN JALUR BACKEND ASLI MILIK KIAN
+    // =========================================================
+    const WORKER = "https://ringkas-api.ryalandsokay.workers.dev"; 
+    const SUPABASE_URL = "https://xqrrimruddjmnhutxcjf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxcnJpbXJ1ZGRqbW5odXR4Y2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjM1NzYsImV4cCI6MjA5NTE5OTU3Nn0.KEHcusLNEJEuTYUi_prUvWrpIVo7t97JLkwkV6lUYis";
+    const HF_SPACE_API = "https://kian1904-ringkas-backend.hf.space/api/predict"; 
 
-var extractedDocumentText = ""; 
-var lastResultText = "";
-var currentLang = "id";
-
-// Fungsi Navigasi Menu Halaman
-function showPage(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  
-  var activePage = document.getElementById('page-' + pageId);
-  var activeNav = document.getElementById('nav-' + pageId);
-  
-  if(activePage) activePage.classList.add('active');
-  if(activeNav) activeNav.classList.add('active');
-  
-  var titleElemen = document.getElementById('topbar-title');
-  if(titleElemen) {
-    if(pageId === 'ringkas') titleElemen.innerText = "Ringkas Materi";
-    if(pageId === 'kuis') titleElemen.innerText = "Mode Kuis AI";
-    if(pageId === 'terjemahan') titleElemen.innerText = "Terjemahan";
-    if(pageId === 'riwayat') titleElemen.innerText = "Riwayat Belajar";
-    if(pageId === 'tentang') titleElemen.innerText = "Tentang Aplikasi";
-  }
-  closeSidebar();
-}
-
-function selectChip(element) {
-  element.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  element.classList.add('active');
-}
-
-function toggleSidebar() { document.body.classList.toggle('sidebar-open'); }
-function closeSidebar() { document.body.classList.remove('sidebar-open'); }
-function setLang(lang) {
-  currentLang = lang;
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  if(lang === 'id') document.getElementById('btnID').classList.add('active');
-  if(lang === 'en') document.getElementById('btnEN').classList.add('active');
-}
-
-// SIMULASI LOGIN GOOGLE BYPASS (Agar App Bisa Terbuka)
-window.onload = function() {
-  document.getElementById('authGate').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-};
-
-// ================= FUNGSI PEMBACAL PDF =================
-async function bacaTeksPDF(file) {
-  var btn = document.getElementById('submitBtn');
-  var preview = document.getElementById('previewRow');
-  
-  if (file.size > 50 * 1024 * 1024) {
-    alert('File terlalu besar, maksimal 50MB');
-    return;
-  }
-  
-  if (btn) { btn.disabled = true; btn.innerText = '⏳ Membaca PDF...'; }
-  
-  try {
-    var buf = await file.arrayBuffer();
-    var loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buf) });
-    var pdf = await loadingTask.promise;
-    var total = pdf.numPages;
-    var texts = [];
+    // Inisialisasi Klien Supabase Resmi
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    for (var i = 1; i <= total; i++) {
-      if (btn) btn.innerText = '⏳ Membaca halaman ' + i + ' dari ' + total + '...';
-      var page = await pdf.getPage(i);
-      var content = await page.getTextContent();
-      texts.push(content.items.map(function(s) { return s.str; }).join(' '));
-    }
-    
-    extractedDocumentText = texts.join('\n\n');
-    pdf.destroy(); // Bebas memori
-    
-    if (!extractedDocumentText.trim()) {
-      alert('PDF ini hanya berisi gambar, belum mendukung OCR.');
-      extractedDocumentText = '';
-      if (btn) { btn.disabled = false; btn.innerText = 'Ringkas Sekarang'; }
-      return;
-    }
-    
-    if (btn) { btn.disabled = false; btn.innerText = '✅ PDF siap (' + total + ' halaman) — Ringkas Sekarang'; }
-    
-  } catch(e) {
-    var msg = e.message || '';
-    if (msg.includes('password') || msg.includes('encrypt')) {
-      alert('PDF terenkripsi, tidak bisa dibaca.');
-    } else {
-      alert('PDF corrupt atau tidak bisa dibuka: ' + msg);
-    }
-    extractedDocumentText = '';
-    if (btn) { btn.disabled = false; btn.innerText = 'Ringkas Sekarang'; }
-  }
-}
-  
-function processFiles(files) {
-  extractedDocumentText = '';
-  var preview = document.getElementById('previewRow');
-  preview.innerHTML = '';
-  
-  for (var i = 0; i < files.length; i++) {
-    var f = files[i];
-    if (f.name.toLowerCase().endsWith('.pdf')) {
-      var div = document.createElement('div');
-      div.style = "padding:8px 12px;background:rgba(47,228,138,0.1);border:1px solid #2fe48a;border-radius:8px;font-size:13px;color:#2fe48a;display:inline-flex;margin:4px;";
-      div.innerHTML = '📄 ' + f.name;
-      preview.appendChild(div);
-      bacaTeksPDF(f);
-    }
-  }
-  preview.classList.add('show');
-}
-  
-// ================= FUNGSI DO RINGKAS (ANTI-OBJECT) =================
-async function doRingkas() {
-  var txt = document.getElementById('textArea').value.trim();
-  var hasPDF = extractedDocumentText && extractedDocumentText.trim().length > 0;
-  
-  if (!txt && !hasPDF) {
-    alert('Masukkan teks atau pilih PDF terlebih dahulu!');
-    return;
-  }
-  
-  var styleElemen = document.querySelector('#styleRow .chip.active');
-  var style = styleElemen ? styleElemen.textContent : 'Poin Penting';
-  
-  var loading = document.getElementById('loadingWrap');
-  var result = document.getElementById('resultWrap');
-  var resultBody = document.getElementById('resultBody');
-  var btn = document.getElementById('submitBtn');
-  
-  loading.classList.add('show');
-  result.classList.remove('show');
-  btn.disabled = true;
- 
-  // Susun konten yang mau dikirim
-  var finalText = '';
-  if (hasPDF) {
-    finalText = 'Ringkas dokumen PDF ini dengan gaya "' + style + '":\n\n' + 
-                extractedDocumentText.slice(0, 15000);
-    if (txt) finalText += '\n\nArahan tambahan: ' + txt;
-  } else {
-    finalText = 'Ringkas dengan gaya "' + style + '":\n\n' + txt;
-  }
- 
-  var sys = 'Kamu adalah asisten pelajar yang membantu. Jawab dalam Bahasa Indonesia. ' +
-            'Gunakan Markdown: **bold**, heading (##), bullet list, tabel, dan LaTeX math jika perlu. ' +
-            'Output HANYA sesuai gaya yang diminta.';
- 
-  try {
-    var res = await fetch(WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: sys },
-          { role: 'user', content: [{ type: 'text', text: finalText }] }
-        ]
-      })
+    // Global State
+    let currentUser = null;
+    let extractedDocumentText = "";
+    let lastResultText = "";
+    const DAILY_LIMIT_MAX = 20;
+
+    // --- MANAJEMEN SISTEM AUTH SUPABASE ---
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        currentUser = session.user;
+        document.body.classList.add('logged-in');
+        document.getElementById('user-avatar').innerText = currentUser.email.charAt(0).toUpperCase();
+        updateLimitUI();
+      } else {
+        currentUser = null;
+        document.body.classList.remove('logged-in');
+      }
     });
-    
-    var d = await res.json();
-    
-    // Parse response dengan aman
-    var content = '';
-    if (d.choices && d.choices[0] && d.choices[0].message) {
-      content = d.choices[0].message.content;
-    } else if (d.error) {
-      content = '⚠️ Error: ' + (typeof d.error === 'object' ? d.error.message : d.error);
-    } else {
-      content = '⚠️ Respons tidak dikenali: ' + JSON.stringify(d);
+
+    async function handleAuth(type) {
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value.trim();
+      if(!email || !password) return alert('Lengkapi kolom email dan kata sandi!');
+      
+      try {
+        if(type === 'login') {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if(error) throw error;
+        } else {
+          const { error } = await supabase.auth.signUp({ email, password });
+          if(error) throw error;
+          alert('Pendaftaran berhasil! Silakan periksa kotak masuk email kamu untuk konfirmasi atau coba langsung masuk.');
+        }
+      } catch(err) { alert(err.message); }
     }
-    
-    lastResultText = content;
-    resultBody.innerHTML = marked.parse(content);
-    result.classList.add('show');
-    
-    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-      MathJax.typesetPromise([resultBody]).catch(function(e) { console.log(e); });
+
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.reload();
     }
-    
-  } catch(e) {
-    resultBody.innerHTML = '<span style="color:#f87171">Gagal: ' + e.message + '</span>';
-    result.classList.add('show');
-  }
-  
-  loading.classList.remove('show');
-  btn.disabled = false;
-}
-</script>
+
+    function toggleLogoutMenu() {
+      const el = document.getElementById('logout-menu');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // --- SISTEM PEMBATASAN (LIMIT) & RIWAYAT AKTIVITAS ---
+    function getTodayKey() {
+      const d = new Date();
+      return `${currentUser.id}_limit_${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    }
+
+    function checkAndIncrementLimit() {
+      const key = getTodayKey();
+      let used = parseInt(localStorage.getItem(key) || "0", 10);
+      if (used >= DAILY_LIMIT_MAX) return false;
+      localStorage.setItem(key, (used + 1).toString());
+      updateLimitUI();
+      return true;
+    }
+
+    function updateLimitUI() {
+      if(!currentUser) return;
+      const key = getTodayKey();
+      const used = parseInt(localStorage.getItem(key) || "0", 10);
+      const remaining = Math.max(0, DAILY_LIMIT_MAX - used);
+      document.getElementById('limit-badge').innerText = `${remaining} / ${DAILY_LIMIT_MAX}`;
+    }
+
+    function saveToHistory(mode, inputSummary, outputData) {
+      if(!currentUser) return;
+      const key = `${currentUser.id}_history`;
+      let currentHist = JSON.parse(localStorage.getItem(key) || "[]");
+      currentHist.unshift({
+        time: new Date().toLocaleString('id-ID'), mode, title: inputSummary.slice(0, 50) + '...', content: outputData
+      });
+      localStorage.setItem(key, JSON.stringify(currentHist.slice(0, 30)));
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-container');
+      container.innerHTML = '';
+      if(!currentUser) return;
+      const data = JSON.parse(localStorage.getItem(`${currentUser.id}_history`) || "[]");
+      if(data.length === 0) { container.innerHTML = '<p style="color:var(--text3)">Belum ada riwayat aktivitas belajar.</p>'; return; }
+      
+      data.forEach((item) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `<strong>[${item.mode}]</strong> ${item.title} <br/><small style="color:var(--text3)">${item.time}</small>`;
+        div.onclick = () => {
+          document.getElementById('resultBody').innerHTML = marked.parse(item.content);
+          document.getElementById('resultWrap').classList.add('show');
+          window.scrollTo({ top: document.getElementById('resultWrap').offsetTop, behavior: 'smooth' });
+        };
+        container.appendChild(div);
+      });
+    }
+
+    // --- NAVIGASI ANTAR HALAMAN ---
+    function switchPage(element) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
+      element.classList.add('active');
+      
+      const target = element.getAttribute('data-target');
+      document.getElementById(target).classList.add('active');
+      document.getElementById('page-title').innerText = element.innerText;
+      document.body.classList.remove('sidebar-open');
+    }
+
+    // Event Delegasi untuk Chips
+    document.querySelectorAll('.chip-container').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if(e.target.classList.contains('chip')) {
+          row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+          e.target.classList.add('active');
+        }
+      });
+    });
+
+    // --- PENANGANAN BERKAS PDF (ROBUSTED BY CLAUDE) ---
+    async function bacaTeksPDF(file) {
+      var btn = document.getElementById('submitBtn');
+      if (file.size > 50 * 1024 * 1024) { alert('File terlalu besar, maksimal 50MB'); return; }
+      if (btn) { btn.disabled = true; btn.innerText = '⏳ Membaca PDF...'; }
+      
+      try {
+        var buf = await file.arrayBuffer();
+        var loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buf) });
+        var pdf = await loadingTask.promise;
+        var total = pdf.numPages; var texts = [];
+        
+        for (var i = 1; i <= total; i++) {
+          if (btn) btn.innerText = '⏳ Membaca halaman ' + i + ' dari ' + total + '...';
+          var page = await pdf.getPage(i); var content = await page.getTextContent();
+          texts.push(content.items.map(function(s) { return s.str; }).join(' '));
+        }
+        extractedDocumentText = texts.join('\n\n');
+        pdf.destroy();
+        
+        if (!extractedDocumentText.trim()) {
+          alert('PDF ini hanya berisi gambar, belum mendukung OCR.');
+          extractedDocumentText = '';
+          if (btn) { btn.disabled = false; btn.innerText = 'Proses Rangkuman'; }
+          return;
+        }
+        if (btn) { btn.disabled = false; btn.innerText = '✅ PDF siap (' + total + ' halaman) — Ringkas Sekarang'; }
+      } catch(e) {
+        alert('PDF rusak atau tidak bisa dibuka: ' + e.message);
+        extractedDocumentText = '';
+        if (btn) { btn.disabled = false; btn.innerText = 'Proses Rangkuman'; }
+      }
+    }
+
+    function processFiles(files) {
+      extractedDocumentText = '';
+      var preview = document.getElementById('previewRow');
+      preview.innerHTML = '';
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        if (f.name.toLowerCase().endsWith('.pdf')) {
+          var div = document.createElement('div');
+          div.style = "padding:8px 12px;background:rgba(47,228,138,0.1);border:1px solid #2fe48a;border-radius:8px;font-size:13px;color:#2fe48a;display:inline-flex;margin:4px;";
+          div.innerHTML = '📄 ' + f.name;
+          preview.appendChild(div);
+          bacaTeksPDF(f);
+        }
+      }
+      preview.style.display = 'block';
+    }
+
+    // --- PUSAT ENGINE KIRIM DATA KE CORE CLOUDFLARE WORKER ---
+    async function requestCoreAI(sysPrompt, userContent, fallbackTitle) {
+      var loading = document.getElementById('loadingWrap');
+      var result = document.getElementById('resultWrap');
+      var resultBody = document.getElementById('resultBody');
+      
+      loading.classList.add('show');
+      result.classList.remove('show');
+
+      try {
+        var res = await fetch(WORKER, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: userContent }]
+          })
+        });
+        
+        var d = await res.json();
+        var content = '';
+        
+        if (d.choices && d.choices[0] && d.choices[0].message) {
+          content = d.choices[0].message.content;
+        } else if (d.error) {
+          content = '⚠️ Error Server: ' + (typeof d.error === 'object' ? d.error.message : d.error);
+        } else {
+          content = '⚠️ Format Respons Gagal Dikenali: ' + JSON.stringify(d);
+        }
+
+        lastResultText = content;
+        resultBody.innerHTML = marked.parse(content);
+        result.classList.add('show');
+        saveToHistory(fallbackTitle, userContent, content);
+
+        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+          MathJax.typesetPromise([resultBody]).catch(e => console.log(e));
+        }
+      } catch(e) {
+        resultBody.innerHTML = '<span style="color:#f87171">Gagal Menghubungi Jalur Worker API: ' + e.message + '</span>';
+        result.classList.add('show');
+      } finally {
+        loading.classList.remove('show');
+      }
+    }
+
+    // --- INTERKONEKSI INTEGRASI FITUR RINGKAS ---
+    async function doRingkas() {
+      var txt = document.getElementById('textArea').value.trim();
+      var hasPDF = extractedDocumentText && extractedDocumentText.trim().length > 0;
+      if (!txt && !hasPDF) return alert('Ketik materi atau pilih lampiran PDF dulu!');
+      
+      if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis! (Maksimal 20 request per hari).");
+
+      var style = document.querySelector('#styleRow .chip.active')?.textContent || 'Poin Penting';
+      var ArrayText = hasPDF ? `Ringkas dokumen PDF ini dengan gaya "${style}":\n\n${extractedDocumentText.slice(0, 15000)}` : `Ringkas dengan gaya "${style}":\n\n${txt}`;
+      if (hasPDF && txt) ArrayText += '\n\nArahan tambahan: ' + txt;
+
+      var sys = 'Kamu adalah asisten pelajar yang membantu. Jawab dalam Bahasa Indonesia. Gunakan susunan Markdown komplit (tabel, list, heading) & LaTeX math jika relevan.';
+      await requestCoreAI(sys, ArrayText, "Ringkas");
+    }
+
+    // --- INTEGRASI SEMPURNA HALAMAN YOUTUBE ➔ HUGGING FACE ➔ WORKER ---
+    async function doProcessYouTube() {
+      var url = document.getElementById('ytUrl').value.trim();
+      var notes = document.getElementById('ytNotes').value.trim();
+      if(!url) return alert('Tautan video YouTube tidak boleh kosong!');
+      
+      if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis! (Maksimal 20 request per hari).");
+
+      var loading = document.getElementById('loadingWrap');
+      var result = document.getElementById('resultWrap');
+      var resultBody = document.getElementById('resultBody');
+      var loaderText = document.querySelector('#loadingWrap span');
+      
+      loading.classList.add('show'); result.classList.remove('show');
+      loaderText.innerText = "⏳ Langkah 1: Meminta Hugging Face Space menarik transkrip video...";
+
+      try {
+        // Ekstraksi Transkrip Asli dari Hugging Face API Space Kamu
+        var hfRes = await fetch(HF_SPACE_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: [url] }) // Format standar Gradio API API JSON data array
+        });
+        
+        var hfData = await hfRes.json();
+        // Membaca kembalian Gradio Space (biasanya ada di data[0])
+        var transkripTeks = hfData.data ? hfData.data[0] : (hfData.result || JSON.stringify(hfData));
+        
+        if(!transkripTeks || transkripTeks.trim().length === 0 || transkripTeks.includes("error")) {
+          throw new Error(transkripTeks || "Transkrip kosong/Gagal diekstrak.");
+        }
+
+        loaderText.innerText = "⏳ Langkah 2: Mengirim transkrip ke Cloudflare Worker untuk dianalisis oleh AI...";
+        
+        var promptUser = `Berikut adalah transkrip lengkap dari video YouTube. Tolong bedah materi esensialnya secara mendalam:\n\n${transkripTeks}`;
+        if(notes) promptUser += `\n\nCatatan Tambahan Pengguna: ${notes}`;
+        
+        var sys = 'Kamu adalah bot edukasi spesialis transkripsi dan analisis video. Bedah poin penting isi video tersebut dengan sangat detail dalam Bahasa Indonesia menggunakan Markdown.';
+        
+        // Oper ke engine utama Worker API
+        await requestCoreAI(sys, promptUser, "YouTube");
+
+      } catch(e) {
+        resultBody.innerHTML = '<span style="color:#f87171">Gagal memproses Hugging Face / API Transkrip: ' + e.message + '</span>';
+        result.classList.add('show');
+        loading.classList.remove('show');
+      } finally {
+        loaderText.innerText = "⏳ AI sedang merakit jawaban terbaik, mohon tunggu sebentar...";
+      }
+    }
+
+    // --- EKSEKUTOR MODUL KUIS ---
+    async function doGenerateQuiz() {
+      var src = document.getElementById('quizSource').value.trim();
+      if(!src) return alert('Masukkan materi fondasi soal kuis terlebih dahulu!');
+      
+      if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis!");
+
+      var tipe = document.querySelector('#quizTypeRow .chip.active')?.textContent || 'Pilihan Ganda';
+      var sys = `Kamu adalah dosen akademis. Buat susunan instan kuis berbasis ${tipe} lengkap dengan kunci jawaban tersembunyi/penjelasan di bawahnya dari materi teks user.`;
+      await requestCoreAI(sys, src, "Buat Kuis");
+    }
+
+    // --- EKSEKUTOR MODUL TRANSLATION ---
+    async function doTranslate() {
+      var src = document.getElementById('transSource').value.trim();
+      if(!src) return alert('Teks asal bahasa yang mau diterjemahkan masih kosong!');
+      
+      if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis!");
+
+      var mode = document.querySelector('#langRow .chip.active')?.textContent || 'Inggris ➔ Indonesia';
+      var sys = `Kamu adalah penerjemah profesional jurnal internasional. Terjemahkan teks masukan user secara natural, baku, dan sesuai konteks ilmiah arah: ${mode}.`;
+      await requestCoreAI(sys, src, "Terjemahan");
+    }
+  </script>
 </body>
 </html>
