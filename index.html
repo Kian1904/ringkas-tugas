@@ -39,7 +39,6 @@
       overflow-x: hidden; 
     }
 
-    /* Layar Login (Auth Screen) */
     #auth-screen {
       position: fixed; inset: 0; background: var(--bg);
       display: flex; align-items: center; justify-content: center; z-index: 999; padding: 20px;
@@ -65,12 +64,10 @@
     }
     #authError.show { display: block; }
 
-    /* Kontainer Utama Aplikasi */
     #app-container { display: none; }
     body.logged-in #app-container { display: block; }
     body.logged-in #auth-screen { display: none; }
 
-    /* Sidebar dengan Tombol Close */
     .sidebar { 
       position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); 
       background: rgba(17, 24, 39, 0.85); backdrop-filter: var(--glass-blur); 
@@ -105,7 +102,6 @@
 
     .main-content { margin-top: var(--topbar-h); padding: var(--gap); max-width: 1100px; }
      
-    /* Navigasi */
     .nav-item {
       padding: 12px 20px; color: var(--text2); cursor: pointer; border-radius: 12px;
       margin: 4px 12px; font-weight: 500; display: flex; align-items: center; gap: 10px;
@@ -120,7 +116,6 @@
       border: 1px solid var(--border); border-radius: 24px; padding: 24px; margin-bottom: 20px; 
     }
 
-    /* BARU: TATA LETAK 4 KOTAK INPUT INPUT GRID */
     .input-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -163,7 +158,6 @@
     }
     .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Profil & Avatar */
     .user-profile { display: flex; align-items: center; gap: 12px; position: relative; }
     .avatar-wrapper { width: 36px; height: 36px; position: relative; cursor: pointer; }
     .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: none; }
@@ -180,39 +174,69 @@
       width: 100%; padding: 8px; background: transparent; border: none; color: #f87171; text-align: left; cursor: pointer; font-family: inherit; font-weight: 500;
     }
 
-    /* Tombol Saweria */
     .saweria-btn {
       margin: auto 16px 16px 16px; padding: 12px; border: 1px solid rgba(246, 190, 0, 0.3);
       background: rgba(246, 190, 0, 0.1); border-radius: 12px; text-align: center;
       text-decoration: none; color: #f6be00; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;
     }
 
-    /* Manajemen Halaman */
     .app-page { display: none; }
     .app-page.active { display: block; }
 
     .loading-wrap, .result-wrap { display: none; margin-top: 20px; }
     .loading-wrap.show, .result-wrap.show { display: block; }
-    
-    /* BARU: SISTEM TRIPLE WARNA BERBOBOT PADA HASIL JAWABAN */
+
+    /* ===================== RESULT TABS ===================== */
+    .result-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .result-tab {
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+      color: var(--text2);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      transition: .2s;
+    }
+
+    .result-tab.active {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: rgba(34,211,238,.08);
+    }
+
+    .result-tab:hover:not(.active) {
+      border-color: rgba(255,255,255,.15);
+      color: var(--text);
+    }
+    /* ======================================================= */
+
     .result-body { 
       background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); border-radius: 16px; padding: 24px; line-height: 1.7; 
-      color: #ffffff; /* Default: Jawaban Biasa Berwarna Putih */
+      color: #ffffff;
     }
-    /* 1. Jawaban Berbobot Berat (Headings, Inti Rumus, Struktur Utama) -> WARNA BIRU */
     .result-body h1, .result-body h2, .result-body h3, .result-body h4, .result-body strong, .result-body th {
       color: #3b82f6 !important;
     }
-    /* 2. Poin Penting / List / Item / Steps -> WARNA HIJAU */
     .result-body li, .result-body ol, .result-body ul {
       color: #10b981 !important;
     }
-    /* 3. Tabel Custom Styling */
     .result-body table { width: 100%; border-collapse: collapse; margin: 16px 0; }
     .result-body th, .result-body td { border: 1px solid var(--border); padding: 10px; text-align: left; }
     .result-body th { background: rgba(59, 130, 246, 0.1); }
+
+    /* Section tersembunyi saat tab aktif */
+    .result-section { display: none; }
+    .result-section.visible { display: block; }
      
-    /* Riwayat / History */
     .history-item {
       padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border);
       border-radius: 10px; margin-bottom: 8px; cursor: pointer; font-size: 13px; color: var(--text2);
@@ -283,9 +307,11 @@
        
       <section id="page-ringkas" class="app-page active">
         <div class="card">
+          <!-- EDIT 1: Tambah chip Explain -->
           <div class="chip-container" id="styleRow">
             <div class="chip active">Poin Penting</div>
             <div class="chip">Rangkuman Detail</div>
+            <div class="chip">Explain</div>
             <div class="chip">Tabel & Rumus Matematika</div>
             <div class="chip">Langkah Tutorial</div>
           </div>
@@ -352,8 +378,25 @@
         </div>
       </div>
        
+      <!-- EDIT 3: Result area dengan tab navigasi -->
       <div class="result-wrap" id="resultWrap">
-        <div class="result-body" id="resultBody"></div>
+
+        <div class="result-tabs" id="resultTabs">
+          <button class="result-tab active" data-section="sec-poin">📌 Poin Penting</button>
+          <button class="result-tab" data-section="sec-rangkuman">📖 Rangkuman Detail</button>
+          <button class="result-tab" data-section="sec-explain">💡 Explain</button>
+          <button class="result-tab" data-section="sec-tabel">🧮 Tabel & Rumus</button>
+          <button class="result-tab" data-section="sec-langkah">📝 Langkah Tutorial</button>
+        </div>
+
+        <div class="result-body" id="resultBody">
+          <div class="result-section visible" id="sec-poin"></div>
+          <div class="result-section" id="sec-rangkuman"></div>
+          <div class="result-section" id="sec-explain"></div>
+          <div class="result-section" id="sec-tabel"></div>
+          <div class="result-section" id="sec-langkah"></div>
+        </div>
+
       </div>
 
     </main>
@@ -361,7 +404,7 @@
 
   <script>
     // =========================================================
-    // CONFIG BACKEND & KREDENSIAL SUPABASE GOOGLE AUTH KIAN
+    // CONFIG
     // =========================================================
     const WORKER = "https://ringkas-api.ryalandsokay.workers.dev"; 
     const HF_SPACE_API = "https://kian1904-ringkas-backend.hf.space/api/predict"; 
@@ -371,7 +414,6 @@
     
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
      
-    // Global State
     let currentUser = null;
     let uploadedImages = [];  
     let extractedDocumentText = ""; 
@@ -379,7 +421,89 @@
     const DAILY_LIMIT_MAX = 20;
 
     // =========================================================
-    // GOOGLE OAUTH FLOW
+    // RESULT TABS LOGIC
+    // =========================================================
+    const SECTION_MAP = {
+      'sec-poin':      /##\s*📌\s*Poin Penting/i,
+      'sec-rangkuman': /##\s*📖\s*Rangkuman Detail/i,
+      'sec-explain':   /##\s*💡\s*Explain/i,
+      'sec-tabel':     /##\s*🧮\s*Tabel.*?(?:Rumus)?/i,
+      'sec-langkah':   /##\s*📝\s*Langkah Tutorial/i
+    };
+
+    const SECTION_ORDER = ['sec-poin','sec-rangkuman','sec-explain','sec-tabel','sec-langkah'];
+
+    function splitMarkdownToSections(markdown) {
+      // Split berdasarkan heading ## dengan emoji section
+      const lines = markdown.split('\n');
+      const sections = { 'sec-poin': [], 'sec-rangkuman': [], 'sec-explain': [], 'sec-tabel': [], 'sec-langkah': [] };
+      let currentSec = null;
+
+      for (const line of lines) {
+        // Cek apakah baris ini adalah heading section
+        let matched = false;
+        for (const [secId, regex] of Object.entries(SECTION_MAP)) {
+          if (regex.test(line)) {
+            currentSec = secId;
+            sections[secId].push(line); // Include heading-nya
+            matched = true;
+            break;
+          }
+        }
+        if (!matched && currentSec) {
+          sections[currentSec].push(line);
+        }
+      }
+
+      return sections;
+    }
+
+    function renderSections(markdown) {
+      const sections = splitMarkdownToSections(markdown);
+      let hasAnyContent = false;
+
+      for (const secId of SECTION_ORDER) {
+        const el = document.getElementById(secId);
+        const content = sections[secId].join('\n').trim();
+        if (content) {
+          el.innerHTML = marked.parse(content);
+          hasAnyContent = true;
+        } else {
+          el.innerHTML = '<p style="color:var(--text3); font-style:italic;">Bagian ini tidak tersedia untuk materi yang diinput.</p>';
+        }
+      }
+
+      // Kalau AI tidak pakai struktur section sama sekali, fallback: tampilkan semua di poin
+      if (!hasAnyContent) {
+        document.getElementById('sec-poin').innerHTML = marked.parse(markdown);
+      }
+
+      // Re-run MathJax
+      if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+        MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e => console.log(e));
+      }
+    }
+
+    // Tab click handler
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('resultTabs').addEventListener('click', function(e) {
+        const btn = e.target.closest('.result-tab');
+        if (!btn) return;
+
+        // Update active tab
+        document.querySelectorAll('.result-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Show/hide sections
+        const targetSec = btn.getAttribute('data-section');
+        document.querySelectorAll('.result-section').forEach(sec => {
+          sec.classList.toggle('visible', sec.id === targetSec);
+        });
+      });
+    });
+
+    // =========================================================
+    // GOOGLE AUTH
     // =========================================================
     async function signInWithGoogle() {
       const btn = document.querySelector('.google-btn');
@@ -405,35 +529,26 @@
      
     function showAuthError(msg) {
       const el = document.getElementById('authError');
-      if (el) {
-        el.textContent = msg;
-        el.classList.add('show');
-      }
+      if (el) { el.textContent = msg; el.classList.add('show'); }
     }
      
     function setUserUI(user) {
       const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
       const photo = user.user_metadata?.avatar_url || '';
       const initial = name.charAt(0).toUpperCase();
-     
       const placeholder = document.getElementById('topbarAvatarPlaceholder');
       const avImg = document.getElementById('topbarAvatar');
-      
       if (placeholder) placeholder.textContent = initial;
-     
       if (photo && avImg) {
-        avImg.src = photo; 
-        avImg.style.display = 'block';
+        avImg.src = photo; avImg.style.display = 'block';
         if (placeholder) placeholder.style.display = 'none';
       } else if (avImg && placeholder) {
-        avImg.style.display = 'none';
-        placeholder.style.display = 'flex';
+        avImg.style.display = 'none'; placeholder.style.display = 'flex';
       }
     }
      
     function showApp(user) {
-      currentUser = user;
-      setUserUI(user);
+      currentUser = user; setUserUI(user);
       document.body.classList.add('logged-in');
       updateLimitUI();
     }
@@ -444,17 +559,12 @@
     }
      
     sb.auth.onAuthStateChange(function(event, session) {
-      if (session && session.user) {
-        showApp(session.user);
-      } else {
-        hideApp();
-      }
+      if (session && session.user) { showApp(session.user); }
+      else { hideApp(); }
     });
      
     sb.auth.getSession().then(function(result) {
-      if (result.data.session) {
-        showApp(result.data.session.user);
-      }
+      if (result.data.session) { showApp(result.data.session.user); }
     });
 
     function toggleLogoutMenu() {
@@ -462,7 +572,9 @@
       el.style.display = el.style.display === 'block' ? 'none' : 'block';
     }
 
-    // --- LIMIT & HISTORY ---
+    // =========================================================
+    // LIMIT & HISTORY
+    // =========================================================
     function getTodayKey() {
       if (!currentUser) return 'guest_limit';
       const d = new Date();
@@ -483,8 +595,7 @@
       if(!badge) return;
       const key = getTodayKey();
       const used = parseInt(localStorage.getItem(key) || "0", 10);
-      const remaining = Math.max(0, DAILY_LIMIT_MAX - used);
-      badge.innerText = `${remaining} / ${DAILY_LIMIT_MAX}`;
+      badge.innerText = `${Math.max(0, DAILY_LIMIT_MAX - used)} / ${DAILY_LIMIT_MAX}`;
     }
 
     function saveToHistory(mode, inputSummary, outputData) {
@@ -492,7 +603,8 @@
       const key = `${currentUser.id}_history`;
       let currentHist = JSON.parse(localStorage.getItem(key) || "[]");
       currentHist.unshift({
-        time: new Date().toLocaleString('id-ID'), mode, title: inputSummary.slice(0, 50) + '...', content: outputData
+        time: new Date().toLocaleString('id-ID'), mode,
+        title: inputSummary.slice(0, 50) + '...', content: outputData
       });
       localStorage.setItem(key, JSON.stringify(currentHist.slice(0, 30)));
     }
@@ -502,31 +614,37 @@
       container.innerHTML = '';
       if(!currentUser) return;
       const data = JSON.parse(localStorage.getItem(`${currentUser.id}_history`) || "[]");
-      if(data.length === 0) { container.innerHTML = '<p style="color:var(--text3)">Belum ada riwayat aktivitas belajar.</p>'; return; }
-       
+      if(data.length === 0) {
+        container.innerHTML = '<p style="color:var(--text3)">Belum ada riwayat aktivitas belajar.</p>';
+        return;
+      }
       data.forEach((item) => {
         const div = document.createElement('div');
         div.className = 'history-item';
         div.innerHTML = `<strong>[${item.mode}]</strong> ${item.title} <br/><small style="color:var(--text3)">${item.time}</small>`;
         div.onclick = () => {
-          document.getElementById('resultBody').innerHTML = marked.parse(item.content);
+          renderSections(item.content);
           document.getElementById('resultWrap').classList.add('show');
+          // Reset ke tab pertama
+          document.querySelectorAll('.result-tab').forEach((b,i) => b.classList.toggle('active', i===0));
+          document.querySelectorAll('.result-section').forEach((s,i) => s.classList.toggle('visible', i===0));
           window.scrollTo({ top: document.getElementById('resultWrap').offsetTop, behavior: 'smooth' });
         };
         container.appendChild(div);
       });
     }
 
-    // --- NAVIGASI DAN SIDEBAR CLOSE AUTO ---
+    // =========================================================
+    // NAVIGASI
+    // =========================================================
     function switchPage(element) {
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
       element.classList.add('active');
-       
       const target = element.getAttribute('data-target');
       document.getElementById(target).classList.add('active');
       document.getElementById('page-title').innerText = element.innerText;
-      document.body.classList.remove('sidebar-open'); // Auto close ketika menu dipilih
+      document.body.classList.remove('sidebar-open');
     }
 
     document.querySelectorAll('.chip-container').forEach(row => {
@@ -538,14 +656,15 @@
       });
     });
 
-    // --- FILE HANDLING DARI MULTIPLE BOXES ---
+    // =========================================================
+    // FILE HANDLING
+    // =========================================================
     function handleImageUpload(files) {
       uploadedImages = [];
       if(files.length === 0) return;
       const file = files[0];
       const btn = document.getElementById('submitBtn');
       if (btn) { btn.disabled = true; btn.innerText = '⏳ Membaca Gambar...'; }
-
       const reader = new FileReader();
       reader.onload = function(e) {
         const base64Data = e.target.result.split(',')[1];
@@ -563,13 +682,11 @@
       var btn = document.getElementById('submitBtn');
       if (file.size > 50 * 1024 * 1024) { alert('File PDF terlalu besar, maksimal 50MB'); return; }
       if (btn) { btn.disabled = true; btn.innerText = '⏳ Membaca PDF...'; }
-       
       try {
         var buf = await file.arrayBuffer();
         var loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buf) });
         var pdf = await loadingTask.promise;
         var total = pdf.numPages; var texts = [];
-         
         for (var i = 1; i <= total; i++) {
           var page = await pdf.getPage(i); var content = await page.getTextContent();
           texts.push(content.items.map(function(s) { return s.str; }).join(' '));
@@ -590,15 +707,14 @@
       preview.innerHTML = `<div style="padding:8px 12px; background:rgba(255,255,255,0.03); border:1px solid ${color}; border-radius:8px; font-size:13px; color:${color}; display:inline-flex; margin:4px;">${text}</div>`;
     }
 
-    // --- ENGINE API REQUEST ---
+    // =========================================================
+    // ENGINE API
+    // =========================================================
     async function requestCoreAI(sysPrompt, userContent, fallbackTitle) {
       var loading = document.getElementById('loadingWrap');
       var result = document.getElementById('resultWrap');
-      var resultBody = document.getElementById('resultBody');
-       
       loading.classList.add('show');
       result.classList.remove('show');
-
       try {
         var res = await fetch(WORKER, {
           method: 'POST',
@@ -607,10 +723,8 @@
             messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: userContent }]
           })
         });
-         
         var d = await res.json();
         var content = '';
-         
         if (d.choices && d.choices[0] && d.choices[0].message) {
           content = d.choices[0].message.content;
         } else if (d.error) {
@@ -618,17 +732,22 @@
         } else {
           content = '⚠️ Format Respons Gagal Dikenali.';
         }
-
         lastResultText = content;
-        resultBody.innerHTML = marked.parse(content);
+        // Untuk kuis & terjemahan: tampilkan di tab pertama saja
+        document.getElementById('sec-poin').innerHTML = marked.parse(content);
+        ['sec-rangkuman','sec-explain','sec-tabel','sec-langkah'].forEach(id => {
+          document.getElementById(id).innerHTML = '';
+        });
         result.classList.add('show');
+        // Reset ke tab pertama
+        document.querySelectorAll('.result-tab').forEach((b,i) => b.classList.toggle('active', i===0));
+        document.querySelectorAll('.result-section').forEach((s,i) => s.classList.toggle('visible', i===0));
         saveToHistory(fallbackTitle, typeof userContent === 'string' ? userContent : 'Multi-input data', content);
-
         if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-          MathJax.typesetPromise([resultBody]).catch(e => console.log(e));
+          MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e => console.log(e));
         }
       } catch(e) {
-        resultBody.innerHTML = '<span style="color:#f87171">Gagal Menghubungi Jalur Worker API: ' + e.message + '</span>';
+        document.getElementById('sec-poin').innerHTML = '<span style="color:#f87171">Gagal Menghubungi Jalur Worker API: ' + e.message + '</span>';
         result.classList.add('show');
       } finally {
         loading.classList.remove('show');
@@ -636,7 +755,7 @@
     }
 
     // =========================================================
-    // BARU: FUNGSI UTAMA ALL-IN-ONE (MEMBACA 4 KOTAK)
+    // EDIT 4: PROMPT ALL-IN-ONE DENGAN STRUKTUR SECTION WAJIB
     // =========================================================
     async function doRingkasAllInOne() {
       if (!checkAndIncrementLimit()) {
@@ -647,7 +766,6 @@
       var chip = document.querySelector('#styleRow .chip.active');
       var styleGaya = chip ? chip.textContent : 'Poin Penting';
       
-      // Ambil seluruh value dari 4 Kotak
       var txtInput = document.getElementById('textArea').value.trim();
       var ytInput = document.getElementById('youtubeUrlInput').value.trim();
       var hasPDF = extractedDocumentText && extractedDocumentText.trim().length > 0;
@@ -659,75 +777,78 @@
       }
 
       var loadingWrap = document.getElementById('loadingWrap');
-      var loaderText = document.querySelector('#loadingWrap span');
+      var loaderSpan = document.querySelector('#loadingWrap span');
       if (loadingWrap) loadingWrap.classList.add('show');
       document.getElementById('resultWrap').classList.remove('show');
 
       var finalPayload = [];
-      var textKompilasi = `Gaya Instruksi Jawaban: Tolong buatkan output dengan gaya "${styleGaya}".\n\n`;
+      var textKompilasi = `Gaya Instruksi Jawaban: Tolong utamakan gaya "${styleGaya}".\n\n`;
 
-      // 1. Ambil Data YouTube Transcript jika link diisi
+      // 1. YouTube Transcript
       if (ytInput) {
-        if (loaderText) loaderText.textContent = '⏳ Menarik transkrip YouTube...';
+        if (loaderSpan) loaderSpan.textContent = '⏳ Menarik transkrip YouTube...';
         try {
-         // Ganti dengan ini agar sesuai dengan endpoint FastAPI kamu:
-         var hfRes = await fetch(`${HF_SPACE_API.replace('/api/predict', '')}/transcript?url=${encodeURIComponent(ytInput)}`);
-         var hfData = await hfRes.json();
-         var ytTranscript = hfData.transcript ? hfData.transcript : "";
-
-          // Jika HF Gagal atau Not Found, lempar ke Worker sebagai Fallback
+          var hfRes = await fetch(`${HF_SPACE_API.replace('/api/predict', '')}/transcript?url=${encodeURIComponent(ytInput)}`);
+          var hfData = await hfRes.json();
+          var ytTranscript = hfData.transcript ? hfData.transcript : "";
           if (!ytTranscript || ytTranscript.includes("Not Found")) {
             var workerYt = await fetch(WORKER, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ action: 'transcript', url: ytInput })
             });
             var workerYtData = await workerYt.json();
             ytTranscript = workerYtData.transcript || workerYtData.data?.[0] || "";
           }
-
           if(ytTranscript && !ytTranscript.includes("Not Found")) {
             textKompilasi += `[TRANSKRIP YOUTUBE]:\n${ytTranscript}\n\n`;
           } else {
-            textKompilasi += `[INFO YOUTUBE]: Tautan video dikirim, tapi sistem eksternal gagal mengambil transkrip otomatis.\n\n`;
+            textKompilasi += `[INFO YOUTUBE]: Sistem eksternal gagal mengambil transkrip otomatis.\n\n`;
           }
         } catch(err) {
           textKompilasi += `[INFO YOUTUBE]: Gagal memproses transkrip karena kendala jaringan backend.\n\n`;
         }
       }
 
-      // 2. Tambahkan Data Teks Manual Box 1
-      if (txtInput) {
-        textKompilasi += `[INPUT TEKS MANUAL USER / ARAHAN]:\n${txtInput}\n\n`;
-      }
+      // 2. Teks Manual
+      if (txtInput) textKompilasi += `[INPUT TEKS MANUAL USER]:\n${txtInput}\n\n`;
 
-      // 3. Tambahkan Ekstraksi PDF Box 3
-      if (hasPDF) {
-        textKompilasi += `[ISI KONTEN DOKUMEN PDF]:\n${extractedDocumentText}\n\n`;
-      }
+      // 3. PDF
+      if (hasPDF) textKompilasi += `[ISI KONTEN DOKUMEN PDF]:\n${extractedDocumentText}\n\n`;
 
-      // 4. Masukkan Foto Box 2 ke payload Vision (jika ada)
+      // 4. Foto
       if (hasFoto) {
         uploadedImages.forEach(function(img) {
-          finalPayload.push({
-            type: 'image_url',
-            image_url: { url: 'data:' + img.mediaType + ';base64,' + img.base64 }
-          });
+          finalPayload.push({ type: 'image_url', image_url: { url: 'data:' + img.mediaType + ';base64,' + img.base64 } });
         });
       }
 
-      // Gabungkan seluruh data teks ke payload utama AI
       finalPayload.push({ type: 'text', text: textKompilasi });
+      if (loaderSpan) loaderSpan.textContent = '⚡ AI sedang menyusun jawaban berbobot...';
 
-      if (loaderText) loaderText.textContent = '⚡ AI sedang menyusun jawaban berbobot...';
-
-      // Jalankan prompt instruksi sistem
+      // EDIT 4: System prompt dengan struktur 5 section wajib
       var sysInstruction = `Kamu adalah asisten akademik super cerdas. Jawab penuh dalam Bahasa Indonesia menggunakan format Markdown komplit.
+
+WAJIB buat output dengan TEPAT 5 section heading berikut secara berurutan (jangan diubah teksnya):
+
+## 📌 Poin Penting
+Tulis poin-poin inti materi dalam format bullet list.
+
+## 📖 Rangkuman Detail
+Tulis rangkuman narasi lengkap dan menyeluruh.
+
+## 💡 Explain
+Jelaskan materi dengan bahasa sederhana seperti menjelaskan ke siswa yang baru pertama kali belajar. Gunakan analogi, contoh nyata, dan kalimat yang mudah dipahami.
+
+## 🧮 Tabel & Rumus Matematika
+Buat tabel perbandingan atau rangkuman rumus jika relevan. Gunakan LaTeX untuk rumus matematika.
+
+## 📝 Langkah Tutorial
+Tulis langkah-langkah praktis step-by-step jika materi bisa diterapkan secara praktikal.
+
 Aturan Wajib Output Visual:
-- Seluruh Judul/Heading (##), sub-heading, struktur utama, rumus matematika LaTeX, dan teks berbobot berat (kata penting/strong) wajib tampil dalam teks bold terstruktur agar terwarnai Biru oleh CSS.
-- Seluruh bentuk poin-poin penting, daftar langkah, tutorial langkah demi langkah, item, bullet, ol/ul wajib ditulis memakai format list markdown agar terwarnai Hijau oleh CSS.
-- Penjelasan narasi deskriptif biasa di luar judul dan poin wajib ditulis normal agar berwarna Putih.
-- Jika ada perbandingan data, buatkan sebuah tabel Markdown yang rapi.`;
+- Heading (##) dan teks bold/strong wajib pakai markdown agar terwarnai Biru oleh CSS.
+- Poin-poin list (ul/ol) wajib pakai format list markdown agar terwarnai Hijau oleh CSS.
+- Penjelasan narasi biasa ditulis normal agar berwarna Putih.`;
 
       try {
         var res = await fetch(WORKER, {
@@ -745,15 +866,19 @@ Aturan Wajib Output Visual:
         var content = d.choices?.[0]?.message?.content || '⚠️ Server AI mengalami kendala memformat respons.';
         
         lastResultText = content;
-        document.getElementById('resultBody').innerHTML = marked.parse(content);
+
+        // Render ke section-section yang terpisah
+        renderSections(content);
         document.getElementById('resultWrap').classList.add('show');
+
+        // Reset ke tab 📌 Poin Penting
+        document.querySelectorAll('.result-tab').forEach((b,i) => b.classList.toggle('active', i===0));
+        document.querySelectorAll('.result-section').forEach((s,i) => s.classList.toggle('visible', i===0));
+
         saveToHistory("Ringkas", "Multi-input 4 Box", content);
 
-        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-          MathJax.typesetPromise([document.getElementById('resultBody')]).catch(e => console.log(e));
-        }
       } catch(e) {
-        document.getElementById('resultBody').innerHTML = `<span style="color:#f87171">Error: ${e.message}</span>`;
+        document.getElementById('sec-poin').innerHTML = `<span style="color:#f87171">Error: ${e.message}</span>`;
         document.getElementById('resultWrap').classList.add('show');
       } finally {
         if (loadingWrap) loadingWrap.classList.remove('show');
