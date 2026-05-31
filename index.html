@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>K's Tools for School — AI Study Assistant</title>
   
-  <!-- CDNs & Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
   <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';</script>
@@ -13,7 +12,6 @@
   <script>window.MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']] } };</script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   
-  <!-- Supabase JS Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -48,21 +46,26 @@
     }
     .auth-card {
       background: var(--surface); backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--border); border-radius: 24px; padding: 32px; width: 100%; max-width: 400px;
+      border: 1px solid var(--border); border-radius: 24px; padding: 40px 32px; width: 100%; max-width: 400px;
+      text-align: center;
     }
-    .auth-input {
-      width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); 
-      border: 1px solid var(--border); border-radius: 12px; color: white; margin-bottom: 16px;
-      font-family: inherit; outline: none;
+    .google-btn {
+      width: 100%; padding: 14px; background: white; border: none;
+      border-radius: 12px; font-weight: 600; color: #1f2937; cursor: pointer;
+      font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      transition: background 0.2s;
     }
-    .auth-input:focus { border-color: var(--accent2); }
-    .auth-btn {
-      width: 100%; padding: 12px; background: var(--accent); border: none;
-      border-radius: 12px; font-weight: 700; color: #030712; cursor: pointer; margin-bottom: 12px;
-      font-family: inherit;
-    }
+    .google-btn:hover { background: #f3f4f6; }
+    .google-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-    /* Kontainer Aplikasi */
+    #authError {
+      display: none; color: #ef4444; font-size: 13px; margin-top: 16px; background: rgba(239, 68, 68, 0.1);
+      padding: 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    #authError.show { display: block; }
+
+    /* Kontainer Utama Aplikasi */
     #app-container { display: none; }
     body.logged-in #app-container { display: block; }
     body.logged-in #auth-screen { display: none; }
@@ -89,7 +92,7 @@
     }
 
     .main-content { margin-top: var(--topbar-h); padding: var(--gap); max-width: 900px; }
-    
+     
     /* Navigasi */
     .nav-item {
       padding: 12px 20px; color: var(--text2); cursor: pointer; border-radius: 12px;
@@ -104,7 +107,7 @@
       background: var(--surface); backdrop-filter: var(--glass-blur); 
       border: 1px solid var(--border); border-radius: 24px; padding: 24px; margin-bottom: 20px; 
     }
-    
+     
     .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     .chip { 
       padding: 8px 16px; border: 1px solid rgba(255,255,255,0.08); 
@@ -131,17 +134,19 @@
 
     /* Profil & Avatar */
     .user-profile { display: flex; align-items: center; gap: 12px; position: relative; }
-    .avatar {
-      width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent2), #3b82f6);
+    .avatar-wrapper { width: 36px; height: 36px; position: relative; cursor: pointer; }
+    .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: none; }
+    .avatar-placeholder {
+      width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, var(--accent2), #3b82f6);
       display: flex; align-items: center; justify-content: center; font-weight: 700; color: #030712;
-      cursor: pointer; font-size: 14px; user-select: none;
+      font-size: 14px; user-select: none;
     }
     .logout-dropdown {
       display: none; position: absolute; top: 44px; right: 0; background: #111827;
-      border: 1px solid var(--border); border-radius: 10px; padding: 8px; width: 120px; box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+      border: 1px solid var(--border); border-radius: 10px; padding: 8px; width: 140px; box-shadow: 0 10px 15px rgba(0,0,0,0.5);
     }
     .logout-dropdown button {
-      width: 100%; padding: 6px; background: transparent; border: none; color: #f87171; text-align: left; cursor: pointer; font-family: inherit;
+      width: 100%; padding: 8px; background: transparent; border: none; color: #f87171; text-align: left; cursor: pointer; font-family: inherit; font-weight: 500;
     }
 
     /* Tombol Saweria */
@@ -158,7 +163,7 @@
     .loading-wrap, .result-wrap { display: none; margin-top: 20px; }
     .loading-wrap.show, .result-wrap.show { display: block; }
     .result-body { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 16px; padding: 24px; line-height: 1.6; }
-    
+     
     /* Riwayat / History */
     .history-item {
       padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border);
@@ -169,18 +174,26 @@
 </head>
 <body>
 
-  <!-- 1. LAYER AUTH SUPABASE -->
   <div id="auth-screen">
     <div class="auth-card">
       <h2 style="margin-bottom: 8px; font-weight:700;">Welcome Student</h2>
-      <p style="color: var(--text2); font-size:14px; margin-bottom: 24px;">Masuk ke K's Tools untuk melanjutkan belajar.</p>
-      <input type="email" id="auth-email" class="auth-input" placeholder="Alamat Email..."/>
-      <button class="auth-btn" onclick="handleAuth('login')">Masuk Aplikasi</button>
-      <button class="auth-btn" style="background:transparent; border:1px solid var(--border); color:var(--text2);" onclick="handleAuth('signup')">Daftar Akun Baru</button>
+      <p style="color: var(--text2); font-size:14px; margin-bottom: 32px;">Masuk ke K's Tools untuk melanjutkan belajar.</p>
+      
+      <button class="google-btn" onclick="signInWithGoogle()">
+        <svg width="20" height="20" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg> 
+        Masuk dengan Google
+      </button>
+
+      <div id="authError"></div>
     </div>
   </div>
 
-  <!-- 2. CONTAINER UTAMA APLIKASI -->
   <div id="app-container">
     <aside class="sidebar">
       <div style="padding: 24px; color: var(--accent); font-weight: 700; font-size: 18px; border-bottom: 1px solid var(--border)">
@@ -193,13 +206,11 @@
         <div class="nav-item" data-target="page-terjemahan" onclick="switchPage(this)">🌐 Terjemahan Pro</div>
         <div class="nav-item" data-target="page-history" onclick="switchPage(this); renderHistory();">📜 Riwayat Aktivitas</div>
       </nav>
-      
-      <!-- Informasi Limit -->
+       
       <div style="padding: 12px 20px; font-size: 12px; color: var(--text2); background: rgba(0,0,0,0.2); margin: 8px 16px; border-radius: 8px;">
         Sisa Kuota Hari Ini: <span id="limit-badge" style="color:var(--accent2); font-weight:700;">20/20</span>
       </div>
 
-      <!-- Tombol Saweria -->
       <a href="https://saweria.co/kian1904" target="_blank" class="saweria-btn">
         👑 Dukung Proyek via Saweria
       </a>
@@ -208,19 +219,20 @@
     <div class="topbar">
       <button class="menu-toggle" onclick="document.body.classList.toggle('sidebar-open')" style="background:transparent; border:none; color:white; font-size:24px; cursor:pointer;">☰</button>
       <h3 id="page-title" style="font-weight: 600;">Ringkas Materi</h3>
-      
-      <!-- Topbar Avatar -->
+       
       <div class="user-profile">
-        <div class="avatar" id="user-avatar" onclick="toggleLogoutMenu()">U</div>
+        <div class="avatar-wrapper" onclick="toggleLogoutMenu()">
+          <img id="topbarAvatar" class="avatar-img" alt="Profile"/>
+          <div id="topbarAvatarPlaceholder" class="avatar-placeholder">U</div>
+        </div>
         <div class="logout-dropdown" id="logout-menu">
-          <button onclick="logout()">Keluar Akun</button>
+          <button onclick="signOut()">Keluar Akun</button>
         </div>
       </div>
     </div>
 
     <main class="main-content">
-      
-      <!-- HALAMAN 1: RINGKAS -->
+       
       <section id="page-ringkas" class="app-page active">
         <div class="card">
           <div class="chip-container" id="styleRow">
@@ -235,7 +247,6 @@
         </div>
       </section>
 
-      <!-- HALAMAN 2: YOUTUBE -->
       <section id="page-youtube" class="app-page">
         <div class="card">
           <h4 style="margin-bottom:12px; color:var(--accent2)">Analisis Materi Video via Hugging Face</h4>
@@ -245,7 +256,6 @@
         </div>
       </section>
 
-      <!-- HALAMAN 3: KUIS -->
       <section id="page-kuis" class="app-page">
         <div class="card">
           <div class="chip-container" id="quizTypeRow">
@@ -257,7 +267,6 @@
         </div>
       </section>
 
-      <!-- HALAMAN 4: TERJEMAHAN -->
       <section id="page-terjemahan" class="app-page">
         <div class="card">
           <div class="chip-container" id="langRow">
@@ -269,7 +278,6 @@
         </div>
       </section>
 
-      <!-- HALAMAN 5: HISTORY -->
       <section id="page-history" class="app-page">
         <div class="card">
           <h4 style="margin-bottom:16px;">Riwayat Penyimpanan Lokal</h4>
@@ -277,13 +285,12 @@
         </div>
       </section>
 
-      <!-- OUTPUT GLOBAL INTERFACE -->
       <div class="loading-wrap" id="loadingWrap">
         <div style="display:flex; align-items:center; gap:12px; color:var(--accent2);" id="loadingText">
           <span>⏳ AI sedang merakit jawaban terbaik, mohon tunggu sebentar...</span>
         </div>
       </div>
-      
+       
       <div class="result-wrap" id="resultWrap">
         <div class="result-body" id="resultBody"></div>
       </div>
@@ -293,55 +300,103 @@
 
   <script>
     // =========================================================
-    // KREDENSIAL UTAMA DAN JALUR BACKEND ASLI MILIK KIAN
+    // CONFIG BACKEND & KREDENSIAL SUPABASE GOOGLE AUTH KIAN
     // =========================================================
     const WORKER = "https://ringkas-api.ryalandsokay.workers.dev"; 
-    const SUPABASE_URL = "https://xqrrimruddjmnhutxcjf.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxcnJpbXJ1ZGRqbW5odXR4Y2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjM1NzYsImV4cCI6MjA5NTE5OTU3Nn0.KEHcusLNEJEuTYUi_prUvWrpIVo7t97JLkwkV6lUYis";
     const HF_SPACE_API = "https://kian1904-ringkas-backend.hf.space/api/predict"; 
-
-    // Inisialisasi Klien Supabase Resmi
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
+    const SUPABASE_URL = 'https://xqrrimruddjmnhutxcjf.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_-r0safaA4GUE6o9I2NupBw_NqyBJn15';
+    
+    // Inisialisasi menggunakan standard Supabase CDN v2 Library
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+     
     // Global State
     let currentUser = null;
     let extractedDocumentText = "";
     let lastResultText = "";
     const DAILY_LIMIT_MAX = 20;
 
-    // --- MANAJEMEN SISTEM AUTH SUPABASE ---
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        currentUser = session.user;
-        document.body.classList.add('logged-in');
-        document.getElementById('user-avatar').innerText = currentUser.email.charAt(0).toUpperCase();
-        updateLimitUI();
-      } else {
-        currentUser = null;
-        document.body.classList.remove('logged-in');
-      }
-    });
-
-    async function handleAuth(type) {
-      const email = document.getElementById('auth-email').value.trim();
-      if(!email) return alert('Lengkapi kolom email);
+    // =========================================================
+    // ENGINE UTAMA GOOGLE OAUTH FLOW (KODE ASLI KIAN YANG DISINKRONKAN)
+    // =========================================================
+    async function signInWithGoogle() {
+      const btn = document.querySelector('.google-btn');
+      btn.disabled = true;
+      btn.textContent = 'Mengarahkan...';
       
-      try {
-        if(type === 'login') {
-          const { error } = await supabase.auth.signwithemail({ email });
-          if(error) throw error;
-        } else {
-          const { error } = await supabase.auth.signUp({ email });
-          if(error) throw error;
-          alert('Pendaftaran berhasil! Silakan periksa kotak masuk email kamu untuk konfirmasi atau coba langsung masuk.');
-        }
-      } catch(err) { alert(err.message); }
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.href }
+      });
+      
+      if (error) {
+        showAuthError(error.message);
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg> Masuk dengan Google`;
+      }
     }
-
-    async function logout() {
-      await supabase.auth.signOut();
+     
+    async function signOut() {
+      await sb.auth.signOut();
       window.location.reload();
     }
+     
+    function showAuthError(msg) {
+      const el = document.getElementById('authError');
+      if (el) {
+        el.textContent = msg;
+        el.classList.add('show');
+      }
+    }
+     
+    function setUserUI(user) {
+      const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+      const photo = user.user_metadata?.avatar_url || '';
+      const initial = name.charAt(0).toUpperCase();
+     
+      const placeholder = document.getElementById('topbarAvatarPlaceholder');
+      const avImg = document.getElementById('topbarAvatar');
+      
+      if (placeholder) placeholder.textContent = initial;
+     
+      if (photo && avImg) {
+        avImg.src = photo; 
+        avImg.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+      } else if (avImg && placeholder) {
+        avImg.style.display = 'none';
+        placeholder.style.display = 'flex';
+      }
+    }
+     
+    function showApp(user) {
+      currentUser = user;
+      setUserUI(user);
+      document.body.classList.add('logged-in');
+      updateLimitUI();
+    }
+
+    function hideApp() {
+      currentUser = null;
+      document.body.classList.remove('logged-in');
+    }
+     
+    // Listen to Auth State Changes
+    sb.auth.onAuthStateChange(function(event, session) {
+      if (session && session.user) {
+        showApp(session.user);
+      } else {
+        hideApp();
+      }
+    });
+     
+    // Check Existing Session on Initial Load
+    sb.auth.getSession().then(function(result) {
+      if (result.data.session) {
+        showApp(result.data.session.user);
+      }
+    });
 
     function toggleLogoutMenu() {
       const el = document.getElementById('logout-menu');
@@ -364,7 +419,6 @@
       return true;
     }
 
-    // Perbaikan pelindung tampilan limit
     function updateLimitUI() {
       const badge = document.getElementById('limit-badge');
       if(!badge) return;
@@ -390,7 +444,7 @@
       if(!currentUser) return;
       const data = JSON.parse(localStorage.getItem(`${currentUser.id}_history`) || "[]");
       if(data.length === 0) { container.innerHTML = '<p style="color:var(--text3)">Belum ada riwayat aktivitas belajar.</p>'; return; }
-      
+       
       data.forEach((item) => {
         const div = document.createElement('div');
         div.className = 'history-item';
@@ -409,14 +463,13 @@
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
       element.classList.add('active');
-      
+       
       const target = element.getAttribute('data-target');
       document.getElementById(target).classList.add('active');
       document.getElementById('page-title').innerText = element.innerText;
       document.body.classList.remove('sidebar-open');
     }
 
-    // Event Delegasi untuk Chips
     document.querySelectorAll('.chip-container').forEach(row => {
       row.addEventListener('click', (e) => {
         if(e.target.classList.contains('chip')) {
@@ -431,13 +484,13 @@
       var btn = document.getElementById('submitBtn');
       if (file.size > 50 * 1024 * 1024) { alert('File terlalu besar, maksimal 50MB'); return; }
       if (btn) { btn.disabled = true; btn.innerText = '⏳ Membaca PDF...'; }
-      
+       
       try {
         var buf = await file.arrayBuffer();
         var loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buf) });
         var pdf = await loadingTask.promise;
         var total = pdf.numPages; var texts = [];
-        
+         
         for (var i = 1; i <= total; i++) {
           if (btn) btn.innerText = '⏳ Membaca halaman ' + i + ' dari ' + total + '...';
           var page = await pdf.getPage(i); var content = await page.getTextContent();
@@ -445,7 +498,7 @@
         }
         extractedDocumentText = texts.join('\n\n');
         pdf.destroy();
-        
+         
         if (!extractedDocumentText.trim()) {
           alert('PDF ini hanya berisi gambar, belum mendukung OCR.');
           extractedDocumentText = '';
@@ -477,12 +530,12 @@
       preview.style.display = 'block';
     }
 
-    // --- PUSAT ENGINE KIRIM DATA KE CORE CLOUDFLARE WORKER ---
+    // --- ENGINE API REQUEST ---
     async function requestCoreAI(sysPrompt, userContent, fallbackTitle) {
       var loading = document.getElementById('loadingWrap');
       var result = document.getElementById('resultWrap');
       var resultBody = document.getElementById('resultBody');
-      
+       
       loading.classList.add('show');
       result.classList.remove('show');
 
@@ -494,10 +547,10 @@
             messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: userContent }]
           })
         });
-        
+         
         var d = await res.json();
         var content = '';
-        
+         
         if (d.choices && d.choices[0] && d.choices[0].message) {
           content = d.choices[0].message.content;
         } else if (d.error) {
@@ -522,16 +575,15 @@
       }
     }
 
-    // --- INTEGRASI FITUR RINGKAS (FIXED DATA TEXT VARIABLE) ---
+    // --- ACTIONS ---
     async function doRingkas() {
       var txt = document.getElementById('textArea').value.trim();
       var hasPDF = extractedDocumentText && extractedDocumentText.trim().length > 0;
       if (!txt && !hasPDF) return alert('Ketik materi atau pilih lampiran PDF dulu!');
-      
+       
       if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis! (Maksimal 20 request per hari).");
 
       var style = document.querySelector('#styleRow .chip.active')?.textContent || 'Poin Penting';
-      // Diperbaiki dari ArrayText kembali ke format teks string tujuan asli
       var finalText = hasPDF ? `Ringkas dokumen PDF ini dengan gaya "${style}":\n\n${extractedDocumentText.slice(0, 15000)}` : `Ringkas dengan gaya "${style}":\n\n${txt}`;
       if (hasPDF && txt) finalText += '\n\nArahan tambahan: ' + txt;
 
@@ -539,19 +591,18 @@
       await requestCoreAI(sys, finalText, "Ringkas");
     }
 
-    // --- INTEGRASI MODUL YOUTUBE ➔ HUGGING FACE ➔ WORKER ---
     async function doProcessYouTube() {
       var url = document.getElementById('ytUrl').value.trim();
       var notes = document.getElementById('ytNotes').value.trim();
       if(!url) return alert('Tautan video YouTube tidak boleh kosong!');
-      
+       
       if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis! (Maksimal 20 request per hari).");
 
       var loading = document.getElementById('loadingWrap');
       var result = document.getElementById('resultWrap');
       var resultBody = document.getElementById('resultBody');
       var loaderText = document.querySelector('#loadingWrap span');
-      
+       
       loading.classList.add('show'); result.classList.remove('show');
       loaderText.innerText = "⏳ Langkah 1: Meminta Hugging Face Space menarik transkrip video...";
 
@@ -561,19 +612,19 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: [url] })
         });
-        
+         
         var hfData = await hfRes.json();
         var transkripTeks = hfData.data ? hfData.data[0] : (hfData.result || JSON.stringify(hfData));
-        
+         
         if(!transkripTeks || transkripTeks.trim().length === 0 || transkripTeks.includes("error")) {
           throw new Error(transkripTeks || "Transkrip kosong/Gagal diekstrak.");
         }
 
         loaderText.innerText = "⏳ Langkah 2: Mengirim transkrip ke Cloudflare Worker untuk dianalisis oleh AI...";
-        
+         
         var promptUser = `Berikut adalah transkrip lengkap dari video YouTube. Tolong bedah materi esensialnya secara mendalam:\n\n${transkripTeks}`;
         if(notes) promptUser += `\n\nCatatan Tambahan Pengguna: ${notes}`;
-        
+         
         var sys = 'Kamu adalah bot edukasi spesialis transkripsi dan analisis video. Bedah poin penting isi video tersebut dengan sangat detail dalam Bahasa Indonesia menggunakan Markdown.';
         await requestCoreAI(sys, promptUser, "YouTube");
 
@@ -586,11 +637,10 @@
       }
     }
 
-    // --- EKSEKUTOR MODUL KUIS (FIXED) ---
     async function doGenerateQuiz() {
       var src = document.getElementById('quizSource').value.trim();
       if(!src) return alert('Masukkan materi fondasi soal kuis terlebih dahulu!');
-      
+       
       if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis!");
 
       var tipe = document.querySelector('#quizTypeRow .chip.active')?.textContent || 'Pilihan Ganda';
@@ -598,11 +648,10 @@
       await requestCoreAI(sys, src, "Buat Kuis");
     }
 
-    // --- EKSEKUTOR MODUL TRANSLATION (FIXED) ---
     async function doTranslate() {
       var src = document.getElementById('transSource').value.trim();
       if(!src) return alert('Teks asal bahasa yang mau diterjemahkan masih kosong!');
-      
+       
       if(!checkAndIncrementLimit()) return alert("🚨 Batas kuota harian habis!");
 
       var mode = document.querySelector('#langRow .chip.active')?.textContent || 'Inggris ➔ Indonesia';
