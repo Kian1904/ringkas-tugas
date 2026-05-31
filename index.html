@@ -749,65 +749,61 @@ window.onload = function() {
 };
 
 // ================= FUNGSI PEMBACAL PDF =================
-function bacaTeksPDF(file) {
-  var reader = new FileReader();
+async function bacaTeksPDF(file) {
   var btn = document.getElementById('submitBtn');
-  
-  if (btn) {
-    btn.disabled = true;
-    btn.innerText = "⏳ Membaca PDF (Mohon Tunggu)...";
-  }
-
-  reader.onload = async function() {
-    try {
-      var typedarray = new Uint8Array(this.result);
-      var pdf = await pdfjsLib.getDocument(typedarray).promise;
-      var totalTeks = "";
-
-      for (var i = 1; i <= pdf.numPages; i++) {
-        var page = await pdf.getPage(i);
-        var textObj = await page.getTextContent();
-        totalTeks += textObj.items.map(item => item.str).join(" ") + "\n";
-      }
-
-      extractedDocumentText = totalTeks;
-      console.log("✅ PDF BERHASIL DIEKSTRAK! Total Karakter:", extractedDocumentText.length);
-      
-      if (btn) {
-        btn.disabled = false;
-        btn.innerText = "Ringkas Sekarang";
-      }
-    } catch (err) {
-      alert("Gagal membaca dokumen PDF: " + err.message);
-      if (btn) { btn.disabled = false; btn.innerText = "Ringkas Sekarang"; }
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function processFiles(files) {
-  extractedDocumentText = "";
   var preview = document.getElementById('previewRow');
-  if(!preview) return;
-  preview.innerHTML = '';
   
-  for (var i = 0; i < files.length; i++) {
-    var f = files[i];
-    if (f.name.toLowerCase().endsWith('.pdf')) {
-      var div = document.createElement('div');
-      div.style = "padding: 8px 12px; background: rgba(47, 228, 138, 0.1); border: 1px solid #2fe48a; border-radius: 8px; font-size: 13px; color: #2fe48a; display: inline-flex; margin: 4px;";
-      div.innerHTML = `📄 PDF: ${f.name}`;
-      preview.appendChild(div);
-      bacaTeksPDF(f);
-    }
+  if (file.size > 50 * 1024 * 1024) {
+    alert('File terlalu besar, maksimal 50MB');
+    return;
   }
-  preview.classList.add('show');
+  
+  if (btn) { btn.disabled = true; btn.innerText = '⏳ Membaca PDF...'; }
+  
+  try {
+    var buf = await file.arrayBuffer();
+    var loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buf) });
+    var pdf = await loadingTask.promise;
+    var total = pdf.numPages;
+    var texts = [];
+    
+    for (var i = 1; i <= total; i++) {
+      if (btn) btn.innerText = '⏳ Membaca halaman ' + i + ' dari ' + total + '...';
+      var page = await pdf.getPage(i);
+      var content = await page.getTextContent();
+      texts.push(content.items.map(function(s) { return s.str; }).join(' '));
+    }
+    
+    extractedDocumentText = texts.join('\n\n');
+    pdf.destroy(); // Bebas memori
+    
+    if (!extractedDocumentText.trim()) {
+      alert('PDF ini hanya berisi gambar, belum mendukung OCR.');
+      extractedDocumentText = '';
+      if (btn) { btn.disabled = false; btn.innerText = 'Ringkas Sekarang'; }
+      return;
+    }
+    
+    if (btn) { btn.disabled = false; btn.innerText = '✅ PDF siap (' + total + ' halaman) — Ringkas Sekarang'; }
+    
+  } catch(e) {
+    var msg = e.message || '';
+    if (msg.includes('password') || msg.includes('encrypt')) {
+      alert('PDF terenkripsi, tidak bisa dibaca.');
+    } else {
+      alert('PDF corrupt atau tidak bisa dibuka: ' + msg);
+    }
+    extractedDocumentText = '';
+    if (btn) { btn.disabled = false; btn.innerText = 'Ringkas Sekarang'; }
+  }
 }
 
 // ================= FUNGSI DO RINGKAS (ANTI-OBJECT) =================
 async function doRingkas() {
   var txt = document.getElementById('textArea').value.trim();
-  if (!txt && (!extractedDocumentText || extractedDocumentText.trim().length === 0)) {
+  var hasPDF = extractedDocumentText && extractedDocumentText.trim().length > 0;
+  
+  if (!txt && !hasPDF) {
     alert('Masukkan teks atau pilih PDF terlebih dahulu!');
     return;
   }
@@ -818,61 +814,65 @@ async function doRingkas() {
   var loading = document.getElementById('loadingWrap');
   var result = document.getElementById('resultWrap');
   var resultBody = document.getElementById('resultBody');
+  var btn = document.getElementById('submitBtn');
   
-  if(loading) loading.classList.add('show');
-  if(result) result.classList.remove('show');
-  
-  var textToSend = txt;
-  if (extractedDocumentText && extractedDocumentText.trim().length > 0) {
-    textToSend = "Materi Dokumen PDF:\n" + extractedDocumentText + "\n\n" + (txt ? "Arahan Tambahan: " + txt : "");
+  loading.classList.add('show');
+  result.classList.remove('show');
+  btn.disabled = true;
+ 
+  // Susun konten yang mau dikirim
+  var finalText = '';
+  if (hasPDF) {
+    finalText = 'Ringkas dokumen PDF ini dengan gaya "' + style + '":\n\n' + 
+                extractedDocumentText.slice(0, 15000);
+    if (txt) finalText += '\n\nArahan tambahan: ' + txt;
+  } else {
+    finalText = 'Ringkas dengan gaya "' + style + '":\n\n' + txt;
+  }
+ 
+  var sys = 'Kamu adalah asisten pelajar yang membantu. Jawab dalam Bahasa Indonesia. ' +
+            'Gunakan Markdown: **bold**, heading (##), bullet list, tabel, dan LaTeX math jika perlu. ' +
+            'Output HANYA sesuai gaya yang diminta.';
+ 
+  try {
+    var res = await fetch(WORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: [{ type: 'text', text: finalText }] }
+        ]
+      })
+    });
+    
+    var d = await res.json();
+    
+    // Parse response dengan aman
+    var content = '';
+    if (d.choices && d.choices[0] && d.choices[0].message) {
+      content = d.choices[0].message.content;
+    } else if (d.error) {
+      content = '⚠️ Error: ' + (typeof d.error === 'object' ? d.error.message : d.error);
+    } else {
+      content = '⚠️ Respons tidak dikenali: ' + JSON.stringify(d);
+    }
+    
+    lastResultText = content;
+    resultBody.innerHTML = marked.parse(content);
+    result.classList.add('show');
+    
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+      MathJax.typesetPromise([resultBody]).catch(function(e) { console.log(e); });
+    }
+    
+  } catch(e) {
+    resultBody.innerHTML = '<span style="color:#f87171">Gagal: ' + e.message + '</span>';
+    result.classList.add('show');
   }
   
-  fetch(''+WORKER+'/ringkas', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({text:textToSend, style:style})
-  })
-  .then(async r => {
-    if (!r.ok) {
-      var errorText = await r.text();
-      throw new Error(`Worker Error (${r.status}): ${errorText}`);
-    }
-    return r.json();
-  })
-  .then(d => {
-    if(loading) loading.classList.remove('show');
-    console.log("Respon Worker:", d);
-    
-    // 🔍 JIKA WORKER MENGIRIM KOTAK ERROR DARI AI
-    if (d && d.error) {
-      var pesanError = typeof d.error === 'object' ? (d.error.message || JSON.stringify(d.error)) : d.error;
-      lastResultText = `⚠️ **Worker Mengalami Kendala Eksekusi AI:**\n\`\`\`text\n${pesanError}\n\`\`\``;
-      if (resultBody) resultBody.innerHTML = marked.parse(lastResultText);
-      if(result) result.classList.add('show');
-      return;
-    }
-
-    // 🧠 BONGKAR STRUKTUR DATA AGAR BEBAS DARI ERROR [OBJECT OBJECT]
-    var rawResult = d.result || d.response || d.text || d.output || d;
-    if (rawResult && typeof rawResult === 'object') {
-      rawResult = rawResult.text || rawResult.response || JSON.stringify(rawResult);
-    }
-    
-    lastResultText = String(rawResult);
-    if (resultBody) resultBody.innerHTML = marked.parse(lastResultText);
-    if(result) result.classList.add('show');
-    
-    if (typeof MathJax !== "undefined" && MathJax.typesetPromise) {
-      MathJax.contentDocument = document;
-      MathJax.typesetPromise([resultBody]).catch(e => console.log(e));
-    }
-  })
-  .catch(e => {
-    if(loading) loading.classList.remove('show');
-    lastResultText = 'Gagal memproses rangkuman: ' + e.message;
-    if (resultBody) resultBody.innerHTML = `<span style="color:#f87171">${lastResultText}</span>`;
-    if(result) result.classList.add('show');
-  });
+  loading.classList.remove('show');
+  btn.disabled = false;
 }
 </script>
 </body>
