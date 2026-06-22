@@ -1359,6 +1359,12 @@
     if (!txtInput && !hasYT && !hasPDF && !hasFoto) {
       alert('Isi minimal satu input!'); return;
     }
+    
+  function extractYoutubeId(url) {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
 
     // Build user bubble label
     const attachLabels = [];
@@ -1380,46 +1386,50 @@
 
     let textKompilasi = `Gaya Instruksi Jawaban: Tolong utamakan gaya "${styleGaya}".\n\n`;
 
-    // YouTube
+    // YouTube Fetching Refactored
     if (hasYT) {
       document.getElementById('loadingText').textContent = '⏳ Menarik transkrip YouTube...';
-      try {
-        let ytTranscript = '';
+      const videoId = extractYoutubeId(youtubeUrl);
+      
+      if (!videoId) {
+        textKompilasi += `[INFO YOUTUBE]: URL tidak valid, gagal mendapatkan Video ID.\n\n`;
+      } else {
         try {
-          async function fetchTranscript(url) {
-         try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 6000); // jangan tunggu cold-start kelamaan
-    const r = await fetch(`${HF_SPACE_API.replace('/api/predict','')}/transcript?url=${encodeURIComponent(url)}`, { signal: ctrl.signal });
-    clearTimeout(t);
-    if (!r.ok) throw new Error('hf-fail');
-    const d = await r.json();
-    if (!d.transcript) throw new Error('hf-empty');
-    return d.transcript;
-  } catch {
-    const r = await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'transcript', url }) });
-    const d = await r.json();
-    return d.transcript || d.data?.[0] || '';
-  }
-  }
+          let ytTranscript = '';
+          
+          // Kirim videoId atau URL ter-encode secara bersih ke API utama
+          const targetUrl = `${HF_SPACE_API.replace('/api/predict','')}/transcript?video_id=${videoId}&url=${encodeURIComponent(youtubeUrl)}`;
+          const hfRes = await fetch(targetUrl);
+          
+          if (hfRes.ok) {
+            const hfData = await hfRes.json();
+            ytTranscript = hfData.transcript || '';
+          }
 
-        if (!ytTranscript || ytTranscript.includes('Not Found')) {
-          const wRes  = await fetch(WORKER, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'transcript', url: youtubeUrl }) });
-          const wData = await wRes.json();
-          ytTranscript = wData.transcript || wData.data?.[0] || '';
+          // Fallback ke worker jika API pertama gagal/kosong
+          if (!ytTranscript || ytTranscript.includes('Not Found')) {
+            const wRes = await fetch(WORKER, { 
+              method: 'POST', 
+              headers: { 'Content-Type': 'application/json' }, 
+              body: JSON.stringify({ action: 'transcript', videoId: videoId, url: youtubeUrl }) 
+            });
+            if (wRes.ok) {
+              const wData = await wRes.json();
+              ytTranscript = wData.transcript || wData.data?.[0] || '';
+            }
+          }
+
+          if (ytTranscript && !ytTranscript.includes('Not Found')) {
+            textKompilasi += `[TRANSKRIP YOUTUBE]:\n${ytTranscript}\n\n`;
+          } else {
+            textKompilasi += `[INFO YOUTUBE]: Gagal mengambil transkrip. Kemungkinan video tidak memiliki teks otomatis atau diblokir oleh YouTube.\n\n`;
+          }
+        } catch(err) {
+          textKompilasi += `[INFO YOUTUBE]: Gagal memproses karena kendala jaringan (${err.message}).\n\n`;
         }
-
-        textKompilasi += ytTranscript && !ytTranscript.includes('Not Found')
-          ? `[TRANSKRIP YOUTUBE]:\n${ytTranscript}\n\n`
-          : `[INFO YOUTUBE]: Gagal mengambil transkrip otomatis.\n\n`;
-      } catch(err) {
-        textKompilasi += `[INFO YOUTUBE]: Gagal memproses karena kendala jaringan.\n\n`;
       }
       youtubeUrl = '';
     }
-
-    if (txtInput)  textKompilasi += `[INPUT TEKS]:\n${txtInput}\n\n`;
-    if (hasPDF)    textKompilasi += `[ISI PDF]:\n${extractedDocText}\n\n`;
 
     // Build payload
     const finalPayload = [];
