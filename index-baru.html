@@ -71,14 +71,29 @@
     </div>
   </main>
 
-    <!-- ===== SI INDUK (mode diagnostik) ===== -->
+      <!-- ===== DETEKTOR SUPER ===== -->
   <script type="module">
-    import('./js/core.js').catch(function (e) {
-      var p = document.createElement('pre');
-      p.style.cssText = 'color:#f87171;background:#200a0a;padding:12px;white-space:pre-wrap;font-size:12px;margin:0';
-      p.textContent = '❌ GAGAL MUAT:\n' + (e && e.message ? e.message : String(e));
-      document.body.insertBefore(p, document.body.firstChild);
-    });
+    var files = [
+      './js/ui.js', './js/aturan.js', './js/ai.js', './js/core.js',
+      '../tools/ringkas.js', '../tools/foto.js', '../tools/pdf.js',
+      '../tools/youtube.js', '../tools/kuis.js', '../tools/translate.js'
+    ];
+    var box = document.createElement('pre');
+    box.style.cssText = 'color:#e8ecf3;background:#0d1017;padding:12px;white-space:pre-wrap;font-size:11px;margin:0';
+    document.body.insertBefore(box, document.body.firstChild);
+    function log(t) { box.textContent += t + '\n'; }
+    log('🔍 Mengecek file satu per satu...\n');
+
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      try {
+        await import(f);
+        log('✅ ' + f);
+      } catch (e) {
+        log('❌ ' + f + '  →  ' + (e.message || e));
+      }
+    }
+    log('\nSelesai. Kirim screenshot ini ke Qwen. 📸');
   </script>
 </body>
 </html>
