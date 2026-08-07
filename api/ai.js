@@ -50,6 +50,12 @@ function kunciGroq() {
 
 // ---------- 1) GEMINI FLASH (default + vision) ----------
 async function lewatGeminiFlash(prompt, image, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  
   const parts = [{ text: prompt }];
   if (image && image.base64 && image.mimeType) {
     parts.push({ inline_data: { mime_type: image.mimeType, data: image.base64 } });
@@ -59,9 +65,42 @@ async function lewatGeminiFlash(prompt, image, res) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: parts }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
+      generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
     })
   });
+
+   if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!r.body) throw new Error('No response body');
+
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      let lines = buffer.split('\n');
+      buffer = lines.pop(); // simpan sisa yang belum lengkap
+
+      for (let line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const jsonStr = line.substring(6);
+            if (jsonStr === '[DONE]') continue;
+            const chunk = JSON.parse(jsonStr);
+            const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            if (text) {
+              res.write(text);
+            }
+  
+    res.end();
+  } catch (e) {
+    console.error('Streaming error:', e);
+    res.end('\n\n[ERROR: ' + (e.message || 'Unknown') + ']');
+  }
+  
   const d = await r.json();
   if (d.error) throw new Error('Gemini: ' + d.error.message);
   const answer = (d.candidates && d.candidates[0] && d.candidates[0].content &&
