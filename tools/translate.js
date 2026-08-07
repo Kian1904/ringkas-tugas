@@ -14,6 +14,7 @@ const BAHASA = {
 export const tool = {
   id: 'translate',
   label: '🌐 Translate',
+  thinkingLabel: 'Larp-Larp',
   terima: 'teks',
   teksWajib: true,
   placeholder: 'Tempel teks yang mau diterjemahkan...',
