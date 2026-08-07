@@ -38,6 +38,7 @@ async function ekstrakPdf(file) {
 export const tool = {
   id: 'pdf',
   label: '📄 PDF',
+  thinkingLabel: 'hmm.. interesting',
   terima: 'file',
   accept: 'application/pdf,.pdf',
   teksWajib: false,
