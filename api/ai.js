@@ -1,7 +1,7 @@
 // =====================================================
 // K's Tools for School — api/ai.js
 // SERVER-SIDE (Vercel) — WAJIB CommonJS (module.exports)
-// "ROUTER OTAK": satu pintu gerbang, banyak model.
+// "ROUTER OTAK" — versi final: jawaban panjang anti-potong
 // =====================================================
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
@@ -9,12 +9,12 @@ const GROQ_CHAT = 'https://api.groq.com/openai/v1/chat/completions';
 
 // ---------- PETA OTAK (ganti model? edit di sini aja) ----------
 const MODEL = {
-  flash:  'gemini-2.5-flash',             // default: cepat + vision
-  tts:    'gemini-2.5-flash-preview-tts', // text-to-speech
-  embed:  'gemini-embedding-001',         // embedding (RAG)
-  search: 'groq/compound',                // search realtime bawaan Groq
-  pikir:  'openai/gpt-oss-120b',          // deep reasoning utama
-  pikirB: 'qwen/qwen3.6-27b'              // cadangan reasoning
+  flash:  'gemini-2.5-flash',
+  tts:    'gemini-2.5-flash-preview-tts',
+  embed:  'gemini-embedding-001',
+  search: 'groq/compound',
+  pikir:  'openai/gpt-oss-120b',
+  pikirB: 'qwen/qwen3.6-27b'
 };
 
 module.exports = async function handler(req, res) {
@@ -36,26 +36,19 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// ---------- util ----------
 function kunciGemini() {
   const k = process.env.GEMINI_API_KEY;
-  if (!k) throw new Error('GEMINI_API_KEY belum di-set (Vercel → Settings → Environment Variables).');
+  if (!k) throw new Error('GEMINI_API_KEY belum di-set di Vercel.');
   return k;
 }
 function kunciGroq() {
   const k = process.env.GROQ_API_KEY;
-  if (!k) throw new Error('GROQ_API_KEY belum di-set (Vercel → Settings → Environment Variables).');
+  if (!k) throw new Error('GROQ_API_KEY belum di-set di Vercel.');
   return k;
 }
 
 // ---------- 1) GEMINI FLASH (default + vision) ----------
 async function lewatGeminiFlash(prompt, image, res) {
-  res.writeHead(200, {
-    'Content-Type': 'text/plain; charset=utf-8',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
-  });
-  
   const parts = [{ text: prompt }];
   if (image && image.base64 && image.mimeType) {
     parts.push({ inline_data: { mime_type: image.mimeType, data: image.base64 } });
@@ -65,42 +58,9 @@ async function lewatGeminiFlash(prompt, image, res) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: parts }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
+      generationConfig: { temperature: 0.7, maxOutputTokens: 16384 }
     })
   });
-
-   if (!r.ok) throw new Error('HTTP ' + r.status);
-    if (!r.body) throw new Error('No response body');
-
-    const reader = r.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      let lines = buffer.split('\n');
-      buffer = lines.pop(); // simpan sisa yang belum lengkap
-
-      for (let line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            const jsonStr = line.substring(6);
-            if (jsonStr === '[DONE]') continue;
-            const chunk = JSON.parse(jsonStr);
-            const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text || '';
-            if (text) {
-              res.write(text);
-            }
-  
-    res.end();
-  } catch (e) {
-    console.error('Streaming error:', e);
-    res.end('\n\n[ERROR: ' + (e.message || 'Unknown') + ']');
-  }
-  
   const d = await r.json();
   if (d.error) throw new Error('Gemini: ' + d.error.message);
   const answer = (d.candidates && d.candidates[0] && d.candidates[0].content &&
@@ -139,7 +99,7 @@ async function lewatGroqSearch(prompt, res) {
   });
 }
 
-// ---------- 3) GROQ REASONING (deep think, ada cadangan) ----------
+// ---------- 3) GROQ REASONING (deep think + cadangan) ----------
 async function lewatGroqPikir(prompt, res) {
   let model = MODEL.pikir;
   let d = await panggilGroq(model, prompt);
@@ -157,11 +117,7 @@ function panggilGroq(model, prompt) {
   return fetch(GROQ_CHAT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + kunciGroq() },
-    body: JSON.stringify({
-      model: model,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.6
-    })
+    body: JSON.stringify({ model: model, messages: [{ role: 'user', content: prompt }], temperature: 0.6 })
   }).then(function (r) { return r.json(); });
 }
 
