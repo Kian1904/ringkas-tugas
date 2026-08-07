@@ -56,6 +56,7 @@ const MODES = [
 export const tool = {
   id: 'ringkas',
   label: '📌 Ringkas',
+  thinkingLabel: 'LET HIM COOK!',
   terima: 'teks',
   teksWajib: true,
   placeholder: 'Tempel materi / catatan pelajaran di sini...',
