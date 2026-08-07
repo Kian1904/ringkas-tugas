@@ -183,7 +183,6 @@ function tambahTyping(label) {
   return wrap;
 }
 
-
 // ---------- ALUR KIRIM ----------
 btnSend.onclick = () => { if (sibuk) stop(); else kirim(); };
 
@@ -227,7 +226,6 @@ async function jalankan(req, tampilan, toolId) {
   sibuk = true;
   btnSend.textContent = '⏹';
   const idSesi = ++sesi;
-  const tool = TOOLS.find(t => t.id === toolId) || toolAktif;
   const typing = tambahTyping(tool.thinkingLabel || 'Lemme locked in...');
 
   const d = await tanyaAI(req.prompt, { gambar: req.image }).catch(e => ({ ok: false, error: e.message }));
