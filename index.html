@@ -1624,11 +1624,12 @@ Aturan: Heading (##) dan bold = Biru. List (ul/ol) = Hijau. Narasi biasa = Putih
 
   function hideApp() { currentUser = null; document.body.classList.remove('logged-in'); }
 
-  sb.auth.onAuthStateChange((event, session) => {
-    if (session?.user) showApp(session.user); else hideApp();
+  showApp({
+    id: 'guest',
+    email: 'tamu@ringkas.app',
+    user_metadata: { full_name: 'Tamu' }
   });
-  sb.auth.getSession().then(r => { if (r.data.session) showApp(r.data.session.user); });
-
+  
   function toggleLogoutMenu() {
     document.getElementById('logout-menu').classList.toggle('open');
   }
