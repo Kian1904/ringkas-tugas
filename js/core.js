@@ -162,14 +162,27 @@ function tambahMeta(bubble, otak, teksMentah) {
   bubble.appendChild(meta);
 }
 
-function tambahTyping() {
+function tambahTyping(label) {
   const wrap = el('div', 'msg ai typing-wrap');
   wrap.appendChild(el('div', 'avatar', '🤖'));
-  wrap.appendChild(el('div', 'bubble', '<div class="typing"><span></span><span></span><span></span></div>'));
+  
+  const bubble = el('div', 'bubble');
+  const thinkingText = el('div', 'typing-text');
+  thinkingText.textContent = label || 'Berpikir...';
+  
+  const dots = el('div', 'typing-dots');
+  for (let i = 0; i < 3; i++) {
+    dots.appendChild(el('span', '', ''));
+  }
+  
+  bubble.appendChild(thinkingText);
+  bubble.appendChild(dots);
+  wrap.appendChild(bubble);
   chatLog.appendChild(wrap);
   scrollBawah();
   return wrap;
 }
+
 
 // ---------- ALUR KIRIM ----------
 btnSend.onclick = () => { if (sibuk) stop(); else kirim(); };
