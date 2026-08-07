@@ -227,7 +227,8 @@ async function jalankan(req, tampilan, toolId) {
   sibuk = true;
   btnSend.textContent = '⏹';
   const idSesi = ++sesi;
-  const typing = tambahTyping();
+  const tool = TOOLS.find(t => t.id === toolId) || toolAktif;
+  const typing = tambahTyping(tool.thinkingLabel || 'Lemme locked in...');
 
   const d = await tanyaAI(req.prompt, { gambar: req.image }).catch(e => ({ ok: false, error: e.message }));
 
