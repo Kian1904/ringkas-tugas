@@ -24,7 +24,7 @@ async function infoYouTube(url) {
 export const tool = {
   id: 'youtube',
   label: '🎬 YouTube',
-  thinkingLabe: 'THE FUHH WAS THAT?',
+  thinkingLabel: 'THE FUHH WAS THAT?',
   terima: 'teks',
   teksWajib: true,
   placeholder: 'Tempel link YouTube... (perintah opsional di baris baru)',
