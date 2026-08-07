@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Otak Server</title>
+<style>
+  body { font-family: sans-serif; background: #0f1115; color: #e8e8e8; padding: 20px; }
+  h1 { font-size: 18px; }
+  button { display: block; width: 100%; padding: 14px; margin: 10px 0; border: none; border-radius: 10px; background: #6c5ce7; color: white; font-size: 16px; }
+  #hasil { white-space: pre-wrap; background: #1a1d24; border-radius: 10px; padding: 14px; min-height: 150px; font-size: 14px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>🧪 Halaman Test Otak Server</h1>
+<p>Tekan tombol, lihat hasil di bawah.</p>
+<button onclick="testPing()">1️⃣ Test Server Hidup</button>
+<button onclick="testTeks()">2️⃣ Test AI Teks</button>
+<div id="hasil">Hasil akan muncul di sini...</div>
+
+<script>
+var hasil = document.getElementById('hasil');
+
+function tulis(pesan) {
+  hasil.textContent = pesan;
+}
+
+function testPing() {
+  tulis('⏳ Mengecek server...');
+  fetch('/api/ai')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      tulis('✅ Server HIDUP!\n\nRespons: ' + JSON.stringify(d) + '\n\n(Kalau muncul "Method not allowed" itu NORMAL — artinya API terpasang dengan benar.)');
+    })
+    .catch(function (e) {
+      tulis('❌ Server tidak merespons: ' + e.message);
+    });
+}
+
+function testTeks() {
+  tulis('⏳ Bertanya ke AI... (tunggu maks 30 detik)');
+  fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: 'Halo! Jawab singkat saja: kamu model AI apa?' })
+  })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.ok) {
+        tulis('✅ BERHASIL!\n\n🧠 Otak yang menjawab: ' + d.otak + '\n\n💬 Jawaban AI: ' + d.answer);
+      } else {
+        tulis('❌ Gagal: ' + d.error);
+      }
+    })
+    .catch(function (e) {
+      tulis('❌ Error: ' + e.message);
+    });
+}
+</script>
+</body>
+</html>
+
