@@ -33,6 +33,7 @@ function kunciIndex(soal, jmlOpsi) {
 export const tool = {
   id: 'kuis',
   label: '📝 Kuis',
+  thinkingLabel: 'too weak..',
   terima: 'teks',
   teksWajib: true,
   placeholder: 'Tempel materi yang mau dijadikan kuis...',
