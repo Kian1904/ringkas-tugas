@@ -43,6 +43,7 @@ function fotoKeBase64(file) {
 export const tool = {
   id: 'foto',
   label: '📷 Foto',
+  thinkingLabel: 'paparazi..',
   terima: 'file',
   accept: 'image/*',
   teksWajib: false,
