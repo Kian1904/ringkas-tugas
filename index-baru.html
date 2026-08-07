@@ -1,1 +1,78 @@
-cat
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0e14">
+  <title>K's Tools for School</title>
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
+  <!-- Kulit -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/kuis.css">
+
+  <!-- MathJax (render rumus $...$) -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\$', '\$']] },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <!-- pdf.js (dipakai tools/pdf.js) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== TOPBAR ===== -->
+  <header class="topbar">
+    <div class="logo">K<span>'</span>s Tools</div>
+    <div class="topnav">
+      <button class="icon-btn active" data-page="chat">💬</button>
+      <button class="icon-btn" data-page="history">🗒️</button>
+      <span id="quota" class="badge">⚡ 0/15</span>
+    </div>
+  </header>
+
+  <!-- ===== HALAMAN: CHAT ===== -->
+  <main class="page active" id="page-chat">
+    <div id="chat-log" class="chat-log"></div>
+
+    <div class="inputbar">
+      <div id="attach-preview" class="attach-preview">
+        <img id="attach-thumb" alt="">
+        <span id="attach-name"></span>
+        <button id="attach-remove" class="remove">✕</button>
+      </div>
+
+      <div id="chips" class="chips"></div>
+      <div id="subchips" class="chips"></div>
+
+      <div class="input-row">
+        <button id="btn-file" class="icon-btn hidden">📎</button>
+        <input type="file" id="file-input" hidden>
+        <textarea id="input-text" rows="1" placeholder="Ketik sesuatu..."></textarea>
+        <button id="btn-send" class="btn-send">➤</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== HALAMAN: RIWAYAT ===== -->
+  <main class="page" id="page-history">
+    <div class="page-scroll">
+      <div class="page-title">🗒️ Riwayat</div>
+      <div class="page-sub">Maksimal 50 percakapan terakhir, tersimpan di HP-mu.</div>
+      <div id="history-list"></div>
+    </div>
+  </main>
+
+  <!-- ===== SI INDUK ===== -->
+  <script type="module" src="js/core.js"></script>
+</body>
+</html>
+
