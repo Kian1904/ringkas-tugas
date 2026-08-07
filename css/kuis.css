@@ -1,1 +1,17 @@
-cat
+/* =====================================================
+   K's Tools for School — css/kuis.css
+   Style tambahan khusus kuis
+   ===================================================== */
+
+.quiz-q { margin-bottom: 10px; }
+.quiz-q p { margin: 0; }
+
+.quiz-explain {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.quiz-explain strong { color: var(--text); }
+
+.quiz-skor { margin-bottom: 10px; }
+
