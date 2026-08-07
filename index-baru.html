@@ -71,8 +71,15 @@
     </div>
   </main>
 
-  <!-- ===== SI INDUK ===== -->
-  <script type="module" src="js/core.js"></script>
+    <!-- ===== SI INDUK (mode diagnostik) ===== -->
+  <script type="module">
+    import('./js/core.js').catch(function (e) {
+      var p = document.createElement('pre');
+      p.style.cssText = 'color:#f87171;background:#200a0a;padding:12px;white-space:pre-wrap;font-size:12px;margin:0';
+      p.textContent = '❌ GAGAL MUAT:\n' + (e && e.message ? e.message : String(e));
+      document.body.insertBefore(p, document.body.firstChild);
+    });
+  </script>
 </body>
 </html>
 
