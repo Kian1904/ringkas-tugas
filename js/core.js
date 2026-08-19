@@ -1,7 +1,7 @@
 // =====================================================
 // K's Tools for School — js/core.js
-// SI INDUK: KTP tools, UI chat, kuota, riwayat,
-// otak ganda (⚡//🧠) + thinking labels + proses & sumber
+// SI INDUK v4 — UI bernapas: tools di balik tombol "+"
+// otak ganda + thinking labels + proses & sumber
 // =====================================================
 
 import { tanyaAI } from './ai.js';
@@ -16,14 +16,12 @@ import { tool as translate } from '../tools/translate.js';
 const TOOLS = [ringkas, foto, pdf, youtube, kuis, translate];
 const KUOTA_HARIAN = 15;
 
-// ---------- OTAK GANDA ----------
 const MESIN = [
-  { id: 'flash',  label: '⚡ Flash' },
-  { id: 'search', label: '🌐 Search' },
-  { id: 'pikir',  label: '🧠 Deep' }
+  { id: 'flash',  label: 'Flash' },
+  { id: 'search', label: 'Search' },
+  { id: 'pikir',  label: 'Deep' }
 ];
 
-// Label "thinking" unik per tool (saat mode ⚡)
 const LABEL_TOOL = {
   ringkas: 'Mencerna materi...',
   foto: 'Mengintip foto...',
@@ -40,15 +38,14 @@ let fileAktif = null;
 let mesinAktif = 'flash';
 let sibuk = false;
 let sesi = 0;
-let terakhir = null; // { req, toolId } buat regenerate
+let terakhir = null;
 
-// ---------- ELEMEN (kontrak dengan index.html) ----------
+// ---------- ELEMEN ----------
 const $ = (id) => document.getElementById(id);
 const chatLog = $('chat-log');
-const chipsEl = $('chips');
-const subEl = $('subchips');
 const inputText = $('input-text');
 const btnSend = $('btn-send');
+const btnPlus = $('btn-plus');
 const btnFile = $('btn-file');
 const fileInput = $('file-input');
 const preview = $('attach-preview');
@@ -57,12 +54,70 @@ const previewName = $('attach-name');
 const previewRemove = $('attach-remove');
 const quotaEl = $('quota');
 
-// Baris chip otak: dibuat otomatis, tanpa edit HTML
-const brainEl = document.createElement('div');
-brainEl.className = 'chips brain-chips';
-chipsEl.parentNode.insertBefore(brainEl, chipsEl);
+// Panel alat (dibangun otomatis, tanpa edit HTML)
+const panel = el('div', 'tool-panel hidden');
+const backdrop = el('div', 'tool-backdrop hidden');
+document.body.appendChild(backdrop);
+document.body.appendChild(panel);
 
-// ---------- KUOTA HARIAN ----------
+function bangunPanel() {
+  panel.innerHTML = '';
+
+  const hOtak = el('div', 'panel-judul', 'OTAK');
+  panel.appendChild(hOtak);
+  const rowOtak = el('div', 'panel-row');
+  MESIN.forEach(m => {
+    const b = el('button', 'panel-chip' + (m.id === mesinAktif ? ' active' : ''), m.label);
+    b.onclick = () => { mesinAktif = m.id; bangunPanel(); };
+    rowOtak.appendChild(b);
+  });
+  panel.appendChild(rowOtak);
+
+  const hAlat = el('div', 'panel-judul', 'ALAT');
+  panel.appendChild(hAlat);
+  const rowAlat = el('div', 'panel-row');
+  TOOLS.forEach(t => {
+    const b = el('button', 'panel-chip' + (t === toolAktif ? ' active' : ''), t.label.replace(/^[^\w]+/, '').trim());
+    b.onclick = () => { pilihTool(t); tutupPanel(); };
+    rowAlat.appendChild(b);
+  });
+  panel.appendChild(rowAlat);
+
+  // sub-mode (kalau ada)
+  if (toolAktif.subModes) {
+    const hSub = el('div', 'panel-judul', 'MODE');
+    panel.appendChild(hSub);
+    const rowSub = el('div', 'panel-row');
+    toolAktif.subModes.forEach(m => {
+      const b = el('button', 'panel-chip' + (m.id === subAktif ? ' active' : ''), m.label.replace(/^[^\w]+/, '').trim());
+      b.onclick = () => { subAktif = m.id; bangunPanel(); };
+      rowSub.appendChild(b);
+    });
+    panel.appendChild(rowSub);
+  }
+
+  const rowBawah = el('div', 'panel-row panel-bawah');
+  const bRiwayat = el('button', 'panel-chip', 'Riwayat');
+  bRiwayat.onclick = () => { tutupPanel(); document.querySelector('[data-page="history"]').click(); };
+  rowBawah.appendChild(bRiwayat);
+  panel.appendChild(rowBawah);
+}
+
+function bukaPanel() { bangunPanel(); panel.classList.remove('hidden'); backdrop.classList.remove('hidden'); }
+function tutupPanel() { panel.classList.add('hidden'); backdrop.classList.add('hidden'); }
+
+btnPlus.onclick = () => panel.classList.contains('hidden') ? bukaPanel() : tutupPanel();
+backdrop.onclick = tutupPanel;
+
+// indikator alat aktif (teks kecil di atas input)
+const indikator = el('div', 'indikator');
+function renderIndikator() {
+  const namaMesin = (MESIN.find(m => m.id === mesinAktif) || {}).label || '';
+  const namaAlat = (toolAktif.label || '').replace(/^[^\w]+/, '').trim();
+  indikator.textContent = namaMesin + ' · ' + namaAlat;
+}
+
+// ---------- KUOTA ----------
 function kuotaInfo() {
   const hari = new Date().toDateString();
   let q = null;
@@ -71,45 +126,13 @@ function kuotaInfo() {
   return q;
 }
 function kuotaPakai() {
-  const q = kuotaInfo();
-  q.pakai++;
+  const q = kuotaInfo(); q.pakai++;
   localStorage.setItem('ks_quota', JSON.stringify(q));
   renderKuota();
 }
-function renderKuota() {
-  quotaEl.textContent = '⚡ ' + kuotaInfo().pakai + '/' + KUOTA_HARIAN;
-}
+function renderKuota() { quotaEl.textContent = kuotaInfo().pakai + '/' + KUOTA_HARIAN; }
 
-// ---------- CHIPS: OTAK, TOOLS, SUB-MODE ----------
-function renderBrain() {
-  brainEl.innerHTML = '';
-  MESIN.forEach(m => {
-    const b = el('button', 'chip' + (m.id === mesinAktif ? ' active' : ''), m.label);
-    b.onclick = () => { mesinAktif = m.id; renderBrain(); };
-    brainEl.appendChild(b);
-  });
-}
-
-function renderChips() {
-  chipsEl.innerHTML = '';
-  TOOLS.forEach(t => {
-    const b = el('button', 'chip' + (t === toolAktif ? ' active' : ''), t.label);
-    b.onclick = () => pilihTool(t);
-    chipsEl.appendChild(b);
-  });
-}
-
-function renderSub() {
-  subEl.innerHTML = '';
-  if (!toolAktif.subModes) { subEl.classList.add('hidden'); return; }
-  subEl.classList.remove('hidden');
-  toolAktif.subModes.forEach(m => {
-    const b = el('button', 'chip' + (m.id === subAktif ? ' active' : ''), m.label);
-    b.onclick = () => { subAktif = m.id; renderSub(); };
-    subEl.appendChild(b);
-  });
-}
-
+// ---------- PILIH TOOL ----------
 function pilihTool(t) {
   toolAktif = t;
   subAktif = t.defaultSub || (t.subModes ? t.subModes[0].id : null);
@@ -121,11 +144,10 @@ function pilihTool(t) {
     btnFile.classList.add('hidden');
     hapusFile();
   }
-  renderChips();
-  renderSub();
+  renderIndikator();
 }
 
-// ---------- LAMPIRAN FILE ----------
+// ---------- LAMPIRAN ----------
 btnFile.onclick = () => fileInput.click();
 fileInput.onchange = () => { if (fileInput.files[0]) pasangFile(fileInput.files[0]); };
 previewRemove.onclick = hapusFile;
@@ -136,14 +158,11 @@ function pasangFile(f) {
   if (f.type.startsWith('image/')) {
     previewThumb.src = URL.createObjectURL(f);
     previewThumb.style.display = 'block';
-  } else {
-    previewThumb.style.display = 'none';
-  }
+  } else { previewThumb.style.display = 'none'; }
   preview.classList.add('show');
 }
 function hapusFile() {
-  fileAktif = null;
-  fileInput.value = '';
+  fileAktif = null; fileInput.value = '';
   preview.classList.remove('show');
 }
 
@@ -152,7 +171,7 @@ function scrollBawah() { chatLog.scrollTop = chatLog.scrollHeight; }
 
 function tambahBubble(peran, teks) {
   const wrap = el('div', 'msg ' + peran);
-  wrap.appendChild(el('div', 'avatar', peran === 'user' ? '🧑' : '🤖'));
+  wrap.appendChild(el('div', 'avatar', peran === 'user' ? 'K' : 'A'));
   const bubble = el('div', 'bubble', escapeHtml(teks).replace(/\n/g, '<br>'));
   wrap.appendChild(bubble);
   chatLog.appendChild(wrap);
@@ -162,7 +181,7 @@ function tambahBubble(peran, teks) {
 
 function buatBubbleAI() {
   const wrap = el('div', 'msg ai');
-  wrap.appendChild(el('div', 'avatar', '🤖'));
+  wrap.appendChild(el('div', 'avatar', 'A'));
   const bubble = el('div', 'bubble');
   const isi = el('div', 'bubble-isi');
   bubble.appendChild(isi);
@@ -173,22 +192,21 @@ function buatBubbleAI() {
 }
 
 function tambahMeta(bubble, otak, teksMentah) {
-  const meta = el('div', 'chips');
-  meta.style.marginTop = '10px';
-  meta.appendChild(el('span', 'badge', '🧠 ' + (otak || 'AI')));
+  const meta = el('div', 'meta-row');
+  meta.appendChild(el('span', 'badge', otak || 'AI'));
 
-  const bSalin = el('button', 'chip', '📋 Salin');
-  bSalin.onclick = () => { salin(teksMentah); toast('📋 Tersalin!'); };
+  const bSalin = el('button', 'meta-btn', 'Salin');
+  bSalin.onclick = () => { salin(teksMentah); toast('Tersalin'); };
   meta.appendChild(bSalin);
 
-  const bUnduh = el('button', 'chip', '📥 Export');
-  bUnduh.onclick = () => { unduh('k-tools-' + toolAktif.id + '.md', teksMentah); toast('📥 Diunduh!'); };
+  const bUnduh = el('button', 'meta-btn', 'Export');
+  bUnduh.onclick = () => { unduh('k-tools-' + toolAktif.id + '.md', teksMentah); toast('Diunduh'); };
   meta.appendChild(bUnduh);
 
-  const bUlang = el('button', 'chip', '🔄 Ulangi');
+  const bUlang = el('button', 'meta-btn', 'Ulangi');
   bUlang.onclick = () => {
     if (!terakhir) return;
-    jalankan(terakhir.req, '🔄 (mengulangi permintaan)', terakhir.toolId);
+    jalankan(terakhir.req, '(mengulangi)', terakhir.toolId);
   };
   meta.appendChild(bUlang);
 
@@ -197,17 +215,11 @@ function tambahMeta(bubble, otak, teksMentah) {
 
 function tambahTyping(label) {
   const wrap = el('div', 'msg ai typing-wrap');
-  wrap.appendChild(el('div', 'avatar', '🤖'));
-
+  wrap.appendChild(el('div', 'avatar', 'A'));
   const bubble = el('div', 'bubble');
-  const thinkingText = el('div', 'typing-text');
-  thinkingText.textContent = label || 'Berpikir...';
-
+  const thinkingText = el('div', 'typing-text', label || 'Berpikir...');
   const dots = el('div', 'typing-dots');
-  for (let i = 0; i < 3; i++) {
-    dots.appendChild(el('span', '', ''));
-  }
-
+  for (let i = 0; i < 3; i++) dots.appendChild(el('span', '', ''));
   bubble.appendChild(thinkingText);
   bubble.appendChild(dots);
   wrap.appendChild(bubble);
@@ -220,31 +232,26 @@ function tambahTyping(label) {
 btnSend.onclick = () => { if (sibuk) stop(); else kirim(); };
 
 function stop() {
-  sesi++;
-  sibuk = false;
+  sesi++; sibuk = false;
   btnSend.textContent = '➤';
   document.querySelectorAll('.typing-wrap').forEach(n => n.remove());
-  toast('⏹ Dihentikan.');
+  toast('Dihentikan');
 }
 
 async function kirim() {
   const q = kuotaInfo();
-  if (q.pakai >= KUOTA_HARIAN) { toast('⚡ Kuota hari ini habis. Kembali besok ya!'); return; }
+  if (q.pakai >= KUOTA_HARIAN) { toast('Kuota hari ini habis'); return; }
 
   const teks = inputText.value.trim();
-  if (toolAktif.teksWajib && !teks) { toast('✍️ Isi teks dulu ya.'); return; }
-  if (toolAktif.terima === 'file' && !fileAktif) { toast('📎 Pilih file dulu ya.'); return; }
+  if (toolAktif.teksWajib && !teks) { toast('Isi teks dulu'); return; }
+  if (toolAktif.terima === 'file' && !fileAktif) { toast('Pilih file dulu'); return; }
 
   const input = { teks: teks, file: fileAktif, mode: subAktif };
-  const tampilan = teks || '📎 ' + (fileAktif ? fileAktif.name : '');
+  const tampilan = teks || '(lampiran: ' + (fileAktif ? fileAktif.name : '') + ')';
 
   let req;
-  try {
-    req = await toolAktif.siapkan(input);
-  } catch (e) {
-    toast('⚠️ ' + e.message);
-    return;
-  }
+  try { req = await toolAktif.siapkan(input); }
+  catch (e) { toast(e.message); return; }
 
   inputText.value = '';
   hapusFile();
@@ -257,64 +264,55 @@ async function jalankan(req, tampilan, toolId) {
 
   tambahBubble('user', tampilan);
   sibuk = true;
-  btnSend.textContent = '⏹';
+  btnSend.textContent = '■';
   const idSesi = ++sesi;
 
-  // 🎭 thinking label: otak dulu, baru kepribadian tool
   const label =
-    mesinAktif === 'search' ? 'Larping menjelajah web...' :
-    mesinAktif === 'pikir'  ? 'Merenung dalam-dalam...' :
-    (tool.thinkingLabel || LABEL_TOOL[tool.id] || 'Lemme locked in...');
+    mesinAktif === 'search' ? 'Menjelajah web...' :
+    mesinAktif === 'pikir'  ? 'Merenung...' :
+    (tool.thinkingLabel || LABEL_TOOL[tool.id] || 'Berpikir...');
   const typing = tambahTyping(label);
 
   const d = await tanyaAI(req.prompt, { gambar: req.image, mesin: mesinAktif })
     .catch(e => ({ ok: false, error: e.message }));
 
   typing.remove();
-  if (idSesi !== sesi) return; // dihentikan
+  if (idSesi !== sesi) return;
   sibuk = false;
   btnSend.textContent = '➤';
 
-  if (!d.ok) {
-    tambahBubble('ai', '❌ ' + (d.error || 'AI gagal menjawab.'));
-    return;
-  }
+  if (!d.ok) { tambahBubble('ai', (d.error || 'AI gagal menjawab.')); return; }
 
   kuotaPakai();
 
   let hasil = { markdown: d.answer };
   if (tool.olah) {
     try { hasil = tool.olah(d); }
-    catch (e) { hasil = { markdown: d.answer }; toast('⚠️ ' + e.message); }
+    catch (e) { hasil = { markdown: d.answer }; toast(e.message); }
   }
 
   const b = buatBubbleAI();
   if (tool.render && hasil.data) tool.render(b.isi, hasil);
   else b.isi.innerHTML = renderMarkdown(hasil.markdown || d.answer);
 
-  // 💭 proses berpikir (dari 🌐 search / 🧠 deep)
   if (d.proses) {
     const det = document.createElement('details');
     det.className = 'proses';
     const sum = document.createElement('summary');
-    sum.textContent = '💭 Proses berpikir';
+    sum.textContent = 'Proses berpikir';
     const isiP = document.createElement('div');
     isiP.className = 'proses-isi';
     isiP.textContent = d.proses;
-    det.appendChild(sum);
-    det.appendChild(isiP);
+    det.appendChild(sum); det.appendChild(isiP);
     b.isi.insertBefore(det, b.isi.firstChild);
   }
 
-  // 📎 sumber kutipan (dari 🌐 search)
   if (d.sumber && d.sumber.length) {
     const wrapS = el('div', 'sumber');
-    wrapS.appendChild(el('div', 'sumber-judul', '📎 Sumber:'));
+    wrapS.appendChild(el('div', 'sumber-judul', 'Sumber'));
     d.sumber.forEach(s => {
       const a = el('a', 'sumber-link', s.judul || s.url);
-      a.href = s.url;
-      a.target = '_blank';
-      a.rel = 'noopener';
+      a.href = s.url; a.target = '_blank'; a.rel = 'noopener';
       wrapS.appendChild(a);
     });
     b.isi.appendChild(wrapS);
@@ -335,7 +333,7 @@ function simpanRiwayat(entri) {
   if (!Array.isArray(list)) list = [];
   list.unshift(entri);
   if (list.length > 50) list.length = 50;
-  localStorage.setItem(RIWAYAT_KEY, JSON.stringify(entri ? list : list));
+  localStorage.setItem(RIWAYAT_KEY, JSON.stringify(list));
 }
 
 function renderRiwayat() {
@@ -343,7 +341,7 @@ function renderRiwayat() {
   let list = [];
   try { list = JSON.parse(localStorage.getItem(RIWAYAT_KEY)); } catch (e) {}
   if (!Array.isArray(list) || !list.length) {
-    wrap.innerHTML = '<div class="history-empty">Belum ada riwayat. 🗒️</div>';
+    wrap.innerHTML = '<div class="history-empty">Belum ada riwayat.</div>';
     return;
   }
   wrap.innerHTML = '';
@@ -351,7 +349,7 @@ function renderRiwayat() {
     const item = el('div', 'history-item');
     const judul = (e.teks || '(tanpa teks)').slice(0, 70);
     item.innerHTML =
-      '<div class="time">' + formatWaktu(e.waktu) + ' · ' + escapeHtml(e.tool) + ' · 🧠 ' + escapeHtml(e.otak || '?') + '</div>' +
+      '<div class="time">' + formatWaktu(e.waktu) + ' · ' + escapeHtml(e.tool) + ' · ' + escapeHtml(e.otak || '?') + '</div>' +
       escapeHtml(judul);
     item.onclick = () => muatRiwayat(e);
     wrap.appendChild(item);
@@ -371,7 +369,7 @@ function muatRiwayat(e) {
   typeset(b.isi);
 }
 
-// ---------- NAVIGASI HALAMAN ----------
+// ---------- NAVIGASI ----------
 document.querySelectorAll('[data-page]').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -384,11 +382,15 @@ document.querySelectorAll('[data-page]').forEach(btn => {
 
 // ---------- INIT ----------
 renderKuota();
-renderBrain();
 pilihTool(TOOLS[0]);
+// sisipkan indikator di atas input bar
+const inputBar = document.querySelector('.inputbar');
+if (inputBar) inputBar.insertBefore(indikator, inputBar.firstChild);
+renderIndikator();
+
 buatBubbleAI().isi.innerHTML = renderMarkdown(
-  'Halo! Aku **K** 👋 asisten belajarmu.\n\n' +
-  'Pilih tool di bawah, kirim materi, dan aku olah jadi ringkasan, kuis, terjemahan, dan lainnya. ' +
-  'Kuota harian: ' + KUOTA_HARIAN + ' permintaan. Selamat belajar! 🚀'
+  'Halo, aku **K** — asisten belajarmu.\n\n' +
+  'Ketuk **+** untuk memilih alat dan otak, lalu kirim materimu. ' +
+  'Kuota harian ' + KUOTA_HARIAN + ' permintaan. Selamat belajar.'
 );
 
