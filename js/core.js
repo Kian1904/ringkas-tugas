@@ -1,6 +1,7 @@
 // =====================================================
 // K's Tools for School — js/core.js
-// SI INDUK: baca KTP tools, UI chat, kuota, riwayat
+// SI INDUK: KTP tools, UI chat, kuota, riwayat,
+// otak ganda (⚡//🧠) + thinking labels + proses & sumber
 // =====================================================
 
 import { tanyaAI } from './ai.js';
@@ -15,10 +16,28 @@ import { tool as translate } from '../tools/translate.js';
 const TOOLS = [ringkas, foto, pdf, youtube, kuis, translate];
 const KUOTA_HARIAN = 15;
 
+// ---------- OTAK GANDA ----------
+const MESIN = [
+  { id: 'flash',  label: '⚡ Flash' },
+  { id: 'search', label: '🌐 Search' },
+  { id: 'pikir',  label: '🧠 Deep' }
+];
+
+// Label "thinking" unik per tool (saat mode ⚡)
+const LABEL_TOOL = {
+  ringkas: 'Mencerna materi...',
+  foto: 'Mengintip foto...',
+  pdf: 'Membolak-balik halaman...',
+  youtube: 'Menyimak video...',
+  kuis: 'Meracik soal...',
+  translate: 'Menyulap bahasa...'
+};
+
 // ---------- STATE ----------
 let toolAktif = TOOLS[0];
 let subAktif = null;
 let fileAktif = null;
+let mesinAktif = 'flash';
 let sibuk = false;
 let sesi = 0;
 let terakhir = null; // { req, toolId } buat regenerate
@@ -38,6 +57,11 @@ const previewName = $('attach-name');
 const previewRemove = $('attach-remove');
 const quotaEl = $('quota');
 
+// Baris chip otak: dibuat otomatis, tanpa edit HTML
+const brainEl = document.createElement('div');
+brainEl.className = 'chips brain-chips';
+chipsEl.parentNode.insertBefore(brainEl, chipsEl);
+
 // ---------- KUOTA HARIAN ----------
 function kuotaInfo() {
   const hari = new Date().toDateString();
@@ -56,7 +80,16 @@ function renderKuota() {
   quotaEl.textContent = '⚡ ' + kuotaInfo().pakai + '/' + KUOTA_HARIAN;
 }
 
-// ---------- CHIPS TOOLS & SUB-MODE ----------
+// ---------- CHIPS: OTAK, TOOLS, SUB-MODE ----------
+function renderBrain() {
+  brainEl.innerHTML = '';
+  MESIN.forEach(m => {
+    const b = el('button', 'chip' + (m.id === mesinAktif ? ' active' : ''), m.label);
+    b.onclick = () => { mesinAktif = m.id; renderBrain(); };
+    brainEl.appendChild(b);
+  });
+}
+
 function renderChips() {
   chipsEl.innerHTML = '';
   TOOLS.forEach(t => {
@@ -165,16 +198,16 @@ function tambahMeta(bubble, otak, teksMentah) {
 function tambahTyping(label) {
   const wrap = el('div', 'msg ai typing-wrap');
   wrap.appendChild(el('div', 'avatar', '🤖'));
-  
+
   const bubble = el('div', 'bubble');
   const thinkingText = el('div', 'typing-text');
   thinkingText.textContent = label || 'Berpikir...';
-  
+
   const dots = el('div', 'typing-dots');
   for (let i = 0; i < 3; i++) {
     dots.appendChild(el('span', '', ''));
   }
-  
+
   bubble.appendChild(thinkingText);
   bubble.appendChild(dots);
   wrap.appendChild(bubble);
@@ -226,9 +259,16 @@ async function jalankan(req, tampilan, toolId) {
   sibuk = true;
   btnSend.textContent = '⏹';
   const idSesi = ++sesi;
-  const typing = tambahTyping(tool.thinkingLabel || 'Lemme locked in...');
 
-  const d = await tanyaAI(req.prompt, { gambar: req.image }).catch(e => ({ ok: false, error: e.message }));
+  // 🎭 thinking label: otak dulu, baru kepribadian tool
+  const label =
+    mesinAktif === 'search' ? 'Larping menjelajah web...' :
+    mesinAktif === 'pikir'  ? 'Merenung dalam-dalam...' :
+    (tool.thinkingLabel || LABEL_TOOL[tool.id] || 'Lemme locked in...');
+  const typing = tambahTyping(label);
+
+  const d = await tanyaAI(req.prompt, { gambar: req.image, mesin: mesinAktif })
+    .catch(e => ({ ok: false, error: e.message }));
 
   typing.remove();
   if (idSesi !== sesi) return; // dihentikan
@@ -251,6 +291,35 @@ async function jalankan(req, tampilan, toolId) {
   const b = buatBubbleAI();
   if (tool.render && hasil.data) tool.render(b.isi, hasil);
   else b.isi.innerHTML = renderMarkdown(hasil.markdown || d.answer);
+
+  // 💭 proses berpikir (dari 🌐 search / 🧠 deep)
+  if (d.proses) {
+    const det = document.createElement('details');
+    det.className = 'proses';
+    const sum = document.createElement('summary');
+    sum.textContent = '💭 Proses berpikir';
+    const isiP = document.createElement('div');
+    isiP.className = 'proses-isi';
+    isiP.textContent = d.proses;
+    det.appendChild(sum);
+    det.appendChild(isiP);
+    b.isi.insertBefore(det, b.isi.firstChild);
+  }
+
+  // 📎 sumber kutipan (dari 🌐 search)
+  if (d.sumber && d.sumber.length) {
+    const wrapS = el('div', 'sumber');
+    wrapS.appendChild(el('div', 'sumber-judul', '📎 Sumber:'));
+    d.sumber.forEach(s => {
+      const a = el('a', 'sumber-link', s.judul || s.url);
+      a.href = s.url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      wrapS.appendChild(a);
+    });
+    b.isi.appendChild(wrapS);
+  }
+
   typeset(b.isi);
   tambahMeta(b.bubble, d.otak, d.answer);
 
@@ -266,7 +335,7 @@ function simpanRiwayat(entri) {
   if (!Array.isArray(list)) list = [];
   list.unshift(entri);
   if (list.length > 50) list.length = 50;
-  localStorage.setItem(RIWAYAT_KEY, JSON.stringify(list));
+  localStorage.setItem(RIWAYAT_KEY, JSON.stringify(entri ? list : list));
 }
 
 function renderRiwayat() {
@@ -315,6 +384,7 @@ document.querySelectorAll('[data-page]').forEach(btn => {
 
 // ---------- INIT ----------
 renderKuota();
+renderBrain();
 pilihTool(TOOLS[0]);
 buatBubbleAI().isi.innerHTML = renderMarkdown(
   'Halo! Aku **K** 👋 asisten belajarmu.\n\n' +
