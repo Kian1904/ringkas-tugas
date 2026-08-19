@@ -229,3 +229,68 @@ details.proses summary {
 .sumber { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
 .sumber-judul { font-size: 12px; font-weight: 600; }
 .sumber-link { font-size: 13px; color: var(--ink); text-decoration: underline; }
+
+/* ---------- UI BERNAPAS v4: tools di balik "+" ---------- */
+.indikator {
+  font-size: 11px; font-weight: 600; letter-spacing: -0.2px;
+  text-transform: uppercase; color: var(--slate);
+  padding: 0 4px 6px;
+}
+#btn-plus {
+  flex: 0 0 40px; width: 40px; height: 40px;
+  border: 1px solid var(--onyx); background: var(--canvas);
+  border-radius: var(--pill); cursor: pointer;
+  font-size: 20px; line-height: 1; color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* panel melayang */
+.tool-backdrop {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(19, 14, 48, 0.18);
+}
+.tool-panel {
+  position: fixed; left: 12px; right: 12px; bottom: 92px; z-index: 91;
+  background: var(--meadow);
+  border-radius: var(--card);
+  padding: 16px;
+  max-height: 70vh; overflow-y: auto;
+}
+.panel-judul {
+  font-size: 10px; font-weight: 600; letter-spacing: -0.2px;
+  text-transform: uppercase; color: var(--slate);
+  margin: 12px 0 6px;
+}
+.panel-judul:first-child { margin-top: 0; }
+.panel-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.panel-chip {
+  border: 1px solid var(--border, #e3e6da); background: var(--canvas);
+  color: var(--ink); border-radius: var(--pill);
+  padding: 8px 16px; font-family: var(--ui);
+  font-size: 14px; font-weight: 500; cursor: pointer;
+}
+.panel-chip.active { background: var(--yellow); border-color: var(--onyx); }
+.panel-bawah { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border, #e3e6da); }
+
+/* avatar huruf (ganti emoji) */
+.avatar {
+  font-family: var(--display); font-size: 15px; color: var(--ink);
+  background: var(--meadow);
+}
+.msg.user .avatar { background: var(--ink); color: var(--canvas); }
+
+/* meta tombol (tanpa emoji) */
+.meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.meta-btn {
+  border: 1px solid var(--ink); background: var(--canvas); color: var(--ink);
+  border-radius: var(--pill); padding: 5px 14px;
+  font-family: var(--ui); font-size: 12px; font-weight: 500; cursor: pointer;
+}
+.badge {
+  font-size: 10px; font-weight: 600; letter-spacing: -0.2px;
+  text-transform: uppercase; color: var(--slate);
+}
+
+/* sumber & proses (teks bersih) */
+.sumber-judul { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: -0.2px; color: var(--slate); }
+
