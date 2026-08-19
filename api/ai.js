@@ -1,27 +1,26 @@
 // =====================================================
-// K's Tools for School — api/ai.js
+// K's Tools for School — api/ai.js (v3)
 // SERVER-SIDE (Vercel) — WAJIB CommonJS (module.exports)
-// "ROUTER OTAK" — versi final: jawaban panjang anti-potong
 // =====================================================
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
 const GROQ_CHAT = 'https://api.groq.com/openai/v1/chat/completions';
 
-// ---------- PETA OTAK (ganti model? edit di sini aja) ----------
+// ---------- PETA OTAK ----------
 const MODEL = {
-  flash:  'gemini-2.5-flash',
-  tts:    'gemini-2.5-flash-preview-tts',
-  embed:  'gemini-embedding-001',
-  search: 'groq/compound',
-  pikir:  'openai/gpt-oss-120b',
-  pikirB: 'qwen/qwen3.6-27b'
+  flash:   'gemini-2.5-flash',
+  tts:     'gemini-2.5-flash-preview-tts',
+  embed:   'gemini-embedding-001',
+  search:  'groq/compound',
+  searchB: 'groq/compound-mini',
+  pikir:   'openai/gpt-oss-120b',
+  pikirB:  'qwen/qwen3.6-27b'
 };
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
-
   const { prompt, image, mesin } = req.body || {};
   if (!prompt) return res.status(400).json({ ok: false, error: 'Prompt kosong.' });
 
@@ -32,10 +31,12 @@ module.exports = async function handler(req, res) {
     if (mesin === 'embed')  return await lewatGeminiEmbed(prompt, res);
     return await lewatGeminiFlash(prompt, image, res);
   } catch (e) {
+    console.error('[ai.js] ERROR:', e.message);
     return res.status(500).json({ ok: false, error: e.message || 'Server error.' });
   }
 };
 
+// ---------- util ----------
 function kunciGemini() {
   const k = process.env.GEMINI_API_KEY;
   if (!k) throw new Error('GEMINI_API_KEY belum di-set di Vercel.');
@@ -45,6 +46,13 @@ function kunciGroq() {
   const k = process.env.GROQ_API_KEY;
   if (!k) throw new Error('GROQ_API_KEY belum di-set di Vercel.');
   return k;
+}
+async function bacaJSON(r) {
+  const teks = await r.text();
+  try { return JSON.parse(teks); }
+  catch (e) {
+    throw new Error('Groq membalas bukan JSON (status ' + r.status + '). Servernya mungkin sedang ramai — coba lagi sebentar lagi.');
+  }
 }
 
 // ---------- 1) GEMINI FLASH (default + vision) ----------
@@ -69,43 +77,60 @@ async function lewatGeminiFlash(prompt, image, res) {
   return res.status(200).json({ ok: true, answer: answer, otak: 'Gemini 2.5 Flash' });
 }
 
-// ---------- 2) GROQ COMPOUND (search realtime + kutipan) ----------
+// ---------- 2) GROQ SEARCH (3 jalur parasut) ----------
 async function lewatGroqSearch(prompt, res) {
-  const r = await fetch(GROQ_CHAT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + kunciGroq() },
-    body: JSON.stringify({
-      model: MODEL.search,
-      messages: [{ role: 'user', content: prompt }],
-      search_settings: { country: 'indonesia' }
-    })
-  });
-  const d = await r.json();
-  if (d.error) throw new Error('Groq: ' + (d.error.message || 'error'));
-  const m = d.choices && d.choices[0] && d.choices[0].message;
+  const rencana = [
+    { model: MODEL.search,  pakaiSearch: true  },
+    { model: MODEL.search,  pakaiSearch: false },
+    { model: MODEL.searchB, pakaiSearch: false }
+  ];
 
-  let sumber = [];
-  if (m && m.executed_tools && m.executed_tools[0] && m.executed_tools[0].search_results) {
-    let s = m.executed_tools[0].search_results.results || m.executed_tools[0].search_results;
-    sumber = s.slice(0, 5).map(function (x) { return { judul: x.title, url: x.url }; });
+  let errTerakhir = '';
+  for (const rct of rencana) {
+    const body = { model: rct.model, messages: [{ role: 'user', content: prompt }] };
+    if (rct.pakaiSearch) body.search_settings = { country: 'ID', language: 'id' };
+
+    const r = await fetch(GROQ_CHAT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + kunciGroq() },
+      body: JSON.stringify(body)
+    });
+    const d = await bacaJSON(r);
+
+    if (!d.error) {
+      const m = d.choices && d.choices[0] && d.choices[0].message;
+      let sumber = [];
+      if (m && m.executed_tools && m.executed_tools[0] && m.executed_tools[0].search_results) {
+        const s = m.executed_tools[0].search_results.results || m.executed_tools[0].search_results;
+        sumber = s.slice(0, 5).map(function (x) { return { judul: x.title, url: x.url }; });
+      }
+      return res.status(200).json({
+        ok: true,
+        answer: (m && m.content) || 'Tidak ada jawaban.',
+        otak: 'Groq Compound',
+        sumber: sumber,
+        proses: (m && m.reasoning) || ''
+      });
+    }
+
+    errTerakhir = 'Groq ' + r.status + ': ' + (d.error.message || 'error');
+    console.error('[ai.js] search gagal (' + rct.model + ') →', errTerakhir);
   }
-
-  return res.status(200).json({
-    ok: true,
-    answer: (m && m.content) || 'Tidak ada jawaban.',
-    otak: 'Groq Compound',
-    sumber: sumber,
-    proses: (m && m.reasoning) || ''
-  });
+  throw new Error(errTerakhir || 'Groq search gagal.');
 }
 
-// ---------- 3) GROQ REASONING (deep think + cadangan) ----------
+// ---------- 3) GROQ DEEP THINK (+ cadangan) ----------
 async function lewatGroqPikir(prompt, res) {
   let model = MODEL.pikir;
-  let d = await panggilGroq(model, prompt);
-  if (d.error) { model = MODEL.pikirB; d = await panggilGroq(model, prompt); }
-  if (d.error) throw new Error('Groq: ' + d.error.message);
-  const m = d.choices && d.choices[0] && d.choices[0].message;
+  let pasangan = await panggilGroq(model, prompt);
+  if (pasangan.d.error) {
+    model = MODEL.pikirB;
+    pasangan = await panggilGroq(model, prompt);
+  }
+  if (pasangan.d.error) {
+    throw new Error('Groq ' + pasangan.r.status + ': ' + (pasangan.d.error.message || 'error'));
+  }
+  const m = pasangan.d.choices && pasangan.d.choices[0] && pasangan.d.choices[0].message;
   return res.status(200).json({
     ok: true,
     answer: (m && m.content) || 'Tidak ada jawaban.',
@@ -118,7 +143,7 @@ function panggilGroq(model, prompt) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + kunciGroq() },
     body: JSON.stringify({ model: model, messages: [{ role: 'user', content: prompt }], temperature: 0.6 })
-  }).then(function (r) { return r.json(); });
+  }).then(async function (r) { return { r: r, d: await bacaJSON(r) }; });
 }
 
 // ---------- 4) GEMINI TTS ----------
@@ -157,3 +182,4 @@ async function lewatGeminiEmbed(prompt, res) {
   if (d.error) throw new Error('Embedding: ' + d.error.message);
   return res.status(200).json({ ok: true, vector: d.embedding && d.embedding.values, otak: 'Embedding 001' });
 }
+
