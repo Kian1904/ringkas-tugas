@@ -99,11 +99,15 @@ async function lewatGroqSearch(prompt, res) {
 
     if (!d.error) {
       const m = d.choices && d.choices[0] && d.choices[0].message;
-      let sumber = [];
-      if (m && m.executed_tools && m.executed_tools[0] && m.executed_tools[0].search_results) {
-        const s = m.executed_tools[0].search_results.results || m.executed_tools[0].search_results;
-        sumber = s.slice(0, 5).map(function (x) { return { judul: x.title, url: x.url }; });
-      }
+            let sumber = [];
+      const et = m && m.executed_tools && m.executed_tools[0];
+      const sr = et && et.search_results;
+      const arr = (sr && (sr.results || (Array.isArray(sr) ? sr : null))) ||
+                  (m && m.citations) || [];
+      sumber = arr.slice(0, 5)
+        .filter(function (x) { return x && (x.url || x.uri); })
+        .map(function (x) { return { judul: x.title || x.name || x.url || x.uri, url: x.url || x.uri }; });
+
       return res.status(200).json({
         ok: true,
         answer: (m && m.content) || 'Tidak ada jawaban.',
