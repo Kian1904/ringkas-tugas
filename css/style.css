@@ -205,3 +205,27 @@ body {
 }
 #history-list small, #history-list .sub { display: block; font-size: 12px; color: var(--slate); margin-top: 2px; }
 
+/* ---------- OTAK GANDA, PROSES & SUMBER ---------- */
+.brain-chips { padding-bottom: 6px; }
+.brain-chips .chip { border: 1px dashed var(--slate); background: var(--canvas); }
+.brain-chips .chip.active { border: 1px solid var(--onyx); background: var(--yellow); }
+
+details.proses {
+  margin: 0 0 10px;
+  background: var(--canvas);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+details.proses summary {
+  cursor: pointer;
+  font-size: 12px; font-weight: 600; color: var(--slate);
+}
+.proses-isi {
+  margin-top: 6px;
+  font-size: 12px; color: var(--slate);
+  max-height: 220px; overflow-y: auto;
+  white-space: pre-wrap;
+}
+.sumber { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.sumber-judul { font-size: 12px; font-weight: 600; }
+.sumber-link { font-size: 13px; color: var(--ink); text-decoration: underline; }
