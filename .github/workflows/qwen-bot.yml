@@ -25,7 +25,7 @@ jobs:
         with:
           # Menghubungkan ke endpoint xKiro yang kompatibel dengan OpenAI
           api_base: "https://api.xkiro.com/v1" # Sesuaikan dengan URL base API xKiro milikmu
-          api_key: ${{ secrets.XKIRO_API_KEY }}
+          api_key: ${{ secrets.QWEN_API_KEY }}
           model: "qwen/qwen3.8-max" # MODEL PALING STREZS😈😈
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
