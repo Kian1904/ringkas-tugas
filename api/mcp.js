@@ -1,10 +1,13 @@
 // =====================================================
 // K's Tools for School — api/mcp.js
 // MCP Server endpoint (JSON-RPC 2.0 over HTTP)
+// Dual-provider: Gemini 2.5 Flash (primary) → Groq Qwen3-32b (fallback)
 // =====================================================
 
-const GROQ_BASE = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_BASE = 'qwen/qwen3.6-27b';
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
+const GROQ_CHAT = 'https://api.groq.com/openai/v1/chat/completions';
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GROQ_MODEL = 'qwen/qwen3.6-27b';
 
 const ATURAN_DASAR =
   'Kamu adalah "K", asisten belajar pelajar Indonesia. ' +
@@ -33,10 +36,20 @@ const TOOLS = [{
   }
 }];
 
+function kunciGemini() {
+  const k = process.env.GEMINI_API_KEY;
+  if (!k) throw new Error('GEMINI_API_KEY belum di-set di Vercel.');
+  return k;
+}
+
+function kunciGroq() {
+  const k = process.env.GROQ_API_KEY;
+  if (!k) throw new Error('GROQ_API_KEY belum di-set di Vercel.');
+  return k;
+}
+
 async function callGemini(prompt) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error('GEMINI_API_KEY belum di-set di Vercel.');
-  const r = await fetch(`${GEMINI_BASE}${GEMINI_MODEL}:generateContent?key=${key}`, {
+  const r = await fetch(GEMINI_BASE + GEMINI_MODEL + ':generateContent?key=' + kunciGemini(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -46,7 +59,41 @@ async function callGemini(prompt) {
   });
   const d = await r.json();
   if (d.error) throw new Error('Gemini: ' + d.error.message);
-  return d.candidates?.[0]?.content?.parts?.[0]?.text || 'Tidak ada jawaban.';
+  return (d.candidates && d.candidates[0] && d.candidates[0].content &&
+    d.candidates[0].content.parts && d.candidates[0].content.parts[0] &&
+    d.candidates[0].content.parts[0].text) || 'Tidak ada jawaban.';
+}
+
+async function callGroq(prompt) {
+  const r = await fetch(GROQ_CHAT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + kunciGroq()
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 8192
+    })
+  });
+  const teks = await r.text();
+  let d;
+  try { d = JSON.parse(teks); }
+  catch (e) { throw new Error('Groq membalas bukan JSON (status ' + r.status + ').'); }
+  if (d.error) throw new Error('Groq: ' + d.error.message);
+  return (d.choices && d.choices[0] && d.choices[0].message &&
+    d.choices[0].message.content) || 'Tidak ada jawaban.';
+}
+
+async function callWithFallback(prompt) {
+  try {
+    return { text: await callGemini(prompt), provider: 'Gemini 2.5 Flash' };
+  } catch (e) {
+    console.error('[mcp.js] Gemini gagal, fallback ke Groq:', e.message);
+    return { text: await callGroq(prompt), provider: 'Groq Qwen3-32b' };
+  }
 }
 
 module.exports = async function handler(req, res) {
@@ -70,9 +117,9 @@ module.exports = async function handler(req, res) {
       if (name === 'summarize') {
         if (!args?.teks) return replyErr(-32602, 'Parameter "teks" wajib diisi.');
         const mode = args.mode || 'poin';
-        const teks = args.teks.length > 15000 ? args.teks.slice(0, 15000) + '\n[...dipotong]' : args.teks || args.text;
-        const hasil = await callGemini((MODES[mode] || MODES.poin)(teks));
-        return reply({ content: [{ type: 'text', text: hasil }] });
+        const teks = args.teks.length > 15000 ? args.teks.slice(0, 15000) + '\n[...dipotong]' : args.teks;
+        const hasil = await callWithFallback((MODES[mode] || MODES.poin)(teks));
+        return reply({ content: [{ type: 'text', text: hasil.text }] });
       }
       return replyErr(-32601, 'Tool tidak ditemukan: ' + name);
     }
@@ -83,3 +130,6 @@ module.exports = async function handler(req, res) {
     return replyErr(-32603, e.message || 'Internal error');
   }
 };
+
+</parameter>
+</invoke>
