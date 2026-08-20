@@ -1,0 +1,31 @@
+name: Qwen Code Contributor
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  qwen_review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-node: '3.10'
+
+      - name: Run Qwen AI Agent
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          # Menghubungkan ke endpoint xKiro yang kompatibel dengan OpenAI
+          api_base: "https://api.xkiro.com/v1" # Sesuaikan dengan URL base API xKiro milikmu
+          api_key: ${{ secrets.XKIRO_API_KEY }}
+          model: "qwen/qwen3.8-max" # MODEL PALING STREZS😈😈
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
