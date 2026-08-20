@@ -70,7 +70,7 @@ module.exports = async function handler(req, res) {
       if (name === 'summarize') {
         if (!args?.teks) return replyErr(-32602, 'Parameter "teks" wajib diisi.');
         const mode = args.mode || 'poin';
-        const teks = args.teks.length > 15000 ? args.teks.slice(0, 15000) + '\n[...dipotong]' : args.teks;
+        const teks = args.teks.length > 15000 ? args.teks.slice(0, 15000) + '\n[...dipotong]' : args.teks || args.text;
         const hasil = await callGemini((MODES[mode] || MODES.poin)(teks));
         return reply({ content: [{ type: 'text', text: hasil }] });
       }
