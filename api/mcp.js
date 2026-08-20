@@ -3,8 +3,8 @@
 // MCP Server endpoint (JSON-RPC 2.0 over HTTP)
 // =====================================================
 
-const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GROQ_BASE = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_BASE = 'qwen/qwen3.6-27b';
 
 const ATURAN_DASAR =
   'Kamu adalah "K", asisten belajar pelajar Indonesia. ' +
