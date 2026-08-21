@@ -8,7 +8,7 @@ const GROQ_CHAT = 'https://api.groq.com/openai/v1/chat/completions';
 
 // ---------- PETA OTAK ----------
 const MODEL = {
-  flash:   'gemini-2.5-flash',
+  flash:   'gemini-3.1-flash-lite',
   tts:     'gemini-2.5-flash-preview-tts',
   embed:   'gemini-embedding-001',
   search:  'groq/compound',
