@@ -130,6 +130,3 @@ module.exports = async function handler(req, res) {
     return replyErr(-32603, e.message || 'Internal error');
   }
 };
-
-</parameter>
-</invoke>
