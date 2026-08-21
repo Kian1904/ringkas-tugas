@@ -17,7 +17,7 @@ const TOOLS = [ringkas, foto, pdf, youtube, kuis, translate];
 const KUOTA_HARIAN = 15;
 
 const MESIN = [
-  { id: 'flash',  label: 'Flash' },
+  { id: 'flash-lite',  label: 'Flash-lite' },
   { id: 'search', label: 'Search' },
   { id: 'pikir',  label: 'Deep' }
 ];
@@ -35,7 +35,7 @@ const LABEL_TOOL = {
 let toolAktif = TOOLS[0];
 let subAktif = null;
 let fileAktif = null;
-let mesinAktif = 'flash';
+let mesinAktif = 'flash-lite';
 let sibuk = false;
 let sesi = 0;
 let terakhir = null;
