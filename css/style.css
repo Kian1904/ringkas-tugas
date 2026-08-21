@@ -294,3 +294,61 @@ details.proses summary {
 /* sumber & proses (teks bersih) */
 .sumber-judul { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: -0.2px; color: var(--slate); }
 
+/* ---------- v5: INPUT MELAYANG + SIDEBAR ---------- */
+
+/* sembunyikan nav lama di topbar (pindah ke sidebar) */
+.topbar [data-page] { display: none; }
+.menu-btn { background: transparent; font-size: 18px; }
+
+/* input melayang ala Claude */
+.inputbar {
+  position: fixed;
+  left: 12px; right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  margin: 0 auto;
+  max-width: 720px;
+  background: var(--canvas);
+  border: 1px solid var(--onyx);
+  border-radius: 28px;
+  padding: 8px 10px;
+  z-index: 50;
+}
+.inputbar .indikator { padding: 0 8px 4px; }
+.input-row { align-items: flex-end; }
+#input-text {
+  border: none; background: transparent;
+  min-height: 24px; height: auto;
+  max-height: 168px; overflow-y: auto;
+  padding: 10px 6px;
+}
+#input-text:focus { outline: none; box-shadow: none; }
+.btn-send { width: 40px; height: 40px; border-radius: 50%; flex: 0 0 40px; }
+#btn-plus { width: 36px; height: 36px; flex: 0 0 36px; font-size: 18px; }
+
+/* chat dapat napas: ruang di bawah biar tak tertutup input */
+.chat-log { padding-bottom: 150px; }
+
+/* sidebar */
+.sidebar {
+  position: fixed; top: 0; bottom: 0; left: 0; z-index: 95;
+  width: min(300px, 84vw);
+  background: var(--meadow);
+  padding: 16px;
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+  animation: slideIn .22s ease;
+}
+@keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+.sidebar-backdrop { position: fixed; inset: 0; z-index: 94; background: rgba(19, 14, 48, 0.18); }
+.sidebar-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.side-item {
+  display: block; width: 100%; text-align: left;
+  border: none; background: transparent;
+  padding: 12px 14px; border-radius: 14px;
+  font-family: var(--ui); font-size: 14px; font-weight: 500;
+  color: var(--ink); cursor: pointer;
+}
+.side-item:active { background: var(--canvas); }
+.side-art { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.side-foot { margin-top: auto; padding: 12px 14px; font-size: 12px; color: var(--slate); }
+.sidebar .history-empty { font-size: 13px; color: var(--slate); padding: 8px 14px; }

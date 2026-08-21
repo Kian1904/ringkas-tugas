@@ -1,7 +1,6 @@
 // =====================================================
-// K's Tools for School — js/core.js
-// SI INDUK v4 — UI bernapas: tools di balik tombol "+"
-// otak ganda + thinking labels + proses & sumber
+// K's Tools for School — js/core.js (v5)
+// UI bernapas: input melayang, auto-grow, sidebar ☰
 // =====================================================
 
 import { tanyaAI } from './ai.js';
@@ -54,7 +53,7 @@ const previewName = $('attach-name');
 const previewRemove = $('attach-remove');
 const quotaEl = $('quota');
 
-// Panel alat (dibangun otomatis, tanpa edit HTML)
+// ---------- PANEL "+" (otak & alat) ----------
 const panel = el('div', 'tool-panel hidden');
 const backdrop = el('div', 'tool-backdrop hidden');
 document.body.appendChild(backdrop);
@@ -63,18 +62,16 @@ document.body.appendChild(panel);
 function bangunPanel() {
   panel.innerHTML = '';
 
-  const hOtak = el('div', 'panel-judul', 'OTAK');
-  panel.appendChild(hOtak);
+  panel.appendChild(el('div', 'panel-judul', 'OTAK'));
   const rowOtak = el('div', 'panel-row');
   MESIN.forEach(m => {
     const b = el('button', 'panel-chip' + (m.id === mesinAktif ? ' active' : ''), m.label);
-    b.onclick = () => { mesinAktif = m.id; bangunPanel(); };
+    b.onclick = () => { mesinAktif = m.id; bangunPanel(); renderIndikator(); };
     rowOtak.appendChild(b);
   });
   panel.appendChild(rowOtak);
 
-  const hAlat = el('div', 'panel-judul', 'ALAT');
-  panel.appendChild(hAlat);
+  panel.appendChild(el('div', 'panel-judul', 'ALAT'));
   const rowAlat = el('div', 'panel-row');
   TOOLS.forEach(t => {
     const b = el('button', 'panel-chip' + (t === toolAktif ? ' active' : ''), t.label.replace(/^[^\w]+/, '').trim());
@@ -83,10 +80,8 @@ function bangunPanel() {
   });
   panel.appendChild(rowAlat);
 
-  // sub-mode (kalau ada)
   if (toolAktif.subModes) {
-    const hSub = el('div', 'panel-judul', 'MODE');
-    panel.appendChild(hSub);
+    panel.appendChild(el('div', 'panel-judul', 'MODE'));
     const rowSub = el('div', 'panel-row');
     toolAktif.subModes.forEach(m => {
       const b = el('button', 'panel-chip' + (m.id === subAktif ? ' active' : ''), m.label.replace(/^[^\w]+/, '').trim());
@@ -95,21 +90,79 @@ function bangunPanel() {
     });
     panel.appendChild(rowSub);
   }
-
-  const rowBawah = el('div', 'panel-row panel-bawah');
-  const bRiwayat = el('button', 'panel-chip', 'Riwayat');
-  bRiwayat.onclick = () => { tutupPanel(); document.querySelector('[data-page="history"]').click(); };
-  rowBawah.appendChild(bRiwayat);
-  panel.appendChild(rowBawah);
 }
-
 function bukaPanel() { bangunPanel(); panel.classList.remove('hidden'); backdrop.classList.remove('hidden'); }
 function tutupPanel() { panel.classList.add('hidden'); backdrop.classList.add('hidden'); }
-
 btnPlus.onclick = () => panel.classList.contains('hidden') ? bukaPanel() : tutupPanel();
 backdrop.onclick = tutupPanel;
 
-// indikator alat aktif (teks kecil di atas input)
+// ---------- SIDEBAR ☰ (ruang: chat baru, riwayat, artifak) ----------
+const sidebar = el('div', 'sidebar hidden');
+const sbBack = el('div', 'sidebar-backdrop hidden');
+document.body.appendChild(sbBack);
+document.body.appendChild(sidebar);
+
+const ART_KEY = 'ks_artifak';
+function bacaArtifak() {
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(ART_KEY)); } catch (e) {}
+  return Array.isArray(list) ? list : [];
+}
+function simpanArtifak(nama, isi) {
+  const list = bacaArtifak();
+  list.unshift({ nama: nama, isi: isi, waktu: Date.now() });
+  if (list.length > 20) list.length = 20;
+  localStorage.setItem(ART_KEY, JSON.stringify(list));
+}
+
+function bangunSidebar() {
+  sidebar.innerHTML = '';
+
+  const head = el('div', 'sidebar-head');
+  head.appendChild(el('div', 'logo', "K's Tools"));
+  const close = el('button', 'icon-btn', '×');
+  close.onclick = tutupSidebar;
+  head.appendChild(close);
+  sidebar.appendChild(head);
+
+  const bNew = el('button', 'side-item', 'Percakapan baru');
+  bNew.onclick = () => { tutupSidebar(); newChat(); };
+  sidebar.appendChild(bNew);
+
+  const bRiw = el('button', 'side-item', 'Riwayat');
+  bRiw.onclick = () => { tutupSidebar(); document.querySelector('[data-page="history"]').click(); };
+  sidebar.appendChild(bRiw);
+
+  sidebar.appendChild(el('div', 'panel-judul', 'ARTIFAK'));
+  const arts = bacaArtifak();
+  if (!arts.length) sidebar.appendChild(el('div', 'history-empty', 'Belum ada dokumen tersimpan.'));
+  arts.forEach(a => {
+    const item = el('button', 'side-item side-art', a.nama);
+    item.onclick = () => { unduh(a.nama, a.isi); toast('Diunduh'); };
+    sidebar.appendChild(item);
+  });
+
+  sidebar.appendChild(el('div', 'side-foot', 'Kuota hari ini: ' + kuotaInfo().pakai + '/' + KUOTA_HARIAN));
+}
+function bukaSidebar() { bangunSidebar(); sidebar.classList.remove('hidden'); sbBack.classList.remove('hidden'); }
+function tutupSidebar() { sidebar.classList.add('hidden'); sbBack.classList.add('hidden'); }
+sbBack.onclick = tutupSidebar;
+
+function newChat() {
+  document.querySelector('[data-page="chat"]').click();
+  chatLog.innerHTML = '';
+  terakhir = null;
+  sesi++;
+  buatBubbleAI().isi.innerHTML = renderMarkdown('Percakapan baru dimulai. Mau belajar apa hari ini?');
+}
+
+// tombol ☰ disuntik ke topbar (tanpa edit HTML)
+const topbar = document.querySelector('.topbar');
+const btnMenu = el('button', 'icon-btn menu-btn', '☰');
+btnMenu.onclick = bukaSidebar;
+topbar.insertBefore(btnMenu, topbar.firstChild);
+
+// ---------- INDIKATOR ----------
 const indikator = el('div', 'indikator');
 function renderIndikator() {
   const namaMesin = (MESIN.find(m => m.id === mesinAktif) || {}).label || '';
@@ -166,6 +219,13 @@ function hapusFile() {
   preview.classList.remove('show');
 }
 
+// ---------- AUTO-GROW TEXTAREA ----------
+function autoGrow() {
+  inputText.style.height = 'auto';
+  inputText.style.height = Math.min(inputText.scrollHeight, 168) + 'px';
+}
+inputText.addEventListener('input', autoGrow);
+
 // ---------- BUBBLES ----------
 function scrollBawah() { chatLog.scrollTop = chatLog.scrollHeight; }
 
@@ -200,7 +260,12 @@ function tambahMeta(bubble, otak, teksMentah) {
   meta.appendChild(bSalin);
 
   const bUnduh = el('button', 'meta-btn', 'Export');
-  bUnduh.onclick = () => { unduh('k-tools-' + toolAktif.id + '.md', teksMentah); toast('Diunduh'); };
+  bUnduh.onclick = () => {
+    const nama = 'k-tools-' + toolAktif.id + '.md';
+    simpanArtifak(nama, teksMentah);
+    unduh(nama, teksMentah);
+    toast('Disimpan ke Artifak');
+  };
   meta.appendChild(bUnduh);
 
   const bUlang = el('button', 'meta-btn', 'Ulangi');
@@ -217,10 +282,9 @@ function tambahTyping(label) {
   const wrap = el('div', 'msg ai typing-wrap');
   wrap.appendChild(el('div', 'avatar', 'A'));
   const bubble = el('div', 'bubble');
-  const thinkingText = el('div', 'typing-text', label || 'Berpikir...');
+  bubble.appendChild(el('div', 'typing-text', label || 'Berpikir...'));
   const dots = el('div', 'typing-dots');
   for (let i = 0; i < 3; i++) dots.appendChild(el('span', '', ''));
-  bubble.appendChild(thinkingText);
   bubble.appendChild(dots);
   wrap.appendChild(bubble);
   chatLog.appendChild(wrap);
@@ -254,6 +318,7 @@ async function kirim() {
   catch (e) { toast(e.message); return; }
 
   inputText.value = '';
+  autoGrow();
   hapusFile();
   jalankan(req, tampilan, toolAktif.id);
 }
@@ -320,7 +385,6 @@ async function jalankan(req, tampilan, toolId) {
 
   typeset(b.isi);
   tambahMeta(b.bubble, d.otak, d.answer);
-
   simpanRiwayat({ tool: toolId, teks: tampilan, jawaban: d.answer, otak: d.otak, waktu: Date.now() });
 }
 
@@ -383,14 +447,13 @@ document.querySelectorAll('[data-page]').forEach(btn => {
 // ---------- INIT ----------
 renderKuota();
 pilihTool(TOOLS[0]);
-// sisipkan indikator di atas input bar
 const inputBar = document.querySelector('.inputbar');
 if (inputBar) inputBar.insertBefore(indikator, inputBar.firstChild);
 renderIndikator();
+autoGrow();
 
 buatBubbleAI().isi.innerHTML = renderMarkdown(
   'Halo, aku **K** — asisten belajarmu.\n\n' +
-  'Ketuk **+** untuk memilih alat dan otak, lalu kirim materimu. ' +
+  'Ketuk **+** untuk memilih alat dan otak, ketuk **☰** untuk percakapan baru dan artifak. ' +
   'Kuota harian ' + KUOTA_HARIAN + ' permintaan. Selamat belajar.'
 );
-
