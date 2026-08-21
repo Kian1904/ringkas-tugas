@@ -6,7 +6,7 @@
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
 const GROQ_CHAT = 'https://api.groq.com/openai/v1/chat/completions';
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 const GROQ_MODEL = 'qwen/qwen3.6-27b';
 
 const ATURAN_DASAR =
@@ -85,14 +85,14 @@ async function callGroq(prompt) {
   if (d.error) throw new Error('Groq: ' + d.error.message);
   return (d.choices && d.choices[0] && d.choices[0].message &&
     d.choices[0].message.content) || 'Tidak ada jawaban.';
-}
+} 
 
 async function callWithFallback(prompt) {
   try {
-    return { text: await callGemini(prompt), provider: 'Gemini 2.5 Flash' };
+    return { text: await callGemini(prompt), provider: 'Gemini 3.1 Flash Lite' };
   } catch (e) {
     console.error('[mcp.js] Gemini gagal, fallback ke Groq:', e.message);
-    return { text: await callGroq(prompt), provider: 'Groq Qwen3-32b' };
+    return { text: await callGroq(prompt), provider: 'Groq Qwen3.6-27b' };
   }
 }
 
